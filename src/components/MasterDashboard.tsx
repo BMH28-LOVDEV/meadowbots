@@ -88,6 +88,31 @@ interface TeamSummary {
 
 const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ teamNumber: string; matchIndex: number } | null>(null);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleDelete = () => {
+    if (deletePassword !== "Group Leader") {
+      setDeleteError("Incorrect password.");
+      return;
+    }
+    if (!deleteTarget) return;
+
+    const raw: ScoutingEntry[] = JSON.parse(localStorage.getItem("scoutingData") || "[]");
+    const teamEntries = raw.filter((e) => e.teamNumber === deleteTarget.teamNumber);
+    const entryToRemove = teamEntries[deleteTarget.matchIndex];
+    if (entryToRemove) {
+      const idx = raw.indexOf(entryToRemove);
+      if (idx !== -1) raw.splice(idx, 1);
+      localStorage.setItem("scoutingData", JSON.stringify(raw));
+    }
+    setDeleteTarget(null);
+    setDeletePassword("");
+    setDeleteError("");
+    setRefreshKey((k) => k + 1);
+  };
 
   const teamSummaries = useMemo(() => {
     const raw: ScoutingEntry[] = JSON.parse(localStorage.getItem("scoutingData") || "[]");
@@ -111,7 +136,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
 
     summaries.sort((a, b) => b.avgScore - a.avgScore);
     return summaries;
-  }, []);
+  }, [refreshKey]);
 
   const getRankColor = (rank: number) => {
     if (rank === 1) return "text-yellow-400";
@@ -240,9 +265,21 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                             <span className="font-display text-sm text-foreground tracking-wider">
                               Match {entry.matchNumber || "N/A"} • Score: {scoreEntry(entry)}
                             </span>
-                            <span className="text-xs text-muted-foreground font-body">
-                              by {entry.scouterName} • {new Date(entry.timestamp).toLocaleDateString()}
-                            </span>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs text-muted-foreground font-body">
+                                by {entry.scouterName} • {new Date(entry.timestamp).toLocaleDateString()}
+                              </span>
+                              <button
+                                onClick={() => {
+                                  setDeleteTarget({ teamNumber: team.teamNumber, matchIndex: i });
+                                  setDeletePassword("");
+                                  setDeleteError("");
+                                }}
+                                className="px-3 py-1 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all duration-200"
+                              >
+                                DELETE
+                              </button>
+                            </div>
                           </div>
 
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-body">
@@ -298,6 +335,49 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
           </>
         )}
       </div>
+
+      {/* Delete confirmation modal */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="glass rounded-xl p-6 w-full max-w-sm mx-4 border border-border space-y-4">
+            <h3 className="font-display text-lg text-destructive tracking-wider">CONFIRM DELETE</h3>
+            <p className="text-sm text-muted-foreground font-body">
+              Enter the password to delete this match entry.
+            </p>
+            <input
+              type="password"
+              value={deletePassword}
+              onChange={(e) => {
+                setDeletePassword(e.target.value);
+                setDeleteError("");
+              }}
+              placeholder="Enter password"
+              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-foreground text-sm font-body focus:outline-none focus:ring-2 focus:ring-destructive/50"
+            />
+            {deleteError && (
+              <p className="text-xs text-destructive font-body">{deleteError}</p>
+            )}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setDeleteTarget(null);
+                  setDeletePassword("");
+                  setDeleteError("");
+                }}
+                className="px-4 py-2 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:bg-muted/30 transition-all"
+              >
+                CANCEL
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all"
+              >
+                DELETE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
