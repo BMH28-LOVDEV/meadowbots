@@ -92,7 +92,8 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
   const [savingAssignment, setSavingAssignment] = useState<string | null>(null);
-  const [editedAssignments, setEditedAssignments] = useState<Record<string, { team_number: string; team_name: string; qual_matches_str: string }>>({});
+  const [editedAssignments, setEditedAssignments] = useState<Record<string, { team_number: string; team_name: string; qual_matches: string[] }>>({});
+  const [matchInputs, setMatchInputs] = useState<Record<string, string>>({});
 
   const fetchEntries = async () => {
     setLoading(true);
@@ -140,12 +141,12 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
     if (!error && data) {
       const typed = data as TeamAssignment[];
       setAssignments(typed);
-      const edited: Record<string, { team_number: string; team_name: string; qual_matches_str: string }> = {};
+      const edited: Record<string, { team_number: string; team_name: string; qual_matches: string[] }> = {};
       typed.forEach((a) => {
         edited[a.scout_name] = {
           team_number: a.team_number,
           team_name: a.team_name,
-          qual_matches_str: (a.qual_matches || []).join(", "),
+          qual_matches: a.qual_matches || [],
         };
       });
       setEditedAssignments(edited);
@@ -158,12 +159,6 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
     fetchAssignments();
   }, []);
 
-  // Parse qual matches from a comma/space separated string
-  const parseQualMatches = (str: string): string[] =>
-    str
-      .split(/[\s,]+/)
-      .map((s) => s.trim().toUpperCase())
-      .filter(Boolean);
 
   // Check if a scout has submitted a specific qual match for their team
   const isMatchDone = (assignment: TeamAssignment, match: string): boolean => {
@@ -180,20 +175,18 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
     if (!edited) return;
     setSavingAssignment(scoutName);
 
-    const qualMatches = parseQualMatches(edited.qual_matches_str);
     const existing = assignments.find((a) => a.scout_name === scoutName);
-
     if (existing) {
       const { error } = await supabase
         .from("team_assignments")
-        .update({ team_number: edited.team_number, team_name: edited.team_name, qual_matches: qualMatches })
+        .update({ team_number: edited.team_number, team_name: edited.team_name, qual_matches: edited.qual_matches })
         .eq("scout_name", scoutName);
       if (error) { toast.error("Failed to save."); console.error(error); }
       else { toast.success(`Saved for ${scoutName}!`); await fetchAssignments(); }
     } else {
       const { error } = await supabase
         .from("team_assignments")
-        .insert({ scout_name: scoutName, team_number: edited.team_number, team_name: edited.team_name, qual_matches: qualMatches });
+        .insert({ scout_name: scoutName, team_number: edited.team_number, team_name: edited.team_name, qual_matches: edited.qual_matches });
       if (error) { toast.error("Failed to save."); console.error(error); }
       else { toast.success(`Saved for ${scoutName}!`); await fetchAssignments(); }
     }
@@ -207,7 +200,22 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
       await fetchAssignments();
       toast.success(`Assignment cleared for ${scoutName}.`);
     }
-    setEditedAssignments((prev) => ({ ...prev, [scoutName]: { team_number: "", team_name: "", qual_matches_str: "" } }));
+    setEditedAssignments((prev) => ({ ...prev, [scoutName]: { team_number: "", team_name: "", qual_matches: [] } }));
+    setMatchInputs((prev) => ({ ...prev, [scoutName]: "" }));
+  };
+
+  const addMatch = (scoutName: string) => {
+    const raw = (matchInputs[scoutName] || "").trim().toUpperCase();
+    if (!raw) return;
+    const current = editedAssignments[scoutName] || { team_number: "", team_name: "", qual_matches: [] };
+    if (current.qual_matches.includes(raw)) { setMatchInputs((prev) => ({ ...prev, [scoutName]: "" })); return; }
+    setEditedAssignments((prev) => ({ ...prev, [scoutName]: { ...current, qual_matches: [...current.qual_matches, raw] } }));
+    setMatchInputs((prev) => ({ ...prev, [scoutName]: "" }));
+  };
+
+  const removeMatch = (scoutName: string, match: string) => {
+    const current = editedAssignments[scoutName] || { team_number: "", team_name: "", qual_matches: [] };
+    setEditedAssignments((prev) => ({ ...prev, [scoutName]: { ...current, qual_matches: current.qual_matches.filter((m) => m !== match) } }));
   };
 
   const handleDelete = async () => {
@@ -561,13 +569,14 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
             ) : (
               <div className="space-y-3">
                 {TEAM_MEMBERS.map((scoutName) => {
-                  const current = editedAssignments[scoutName] || { team_number: "", team_name: "", qual_matches_str: "" };
+                  const current = editedAssignments[scoutName] || { team_number: "", team_name: "", qual_matches: [] };
                   const saved = assignments.find((a) => a.scout_name === scoutName);
                   const isDirty =
                     current.team_number !== (saved?.team_number || "") ||
                     current.team_name !== (saved?.team_name || "") ||
-                    current.qual_matches_str !== (saved?.qual_matches || []).join(", ");
+                    JSON.stringify(current.qual_matches) !== JSON.stringify(saved?.qual_matches || []);
                   const hasAssignment = !!(saved?.team_number);
+                  const matchInput = matchInputs[scoutName] || "";
 
                   return (
                     <div key={scoutName} className={`glass rounded-xl p-4 transition-all duration-200 ${hasAssignment ? "border border-primary/30" : "border border-border/30"}`}>
@@ -604,15 +613,43 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                               />
                             </div>
                           </div>
+
+                          {/* Tag-style match input */}
                           <div>
                             <label className="block text-xs text-muted-foreground font-body mb-1">Qual Matches to Scout</label>
-                            <input
-                              type="text"
-                              value={current.qual_matches_str}
-                              onChange={(e) => setEditedAssignments((prev) => ({ ...prev, [scoutName]: { ...current, qual_matches_str: e.target.value } }))}
-                              placeholder="e.g. Q5, Q7, Q12, Q18"
-                              className="w-full px-3 py-1.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body text-sm outline-none transition-all"
-                            />
+                            <div className="min-h-[44px] w-full px-3 py-2 rounded-lg bg-muted border border-border focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all flex flex-wrap gap-1.5 items-center">
+                              {current.qual_matches.map((match) => {
+                                const done = saved ? isMatchDone(saved, match) : false;
+                                return (
+                                  <button
+                                    key={match}
+                                    type="button"
+                                    onClick={() => removeMatch(scoutName, match)}
+                                    title="Click to remove"
+                                    className={`px-3 py-1 rounded-lg text-sm font-body font-semibold border transition-all duration-200 hover:opacity-70 ${
+                                      done
+                                        ? "bg-glow-success/20 border-glow-success text-glow-success"
+                                        : "bg-destructive/20 border-destructive text-destructive"
+                                    }`}
+                                  >
+                                    {match} ×
+                                  </button>
+                                );
+                              })}
+                              <input
+                                type="text"
+                                value={matchInput}
+                                onChange={(e) => setMatchInputs((prev) => ({ ...prev, [scoutName]: e.target.value }))}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" || e.key === "," || e.key === " ") {
+                                    e.preventDefault();
+                                    addMatch(scoutName);
+                                  }
+                                }}
+                                placeholder={current.qual_matches.length === 0 ? "Type Q5 then Enter…" : "Add more…"}
+                                className="flex-1 min-w-[100px] bg-transparent outline-none text-foreground placeholder:text-muted-foreground/40 font-body text-sm"
+                              />
+                            </div>
                           </div>
                         </div>
 
@@ -635,24 +672,6 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                           )}
                         </div>
                       </div>
-
-                      {/* Live preview of match chips for this scout */}
-                      {saved && (saved.qual_matches || []).length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-border/30 flex flex-wrap gap-1.5">
-                          {(saved.qual_matches || []).map((match) => {
-                            const done = isMatchDone(saved, match);
-                            return (
-                              <span key={match} className={`px-4 py-2 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
-                                done
-                                  ? "bg-glow-success/20 border-glow-success text-glow-success"
-                                  : "bg-destructive/20 border-destructive text-destructive"
-                              }`}>
-                                {match}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      )}
                     </div>
                   );
                 })}
