@@ -324,7 +324,7 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
                   });
                 }}
                 className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
-                  form.penalties.includes(penalty)
+                  (form.penalties || []).includes(penalty)
                     ? penalty === "None observed"
                       ? "bg-glow-success/20 border-glow-success text-glow-success"
                       : "bg-destructive/20 border-destructive text-destructive"
