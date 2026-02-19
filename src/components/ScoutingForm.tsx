@@ -138,8 +138,34 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.teamNumber) {
-      toast.error("Please enter the team number!");
+
+    const missingFields: string[] = [];
+    if (!form.teamNumber) missingFields.push("Team Number");
+    if (!form.matchNumber) missingFields.push("Match Number");
+    if (!form.autoArtifactsScored) missingFields.push("Artifacts Scored (Auto)");
+    if (!form.autoPatternAlignment) missingFields.push("Pattern Alignment (Auto)");
+    if (!form.autoLaunchLine) missingFields.push("Launch Line (Auto)");
+    if (!form.autoLeave) missingFields.push("Leave (Auto)");
+    if (!form.autoConsistency) missingFields.push("Auto Consistency");
+    if (!form.teleopIntakeMethod) missingFields.push("Intake Method (Teleop)");
+    if (!form.teleopBallCapacity) missingFields.push("Ball Capacity (Teleop)");
+    if (!form.teleopShootingAccuracy) missingFields.push("Shooting Accuracy (Teleop)");
+    if (!form.teleopGateInteraction) missingFields.push("Gate Interaction (Teleop)");
+    if (!form.teleopOverflowManagement) missingFields.push("Overflow Management (Teleop)");
+    if (!form.teleopCycleSpeed) missingFields.push("Cycle Speed (Teleop)");
+    if (!form.teleopArtifactClassification) missingFields.push("Artifact Classification (Teleop)");
+    if (!form.endgameParking) missingFields.push("Parking (Endgame)");
+    if (!form.endgameAllianceAssist) missingFields.push("Alliance Assist (Endgame)");
+    if (form.penalties.length === 0) missingFields.push("Penalties");
+    if (!form.goodMatch) missingFields.push("Good Match Assessment");
+
+    if (missingFields.length > 0) {
+      toast.error("Please answer all of the questions.", {
+        description: `Missing: ${missingFields.join(", ")}`,
+        duration: 5000,
+        style: { background: "hsl(0 72% 28%)", border: "1px solid hsl(0 72% 50%)", color: "white" },
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
