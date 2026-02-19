@@ -1,4 +1,3 @@
-// Fuzzy name matching for team members
 const TEAM_MEMBERS = [
   "Alex Gianelloni",
   "Chantelle Wong",
@@ -24,91 +23,52 @@ const TEAM_MEMBERS = [
   "Jude Trujillo",
 ];
 
+// Explicit alternate names/aliases
+const ALIASES: Record<string, string> = {
+  "maxwell": "Max Tran",
+  "maxwell tran": "Max Tran",
+  "ben": "Benjamin Hale",
+  "ben hale": "Benjamin Hale",
+  "will": "William Hu",
+  "will hu": "William Hu",
+};
+
 function normalize(str: string): string {
   return str
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // remove accents
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
-    .replace(/[^a-z ]/g, "") // remove non-alpha except spaces
+    .replace(/[^a-z ]/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
-
-function levenshtein(a: string, b: string): number {
-  const matrix: number[][] = [];
-  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      if (b[i - 1] === a[j - 1]) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j] + 1
-        );
-      }
-    }
-  }
-  return matrix[b.length][a.length];
-}
-
-// Alternate first-name aliases mapped to canonical member names
-const ALIASES: Record<string, string> = {
-  "maxwell": "Max Tran",
-  "ben": "Benjamin Hale",
-};
 
 export function findTeamMember(input: string): string | null {
   const normalizedInput = normalize(input);
   if (!normalizedInput) return null;
 
-  // Master account
   if (normalizedInput === "master data") return "Master Data";
 
-  // Check explicit aliases first
+  // Check explicit aliases
   if (ALIASES[normalizedInput]) return ALIASES[normalizedInput];
 
-  // Priority: exact match on first name (handles short names like "Max" reliably)
-  for (const member of TEAM_MEMBERS) {
-    const parts = normalize(member).split(" ");
-    const firstName = parts[0];
-    if (normalizedInput === firstName) return member;
-  }
-
-  let bestMatch: string | null = null;
-  let bestScore = Infinity;
-
+  // Match full name, first name, or last name (case-insensitive)
   for (const member of TEAM_MEMBERS) {
     const normalizedMember = normalize(member);
     const parts = normalizedMember.split(" ");
     const firstName = parts[0];
     const lastName = parts[parts.length - 1];
-    const lastInitial = lastName?.[0] ?? "";
 
-    // Build candidate strings to match against
-    const candidates = [
-      normalizedMember,              // full name: "max tran"
-      `${firstName} ${lastInitial}`, // first + initial: "max t"
-      firstName,                     // first only: "max"
-      lastName,                      // last only: "tran"
-    ];
-
-    for (const candidate of candidates) {
-      const distance = levenshtein(normalizedInput, candidate);
-      // More generous threshold for short names (≤4 chars)
-      const base = candidate.length <= 4 ? 0.45 : 0.35;
-      const threshold = Math.max(2, Math.floor(candidate.length * base));
-
-      if (distance < bestScore && distance <= threshold) {
-        bestScore = distance;
-        bestMatch = member;
-      }
+    if (
+      normalizedInput === normalizedMember ||
+      normalizedInput === firstName ||
+      normalizedInput === lastName
+    ) {
+      return member;
     }
   }
 
-  return bestMatch;
+  return null;
 }
 
 export { TEAM_MEMBERS };
