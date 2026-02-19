@@ -10,6 +10,9 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [error, setError] = useState("");
   const [isShaking, setIsShaking] = useState(false);
   const [pendingMaster, setPendingMaster] = useState(false);
+  const [pendingScout, setPendingScout] = useState<string | null>(null);
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [masterPassword, setMasterPassword] = useState("");
   const [masterError, setMasterError] = useState("");
 
@@ -20,6 +23,8 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Step 2a: Master password
     if (pendingMaster) {
       if (masterPassword === "MeadowBots") {
         onLogin("Master Data");
@@ -29,14 +34,29 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       }
       return;
     }
+
+    // Step 2b: Scout password
+    if (pendingScout) {
+      if (password.toLowerCase() === "meadowbots") {
+        onLogin(pendingScout);
+      } else {
+        setPasswordError("Incorrect password.");
+        shake();
+      }
+      return;
+    }
+
+    // Step 1: Name lookup
     const match = findTeamMember(name);
     if (match === "Master Data") {
       setPendingMaster(true);
       setMasterPassword("");
       setMasterError("");
     } else if (match) {
+      setPendingScout(match);
+      setPassword("");
+      setPasswordError("");
       setError("");
-      onLogin(match);
     } else {
       setError("Name not recognized. Please enter your team name.");
       shake();
@@ -67,10 +87,10 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         {/* Login card */}
         <div className="glass rounded-xl p-8 glow-primary">
           <h2 className="text-xl font-display text-foreground mb-6 text-center tracking-wide">
-            {pendingMaster ? "MASTER ACCESS" : "IDENTIFY YOURSELF"}
+            {pendingMaster ? "MASTER ACCESS" : pendingScout ? "TEAM PASSWORD" : "IDENTIFY YOURSELF"}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {!pendingMaster ? (
+            {!pendingMaster && !pendingScout ? (
               <div>
                 <label htmlFor="name" className="block text-sm font-body text-muted-foreground mb-2">
                   Enter your full name
@@ -85,6 +105,30 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                   autoComplete="off"
                 />
                 {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+              </div>
+            ) : pendingScout ? (
+              <div>
+                <p className="text-sm font-body text-foreground mb-1">Welcome, <span className="text-primary font-semibold">{pendingScout}</span>!</p>
+                <label htmlFor="scout-pw" className="block text-sm font-body text-muted-foreground mb-2">
+                  Enter the team password
+                </label>
+                <input
+                  id="scout-pw"
+                  type="password"
+                  value={password}
+                  onChange={(e) => { setPassword(e.target.value); setPasswordError(""); }}
+                  placeholder="Password"
+                  autoFocus
+                  className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all duration-300"
+                />
+                {passwordError && <p className="mt-2 text-sm text-destructive">{passwordError}</p>}
+                <button
+                  type="button"
+                  onClick={() => { setPendingScout(null); setName(""); setPassword(""); setPasswordError(""); }}
+                  className="mt-2 text-xs text-muted-foreground hover:text-foreground font-body transition-colors"
+                >
+                  ← Back
+                </button>
               </div>
             ) : (
               <div>
@@ -114,7 +158,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               type="submit"
               className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-display font-semibold tracking-wider hover:glow-primary-strong transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
             >
-              {pendingMaster ? "UNLOCK" : "ENTER"}
+              {pendingMaster || pendingScout ? "UNLOCK" : "ENTER"}
             </button>
           </form>
         </div>
