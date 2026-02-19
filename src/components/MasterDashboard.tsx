@@ -430,7 +430,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               <div className="glass rounded-xl overflow-hidden border border-border/50">
                 <div className="px-5 py-4 border-b border-border/50 flex items-center gap-3">
                   <span className="text-xl">🏆</span>
-                  <h2 className="font-display text-base text-foreground tracking-wider">TOP TEAMS</h2>
+                  <h2 className="font-display text-base text-foreground tracking-wider">TOP 3 TEAMS</h2>
                 </div>
                 <div className="divide-y divide-border/30">
                   {teamSummaries.slice(0, 3).map((team, index) => (
