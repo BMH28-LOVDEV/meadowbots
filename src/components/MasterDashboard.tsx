@@ -97,7 +97,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   const [pendingPassword, setPendingPassword] = useState("");
   const [pendingError, setPendingError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"rankings" | "assignments">("rankings");
+  const [activeTab, setActiveTab] = useState<"rankings" | "progress" | "assignments">("rankings");
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
   const [savingAssignment, setSavingAssignment] = useState<string | null>(null);
@@ -350,6 +350,16 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
             📊 RANKINGS
           </button>
           <button
+            onClick={() => setActiveTab("progress")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 ${
+              activeTab === "progress"
+                ? "bg-primary/20 text-primary border border-primary/40"
+                : "text-muted-foreground hover:text-foreground border border-transparent"
+            }`}
+          >
+            📡 SCOUT PROGRESS
+          </button>
+          <button
             onClick={() => setActiveTab("assignments")}
             className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 ${
               activeTab === "assignments"
@@ -364,13 +374,16 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
 
-        {/* ── RANKINGS TAB ── */}
-        {activeTab === "rankings" && (
+        {/* ── SCOUT PROGRESS TAB ── */}
+        {activeTab === "progress" && (
           <>
-            {/* ── SCOUT PROGRESS CHART ── */}
-            {assignedScouts.length > 0 && (
+            {assignedScouts.length === 0 ? (
+              <div className="glass rounded-xl p-12 text-center">
+                <p className="text-4xl mb-4">📋</p>
+                <p className="text-muted-foreground font-body">No scouts assigned yet. Set up assignments in the Scout Assignments tab.</p>
+              </div>
+            ) : (
               <div className="glass rounded-xl overflow-hidden border border-border/50">
-                {/* Chart header */}
                 <div className="px-5 py-4 border-b border-border/50 flex items-center gap-3">
                   <span className="text-xl">📡</span>
                   <div>
@@ -381,7 +394,6 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                   </div>
                 </div>
 
-                {/* Scout rows */}
                 <div className="divide-y divide-border/30">
                   {assignedScouts.map((assignment) => {
                     const matches = assignment.qual_matches || [];
@@ -391,23 +403,15 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                     return (
                       <div
                         key={assignment.scout_name}
-                        className={`px-5 py-3.5 flex items-center gap-4 flex-wrap transition-colors ${
-                          allDone ? "bg-green-500/5" : ""
-                        }`}
+                        className={`px-5 py-3.5 flex items-center gap-4 flex-wrap transition-colors ${allDone ? "bg-green-500/5" : ""}`}
                       >
-                        {/* Scout info */}
                         <div className="min-w-[130px]">
-                          <p className="font-display text-sm text-foreground tracking-wide leading-tight">
-                            {assignment.scout_name}
-                          </p>
+                          <p className="font-display text-sm text-foreground tracking-wide leading-tight">{assignment.scout_name}</p>
                           <p className="text-xs text-muted-foreground font-body mt-0.5">
-                            {assignment.team_name
-                              ? `${assignment.team_name} #${assignment.team_number}`
-                              : `Team #${assignment.team_number}`}
+                            {assignment.team_name ? `${assignment.team_name} #${assignment.team_number}` : `Team #${assignment.team_number}`}
                           </p>
                         </div>
 
-                        {/* Match chips */}
                         <div className="flex flex-wrap gap-1.5 flex-1">
                           {matches.length === 0 ? (
                             <span className="text-xs text-muted-foreground/50 font-body italic">No matches assigned</span>
@@ -444,7 +448,6 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                   })}
                 </div>
 
-                {/* Summary footer */}
                 <div className="px-5 py-3 border-t border-border/50 bg-muted/20 flex items-center justify-between">
                   <p className="text-xs text-muted-foreground font-body">
                     {assignedScouts.filter((a) => {
@@ -458,7 +461,12 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                 </div>
               </div>
             )}
+          </>
+        )}
 
+        {/* ── RANKINGS TAB ── */}
+        {activeTab === "rankings" && (
+          <>
             {/* ── TEAM RANKINGS ── */}
             {loading ? (
               <div className="glass rounded-xl p-12 text-center">
