@@ -219,7 +219,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   };
 
   const handlePendingAction = async () => {
-    if (pendingPassword !== "Group Leader") { setPendingError("Incorrect password."); return; }
+    if (pendingPassword !== "Team Leader") { setPendingError("Incorrect password."); return; }
     if (!pendingAction) return;
     if (pendingAction.type === "clearAssignment") {
       await executeClearAssignment(pendingAction.scoutName);
@@ -241,7 +241,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   };
 
   const handleClearAll = async () => {
-    if (clearAllPassword !== "Group Leader") { setClearAllError("Incorrect password."); return; }
+    if (clearAllPassword !== "Team Leader") { setClearAllError("Incorrect password."); return; }
     setClearingAll(true);
     const { error } = await supabase.from("scouting_entries").delete().neq("id", "00000000-0000-0000-0000-000000000000");
     if (error) { toast.error("Failed to clear entries."); console.error(error); }
@@ -256,7 +256,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   };
 
   const handleDelete = async () => {
-    if (deletePassword !== "Group Leader") { setDeleteError("Incorrect password."); return; }
+    if (deletePassword !== "Team Leader") { setDeleteError("Incorrect password."); return; }
     if (!deleteTarget) return;
     const { error } = await supabase.from("scouting_entries").delete().eq("id", deleteTarget.id);
     if (error) { toast.error("Failed to delete entry."); console.error(error); return; }
