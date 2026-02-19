@@ -60,6 +60,13 @@ export function findTeamMember(input: string): string | null {
   // Master account
   if (normalizedInput === "master data") return "Master Data";
 
+  // Priority: exact match on first name (handles short names like "Max" reliably)
+  for (const member of TEAM_MEMBERS) {
+    const parts = normalize(member).split(" ");
+    const firstName = parts[0];
+    if (normalizedInput === firstName) return member;
+  }
+
   let bestMatch: string | null = null;
   let bestScore = Infinity;
 
@@ -67,18 +74,22 @@ export function findTeamMember(input: string): string | null {
     const normalizedMember = normalize(member);
     const parts = normalizedMember.split(" ");
     const firstName = parts[0];
-    const lastInitial = parts[parts.length - 1]?.[0] ?? "";
+    const lastName = parts[parts.length - 1];
+    const lastInitial = lastName?.[0] ?? "";
 
     // Build candidate strings to match against
     const candidates = [
-      normalizedMember,                        // full name
-      `${firstName} ${lastInitial}`,           // first name + last initial
-      firstName,                               // first name only
+      normalizedMember,              // full name: "max tran"
+      `${firstName} ${lastInitial}`, // first + initial: "max t"
+      firstName,                     // first only: "max"
+      lastName,                      // last only: "tran"
     ];
 
     for (const candidate of candidates) {
       const distance = levenshtein(normalizedInput, candidate);
-      const threshold = Math.max(2, Math.floor(candidate.length * 0.35));
+      // More generous threshold for short names (≤4 chars)
+      const base = candidate.length <= 4 ? 0.45 : 0.35;
+      const threshold = Math.max(2, Math.floor(candidate.length * base));
 
       if (distance < bestScore && distance <= threshold) {
         bestScore = distance;
