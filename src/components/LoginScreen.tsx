@@ -87,7 +87,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         {/* Login card */}
         <div className="glass rounded-xl p-8 glow-primary">
           <h2 className="text-xl font-display text-foreground mb-6 text-center tracking-wide">
-            {pendingMaster ? "MASTER ACCESS" : pendingScout ? "TEAM PASSWORD" : "IDENTIFY YOURSELF"}
+            {pendingMaster ? "MASTER ACCESS" : pendingScout ? "TEAM PASSWORD" : "AUTHENTICATION"}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
             {!pendingMaster && !pendingScout ? (
