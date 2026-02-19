@@ -13,9 +13,11 @@ interface FormData {
   autoArtifactsScored: string;
   autoPatternAlignment: string;
   autoLaunchLine: string;
+  autoLeave: string;
   autoConsistency: string;
   // Teleop
   teleopIntakeMethod: string;
+  teleopBallCapacity: string;
   teleopShootingAccuracy: string;
   teleopGateInteraction: string;
   teleopOverflowManagement: string;
@@ -24,10 +26,25 @@ interface FormData {
   // Endgame
   endgameParking: string;
   endgameAllianceAssist: string;
+  // Penalties
+  penalties: string[];
   // Short answers
   specialFeatures: string;
   goodMatch: string;
 }
+
+const PENALTY_OPTIONS = [
+  "Clearing the Gate illegally",
+  "Touching opposing robot in Endgame zone",
+  "Entering opposing Alliance's Human Player zone",
+  "Entering opposing Alliance's Secret Tunnel",
+  "Shooting outside the Shooting Zone",
+  "Pinning / trapping opponent",
+  "Robot exceeded 18\" size limit",
+  "Unsafe robot behavior",
+  "Delay of game",
+  "None observed",
+];
 
 const INITIAL_FORM: FormData = {
   teamNumber: "",
@@ -35,8 +52,10 @@ const INITIAL_FORM: FormData = {
   autoArtifactsScored: "",
   autoPatternAlignment: "",
   autoLaunchLine: "",
+  autoLeave: "",
   autoConsistency: "",
   teleopIntakeMethod: "",
+  teleopBallCapacity: "",
   teleopShootingAccuracy: "",
   teleopGateInteraction: "",
   teleopOverflowManagement: "",
@@ -44,6 +63,7 @@ const INITIAL_FORM: FormData = {
   teleopArtifactClassification: "",
   endgameParking: "",
   endgameAllianceAssist: "",
+  penalties: [],
   specialFeatures: "",
   goodMatch: "",
 };
@@ -190,6 +210,13 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
             onChange={handleChange}
           />
           <MCQuestion
+            label="Did they leave (move off the wall) in Autonomous?"
+            name="autoLeave"
+            options={["Yes", "No"]}
+            value={form.autoLeave}
+            onChange={handleChange}
+          />
+          <MCQuestion
             label="How consistent was their Autonomous routine?"
             name="autoConsistency"
             options={["Very Consistent", "Mostly Consistent", "Inconsistent", "No Auto"]}
@@ -206,6 +233,13 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
             name="teleopIntakeMethod"
             options={["Floor Intake", "Pushing", "Both", "No Intake"]}
             value={form.teleopIntakeMethod}
+            onChange={handleChange}
+          />
+          <MCQuestion
+            label="How many balls can their robot hold at once?"
+            name="teleopBallCapacity"
+            options={["1", "2", "3"]}
+            value={form.teleopBallCapacity}
             onChange={handleChange}
           />
           <MCQuestion
@@ -262,6 +296,45 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
             value={form.endgameAllianceAssist}
             onChange={handleChange}
           />
+        </div>
+
+        {/* Penalties */}
+        <div className="glass rounded-xl p-6 border-glow space-y-5">
+          <SectionHeader title="PENALTIES" icon="🚨" />
+          <p className="text-sm font-body text-foreground font-medium">Which penalties did this team receive? (Select all that apply)</p>
+          <div className="flex flex-wrap gap-2">
+            {PENALTY_OPTIONS.map((penalty) => (
+              <button
+                key={penalty}
+                type="button"
+                onClick={() => {
+                  setForm((prev) => {
+                    const has = prev.penalties.includes(penalty);
+                    // If selecting "None observed", clear others. If selecting another, remove "None observed"
+                    if (penalty === "None observed") {
+                      return { ...prev, penalties: has ? [] : ["None observed"] };
+                    }
+                    const withoutNone = prev.penalties.filter((p) => p !== "None observed");
+                    return {
+                      ...prev,
+                      penalties: has
+                        ? withoutNone.filter((p) => p !== penalty)
+                        : [...withoutNone, penalty],
+                    };
+                  });
+                }}
+                className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                  form.penalties.includes(penalty)
+                    ? penalty === "None observed"
+                      ? "bg-glow-success/20 border-glow-success text-glow-success"
+                      : "bg-destructive/20 border-destructive text-destructive"
+                    : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                }`}
+              >
+                {penalty}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Short Answers */}
