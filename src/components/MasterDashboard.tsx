@@ -87,6 +87,10 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string } | null>(null);
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState("");
+  const [showClearAll, setShowClearAll] = useState(false);
+  const [clearAllPassword, setClearAllPassword] = useState("");
+  const [clearAllError, setClearAllError] = useState("");
+  const [clearingAll, setClearingAll] = useState(false);
 
   const [activeTab, setActiveTab] = useState<"rankings" | "assignments">("rankings");
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
@@ -218,6 +222,21 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
     setEditedAssignments((prev) => ({ ...prev, [scoutName]: { ...current, qual_matches: current.qual_matches.filter((m) => m !== match) } }));
   };
 
+  const handleClearAll = async () => {
+    if (clearAllPassword !== "Group Leader") { setClearAllError("Incorrect password."); return; }
+    setClearingAll(true);
+    const { error } = await supabase.from("scouting_entries").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    if (error) { toast.error("Failed to clear entries."); console.error(error); }
+    else {
+      setEntries([]);
+      toast.success("All scouting entries cleared!");
+      setShowClearAll(false);
+      setClearAllPassword("");
+      setClearAllError("");
+    }
+    setClearingAll(false);
+  };
+
   const handleDelete = async () => {
     if (deletePassword !== "Group Leader") { setDeleteError("Incorrect password."); return; }
     if (!deleteTarget) return;
@@ -284,6 +303,12 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200"
             >
               ↻ REFRESH
+            </button>
+            <button
+              onClick={() => { setShowClearAll(true); setClearAllPassword(""); setClearAllError(""); }}
+              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/40 text-destructive/70 hover:border-destructive hover:text-destructive transition-all duration-200"
+            >
+              🗑 CLEAR ALL
             </button>
             <button
               onClick={onLogout}
@@ -709,6 +734,43 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                 className="px-4 py-2 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all"
               >
                 DELETE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Clear All modal */}
+      {showClearAll && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="glass rounded-xl p-6 w-full max-w-sm mx-4 border border-destructive/40 space-y-4">
+            <h3 className="font-display text-lg text-destructive tracking-wider">🗑 CLEAR ALL ENTRIES</h3>
+            <p className="text-sm text-muted-foreground font-body">
+              This will permanently delete <span className="text-foreground font-bold">all {entries.length} scouting entries</span>. Assignments will not be affected. Enter the password to confirm.
+            </p>
+            <input
+              type="password"
+              value={clearAllPassword}
+              onChange={(e) => { setClearAllPassword(e.target.value); setClearAllError(""); }}
+              onKeyDown={(e) => { if (e.key === "Enter") handleClearAll(); }}
+              placeholder="Enter password"
+              autoFocus
+              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-foreground text-sm font-body focus:outline-none focus:ring-2 focus:ring-destructive/50"
+            />
+            {clearAllError && <p className="text-xs text-destructive font-body">{clearAllError}</p>}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => { setShowClearAll(false); setClearAllPassword(""); setClearAllError(""); }}
+                className="px-4 py-2 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:bg-muted/30 transition-all"
+              >
+                CANCEL
+              </button>
+              <button
+                onClick={handleClearAll}
+                disabled={clearingAll}
+                className="px-4 py-2 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all disabled:opacity-60"
+              >
+                {clearingAll ? "CLEARING..." : "CLEAR ALL"}
               </button>
             </div>
           </div>
