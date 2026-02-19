@@ -112,19 +112,19 @@ const SectionHeader = ({ title, icon }: { title: string; icon: string }) => (
 const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
-  const [assignment, setAssignment] = useState<{ team_number: string; team_name: string } | null>(null);
+  const [assignment, setAssignment] = useState<{ team_number: string; team_name: string; qual_matches: string[] } | null>(null);
 
   // Fetch this scout's assignment on mount
   useEffect(() => {
     const fetchAssignment = async () => {
       const { data } = await supabase
         .from("team_assignments")
-        .select("team_number, team_name")
+        .select("team_number, team_name, qual_matches")
         .eq("scout_name", scouterName)
         .maybeSingle();
 
       if (data) {
-        setAssignment(data);
+        setAssignment({ team_number: data.team_number, team_name: data.team_name, qual_matches: data.qual_matches || [] });
         setForm((prev) => ({ ...prev, teamNumber: data.team_number, teamName: data.team_name }));
       }
     };
@@ -266,13 +266,32 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
             </div>
             <div>
               <label className="block text-sm text-muted-foreground font-body mb-1">Match Number</label>
-              <input
-                type="text"
-                value={form.matchNumber}
-                onChange={(e) => handleChange("matchNumber", e.target.value)}
-                placeholder="e.g. Q5"
-                className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
-              />
+              {assignment && assignment.qual_matches.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {assignment.qual_matches.map((match) => (
+                    <button
+                      key={match}
+                      type="button"
+                      onClick={() => handleChange("matchNumber", form.matchNumber === match ? "" : match)}
+                      className={`px-4 py-2 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
+                        form.matchNumber === match
+                          ? "bg-primary/20 border-primary text-primary glow-primary"
+                          : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                      }`}
+                    >
+                      {match}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <input
+                  type="text"
+                  value={form.matchNumber}
+                  onChange={(e) => handleChange("matchNumber", e.target.value)}
+                  placeholder="e.g. Q5"
+                  className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
+                />
+              )}
             </div>
           </div>
         </div>
