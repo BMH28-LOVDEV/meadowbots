@@ -504,7 +504,7 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
                         : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
                     }`}
                   >
-                    {isSelected ? (isYellow ? "🟡" : "🔴") : "⬜"} {card}
+                    {isYellow ? "🟨" : "🟥"} {card}
                   </button>
                 );
               })}
