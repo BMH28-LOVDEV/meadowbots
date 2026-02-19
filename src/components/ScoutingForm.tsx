@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ScoutingFormProps {
   scouterName: string;
@@ -108,21 +109,51 @@ const SectionHeader = ({ title, icon }: { title: string; icon: string }) => (
 
 const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (name: keyof FormData, value: string) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.teamNumber) {
       toast.error("Please enter the team number!");
       return;
     }
-    // Store locally
-    const existing = JSON.parse(localStorage.getItem("scoutingData") || "[]");
-    existing.push({ ...form, scouterName, timestamp: new Date().toISOString() });
-    localStorage.setItem("scoutingData", JSON.stringify(existing));
+
+    setSubmitting(true);
+    const { error } = await supabase.from("scouting_entries").insert({
+      scouter_name: scouterName,
+      team_number: form.teamNumber,
+      match_number: form.matchNumber || null,
+      auto_artifacts_scored: form.autoArtifactsScored || null,
+      auto_pattern_alignment: form.autoPatternAlignment || null,
+      auto_launch_line: form.autoLaunchLine || null,
+      auto_leave: form.autoLeave || null,
+      auto_consistency: form.autoConsistency || null,
+      teleop_intake_method: form.teleopIntakeMethod || null,
+      teleop_ball_capacity: form.teleopBallCapacity || null,
+      teleop_shooting_accuracy: form.teleopShootingAccuracy || null,
+      teleop_gate_interaction: form.teleopGateInteraction || null,
+      teleop_overflow_management: form.teleopOverflowManagement || null,
+      teleop_cycle_speed: form.teleopCycleSpeed || null,
+      teleop_artifact_classification: form.teleopArtifactClassification || null,
+      endgame_parking: form.endgameParking || null,
+      endgame_alliance_assist: form.endgameAllianceAssist || null,
+      penalties: form.penalties,
+      special_features: form.specialFeatures || null,
+      good_match: form.goodMatch || null,
+    });
+
+    setSubmitting(false);
+
+    if (error) {
+      toast.error("Failed to save. Please try again.");
+      console.error(error);
+      return;
+    }
+
     toast.success(`Scouting data for Team ${form.teamNumber} saved!`);
     setForm(INITIAL_FORM);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -310,7 +341,6 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
                 onClick={() => {
                   setForm((prev) => {
                     const has = prev.penalties.includes(penalty);
-                    // If selecting "None observed", clear others. If selecting another, remove "None observed"
                     if (penalty === "None observed") {
                       return { ...prev, penalties: has ? [] : ["None observed"] };
                     }
@@ -369,13 +399,14 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
         {/* Submit */}
         <button
           type="submit"
-          className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-display font-bold text-lg tracking-widest hover:glow-primary-strong transition-all duration-300 hover:scale-[1.01] active:scale-[0.99]"
+          disabled={submitting}
+          className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-display font-bold text-lg tracking-widest hover:glow-primary-strong transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          SUBMIT SCOUTING DATA
+          {submitting ? "SAVING..." : "SUBMIT SCOUTING DATA"}
         </button>
 
         <p className="text-center text-muted-foreground/30 text-xs font-body pb-8">
-          Data is saved locally on this device • FTC DECODE™ 2025–2026
+          Data synced to Lovable Cloud • FTC DECODE™ 2025–2026
         </p>
       </form>
     </div>
