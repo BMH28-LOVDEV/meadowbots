@@ -51,6 +51,9 @@ export function findTeamMember(input: string): string | null {
   const normalizedInput = normalize(input);
   if (!normalizedInput) return null;
 
+  // Master account
+  if (normalizedInput === "master data") return "Master Data";
+
   let bestMatch: string | null = null;
   let bestScore = Infinity;
 
