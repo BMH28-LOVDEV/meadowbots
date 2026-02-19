@@ -30,7 +30,7 @@ interface FormData {
   endgameAllianceAssist: string;
   // Penalties
   penalties: string[];
-  // Short answers
+  cards: string[];
   specialFeatures: string;
   goodMatch: string;
 }
@@ -42,11 +42,11 @@ const PENALTY_OPTIONS = [
   "Entering opposing Alliance's Secret Tunnel",
   "Shooting outside the Shooting Zone",
   "Pinning / trapping opponent",
-  "Robot exceeded 18\" size limit",
-  "Unsafe robot behavior",
-  "Delay of game",
+  "Turned off a robot",
   "None observed",
 ];
+
+const CARD_OPTIONS = ["Yellow Card", "Red Card"];
 
 const INITIAL_FORM: FormData = {
   teamNumber: "",
@@ -67,6 +67,7 @@ const INITIAL_FORM: FormData = {
   endgameParking: "",
   endgameAllianceAssist: "",
   penalties: [],
+  cards: [],
   specialFeatures: "",
   goodMatch: "",
 };
@@ -161,7 +162,7 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
       teleop_artifact_classification: form.teleopArtifactClassification || null,
       endgame_parking: form.endgameParking || null,
       endgame_alliance_assist: form.endgameAllianceAssist || null,
-      penalties: form.penalties,
+      penalties: [...form.penalties, ...form.cards.map((c) => `[CARD] ${c}`)],
       special_features: form.specialFeatures || null,
       good_match: form.goodMatch || null,
     });
@@ -445,7 +446,46 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
               </button>
             ))}
           </div>
+
+          {/* Divider */}
+          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+          {/* Major Cards */}
+          <div className="space-y-3">
+            <p className="text-sm font-body text-foreground font-medium">Major Cards Issued</p>
+            <div className="flex flex-wrap gap-3">
+              {CARD_OPTIONS.map((card) => {
+                const isSelected = (form.cards || []).includes(card);
+                const isYellow = card === "Yellow Card";
+                return (
+                  <button
+                    key={card}
+                    type="button"
+                    onClick={() => {
+                      setForm((prev) => {
+                        const has = prev.cards.includes(card);
+                        return {
+                          ...prev,
+                          cards: has ? prev.cards.filter((c) => c !== card) : [...prev.cards, card],
+                        };
+                      });
+                    }}
+                    className={`px-5 py-2.5 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
+                      isSelected
+                        ? isYellow
+                          ? "bg-yellow-400/20 border-yellow-400 text-yellow-400 shadow-[0_0_12px_2px_rgba(250,204,21,0.4)]"
+                          : "bg-red-500/20 border-red-500 text-red-400 shadow-[0_0_12px_2px_rgba(239,68,68,0.45)]"
+                        : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                    }`}
+                  >
+                    {isSelected ? (isYellow ? "🟡" : "🔴") : "⬜"} {card}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
+
 
         {/* Short Answers */}
         <div className="glass rounded-xl p-6 glow-primary space-y-6">
