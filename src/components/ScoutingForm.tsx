@@ -161,8 +161,8 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
 
     if (missingFields.length > 0) {
       toast.error("Please answer all of the questions.", {
-        description: `Missing: ${missingFields.join(", ")}`,
         duration: 5000,
+        position: "top-center",
         style: { background: "hsl(0 72% 28%)", border: "1px solid hsl(0 72% 50%)", color: "white" },
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
