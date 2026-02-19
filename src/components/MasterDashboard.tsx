@@ -97,7 +97,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   const [pendingPassword, setPendingPassword] = useState("");
   const [pendingError, setPendingError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"rankings" | "progress" | "assignments">("rankings");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments">("dashboard");
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
   const [savingAssignment, setSavingAssignment] = useState<string | null>(null);
@@ -340,6 +340,16 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
         {/* Tabs */}
         <div className="max-w-4xl mx-auto px-4 flex gap-1 pb-2">
           <button
+            onClick={() => setActiveTab("dashboard")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 ${
+              activeTab === "dashboard"
+                ? "bg-primary/20 text-primary border border-primary/40"
+                : "text-muted-foreground hover:text-foreground border border-transparent"
+            }`}
+          >
+            🏠 DASHBOARD
+          </button>
+          <button
             onClick={() => setActiveTab("rankings")}
             className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 ${
               activeTab === "rankings"
@@ -373,6 +383,95 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+
+        {/* ── DASHBOARD TAB ── */}
+        {activeTab === "dashboard" && (
+          <div className="space-y-6">
+            {/* Welcome banner */}
+            <div className="glass rounded-xl p-6 border border-accent/30 glow-primary">
+              <div className="flex items-center gap-4">
+                <span className="text-4xl">🛰️</span>
+                <div>
+                  <h2 className="font-display text-xl text-primary tracking-wider text-glow">MEADOWBOTS SCOUTING HQ</h2>
+                  <p className="text-sm text-muted-foreground font-body mt-1">Master Data — DECODE 2025–2026</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Stats row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="glass rounded-xl p-4 text-center border border-border/50">
+                <p className="font-display text-3xl text-primary text-glow">{entries.length}</p>
+                <p className="text-xs text-muted-foreground font-body mt-1">Total Entries</p>
+              </div>
+              <div className="glass rounded-xl p-4 text-center border border-border/50">
+                <p className="font-display text-3xl text-primary text-glow">{teamSummaries.length}</p>
+                <p className="text-xs text-muted-foreground font-body mt-1">Teams Scouted</p>
+              </div>
+              <div className="glass rounded-xl p-4 text-center border border-border/50">
+                <p className="font-display text-3xl text-primary text-glow">
+                  {assignments.filter((a) => a.team_number).length}
+                </p>
+                <p className="text-xs text-muted-foreground font-body mt-1">Scouts Assigned</p>
+              </div>
+              <div className="glass rounded-xl p-4 text-center border border-border/50">
+                <p className="font-display text-3xl text-primary text-glow">
+                  {assignments.filter((a) => {
+                    const m = a.qual_matches || [];
+                    return m.length > 0 && m.every((q) => entries.some((e) => e.scouterName === a.scout_name && e.teamNumber === a.team_number && e.matchNumber.toUpperCase() === q.toUpperCase()));
+                  }).length}
+                </p>
+                <p className="text-xs text-muted-foreground font-body mt-1">Scouts Complete</p>
+              </div>
+            </div>
+
+            {/* Top 3 teams */}
+            {teamSummaries.length > 0 && (
+              <div className="glass rounded-xl overflow-hidden border border-border/50">
+                <div className="px-5 py-4 border-b border-border/50 flex items-center gap-3">
+                  <span className="text-xl">🏆</span>
+                  <h2 className="font-display text-base text-foreground tracking-wider">TOP TEAMS</h2>
+                </div>
+                <div className="divide-y divide-border/30">
+                  {teamSummaries.slice(0, 3).map((team, index) => (
+                    <div key={team.teamNumber} className="px-5 py-3.5 flex items-center gap-4">
+                      <span className="text-xl w-8 text-center">{getRankIcon(index + 1)}</span>
+                      <div className="flex-1">
+                        <p className="font-display text-sm text-foreground tracking-wide">Team {team.teamNumber}</p>
+                        <p className="text-xs text-muted-foreground font-body">{team.entries.length} match{team.entries.length !== 1 ? "es" : ""} scouted</p>
+                      </div>
+                      <p className="font-display text-lg text-primary text-glow">{Math.round(team.avgScore)} pts</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="px-5 py-3 border-t border-border/50">
+                  <button onClick={() => setActiveTab("rankings")} className="text-xs text-primary font-body hover:underline">
+                    View full rankings →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Quick nav */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <button onClick={() => setActiveTab("rankings")} className="glass rounded-xl p-5 text-left border border-border/50 hover:border-primary/40 transition-all group">
+                <span className="text-2xl">📊</span>
+                <p className="font-display text-sm text-foreground tracking-wider mt-2 group-hover:text-primary transition-colors">RANKINGS</p>
+                <p className="text-xs text-muted-foreground font-body mt-1">Full team rankings & match data</p>
+              </button>
+              <button onClick={() => setActiveTab("progress")} className="glass rounded-xl p-5 text-left border border-border/50 hover:border-primary/40 transition-all group">
+                <span className="text-2xl">📡</span>
+                <p className="font-display text-sm text-foreground tracking-wider mt-2 group-hover:text-primary transition-colors">SCOUT PROGRESS</p>
+                <p className="text-xs text-muted-foreground font-body mt-1">Live match completion status</p>
+              </button>
+              <button onClick={() => setActiveTab("assignments")} className="glass rounded-xl p-5 text-left border border-border/50 hover:border-primary/40 transition-all group">
+                <span className="text-2xl">📋</span>
+                <p className="font-display text-sm text-foreground tracking-wider mt-2 group-hover:text-primary transition-colors">ASSIGNMENTS</p>
+                <p className="text-xs text-muted-foreground font-body mt-1">Assign scouts to teams & matches</p>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ── SCOUT PROGRESS TAB ── */}
         {activeTab === "progress" && (
