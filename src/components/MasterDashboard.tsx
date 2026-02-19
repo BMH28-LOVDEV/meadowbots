@@ -92,6 +92,11 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   const [clearAllError, setClearAllError] = useState("");
   const [clearingAll, setClearingAll] = useState(false);
 
+  // Shared password modal for assignment CLEAR and qual match removal
+  const [pendingAction, setPendingAction] = useState<null | { type: "clearAssignment"; scoutName: string } | { type: "removeMatch"; scoutName: string; match: string }>(null);
+  const [pendingPassword, setPendingPassword] = useState("");
+  const [pendingError, setPendingError] = useState("");
+
   const [activeTab, setActiveTab] = useState<"rankings" | "assignments">("rankings");
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
@@ -197,7 +202,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
     setSavingAssignment(null);
   };
 
-  const handleClearAssignment = async (scoutName: string) => {
+  const executeClearAssignment = async (scoutName: string) => {
     const existing = assignments.find((a) => a.scout_name === scoutName);
     if (existing) {
       await supabase.from("team_assignments").delete().eq("scout_name", scoutName);
@@ -208,6 +213,24 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
     setMatchInputs((prev) => ({ ...prev, [scoutName]: "" }));
   };
 
+  const executeRemoveMatch = (scoutName: string, match: string) => {
+    const current = editedAssignments[scoutName] || { team_number: "", team_name: "", qual_matches: [] };
+    setEditedAssignments((prev) => ({ ...prev, [scoutName]: { ...current, qual_matches: current.qual_matches.filter((m) => m !== match) } }));
+  };
+
+  const handlePendingAction = async () => {
+    if (pendingPassword !== "Group Leader") { setPendingError("Incorrect password."); return; }
+    if (!pendingAction) return;
+    if (pendingAction.type === "clearAssignment") {
+      await executeClearAssignment(pendingAction.scoutName);
+    } else if (pendingAction.type === "removeMatch") {
+      executeRemoveMatch(pendingAction.scoutName, pendingAction.match);
+    }
+    setPendingAction(null);
+    setPendingPassword("");
+    setPendingError("");
+  };
+
   const addMatch = (scoutName: string) => {
     const raw = (matchInputs[scoutName] || "").trim().toUpperCase();
     if (!raw) return;
@@ -215,11 +238,6 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
     if (current.qual_matches.includes(raw)) { setMatchInputs((prev) => ({ ...prev, [scoutName]: "" })); return; }
     setEditedAssignments((prev) => ({ ...prev, [scoutName]: { ...current, qual_matches: [...current.qual_matches, raw] } }));
     setMatchInputs((prev) => ({ ...prev, [scoutName]: "" }));
-  };
-
-  const removeMatch = (scoutName: string, match: string) => {
-    const current = editedAssignments[scoutName] || { team_number: "", team_name: "", qual_matches: [] };
-    setEditedAssignments((prev) => ({ ...prev, [scoutName]: { ...current, qual_matches: current.qual_matches.filter((m) => m !== match) } }));
   };
 
   const handleClearAll = async () => {
@@ -649,7 +667,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                                   <button
                                     key={match}
                                     type="button"
-                                    onClick={() => removeMatch(scoutName, match)}
+                                    onClick={() => { setPendingAction({ type: "removeMatch", scoutName, match }); setPendingPassword(""); setPendingError(""); }}
                                     title="Click to remove"
                                     className={`px-3 py-1 rounded-lg text-sm font-body font-semibold border transition-all duration-200 hover:opacity-70 ${
                                       done
@@ -689,7 +707,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                           </button>
                           {hasAssignment && (
                             <button
-                              onClick={() => handleClearAssignment(scoutName)}
+                              onClick={() => { setPendingAction({ type: "clearAssignment", scoutName }); setPendingPassword(""); setPendingError(""); }}
                               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/50 text-destructive hover:bg-destructive/10 transition-all"
                             >
                               CLEAR
@@ -734,6 +752,46 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                 className="px-4 py-2 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all"
               >
                 DELETE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password modal for CLEAR assignment / remove qual match */}
+      {pendingAction && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="glass rounded-xl p-6 w-full max-w-sm mx-4 border border-destructive/40 space-y-4">
+            <h3 className="font-display text-lg text-destructive tracking-wider">
+              {pendingAction.type === "clearAssignment" ? "🗑 CLEAR ASSIGNMENT" : `✕ REMOVE ${pendingAction.match}`}
+            </h3>
+            <p className="text-sm text-muted-foreground font-body">
+              {pendingAction.type === "clearAssignment"
+                ? `This will clear the full assignment for ${pendingAction.scoutName}. Enter the password to confirm.`
+                : `This will remove match ${pendingAction.match} from ${pendingAction.scoutName}'s schedule. Enter the password to confirm.`}
+            </p>
+            <input
+              type="password"
+              value={pendingPassword}
+              onChange={(e) => { setPendingPassword(e.target.value); setPendingError(""); }}
+              onKeyDown={(e) => { if (e.key === "Enter") handlePendingAction(); }}
+              placeholder="Enter password"
+              autoFocus
+              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-foreground text-sm font-body focus:outline-none focus:ring-2 focus:ring-destructive/50"
+            />
+            {pendingError && <p className="text-xs text-destructive font-body">{pendingError}</p>}
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => { setPendingAction(null); setPendingPassword(""); setPendingError(""); }}
+                className="px-4 py-2 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:bg-muted/30 transition-all"
+              >
+                CANCEL
+              </button>
+              <button
+                onClick={handlePendingAction}
+                className="px-4 py-2 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all"
+              >
+                CONFIRM
               </button>
             </div>
           </div>
