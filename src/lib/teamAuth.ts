@@ -21,6 +21,7 @@ const TEAM_MEMBERS = [
   "William Hu",
   "Lucas Zhang",
   "Isabelle Liang",
+  "Jude Trujillo",
 ];
 
 function normalize(str: string): string {
@@ -53,12 +54,21 @@ function levenshtein(a: string, b: string): number {
   return matrix[b.length][a.length];
 }
 
+// Alternate first-name aliases mapped to canonical member names
+const ALIASES: Record<string, string> = {
+  "maxwell": "Max Tran",
+  "ben": "Benjamin Hale",
+};
+
 export function findTeamMember(input: string): string | null {
   const normalizedInput = normalize(input);
   if (!normalizedInput) return null;
 
   // Master account
   if (normalizedInput === "master data") return "Master Data";
+
+  // Check explicit aliases first
+  if (ALIASES[normalizedInput]) return ALIASES[normalizedInput];
 
   // Priority: exact match on first name (handles short names like "Max" reliably)
   for (const member of TEAM_MEMBERS) {
