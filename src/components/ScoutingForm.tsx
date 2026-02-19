@@ -210,7 +210,7 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
             onChange={handleChange}
           />
           <MCQuestion
-            label="Did they leave (move off the wall) in Autonomous?"
+            label="Did they leave (move from the depot line) at the end of Autonomous?"
             name="autoLeave"
             options={["Yes", "No"]}
             value={form.autoLeave}
