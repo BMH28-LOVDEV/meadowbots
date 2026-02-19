@@ -15,6 +15,12 @@ const TEAM_MEMBERS = [
   "Heath Wells",
   "Michael Xie",
   "Jason Xie",
+  "Jaden Gilmore",
+  "Rock Kuperman",
+  "Naila Nauman",
+  "William Hu",
+  "Lucas Zhang",
+  "Isabelle Liang",
 ];
 
 function normalize(str: string): string {
