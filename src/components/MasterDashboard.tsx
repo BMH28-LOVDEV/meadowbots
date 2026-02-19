@@ -311,7 +311,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="font-display text-xl text-accent text-glow tracking-wider" style={{ textShadow: "0 0 10px hsl(260 80% 60% / 0.5)" }}>
-              MASTER DATA
+              MASTER MEADOWBOT
             </h1>
             <p className="text-xs text-muted-foreground font-body">Team Rankings Dashboard</p>
           </div>
@@ -393,7 +393,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                 <span className="text-4xl">🛰️</span>
                 <div>
                   <h2 className="font-display text-xl text-primary tracking-wider text-glow">MEADOWBOTS SCOUTING HQ</h2>
-                  <p className="text-sm text-muted-foreground font-body mt-1">Master Data — DECODE 2025–2026</p>
+                  <p className="text-sm text-muted-foreground font-body mt-1">Master MeadowBot — DECODE 2025–2026</p>
                 </div>
               </div>
             </div>
