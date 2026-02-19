@@ -1,10 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface MasterDashboardProps {
   onLogout: () => void;
 }
 
 interface ScoutingEntry {
+  id: string;
   teamNumber: string;
   matchNumber: string;
   scouterName: string;
@@ -32,7 +35,6 @@ interface ScoutingEntry {
 const scoreEntry = (entry: ScoutingEntry): number => {
   let score = 0;
 
-  // Auto scoring
   const autoArtifacts: Record<string, number> = { "0": 0, "1-2": 5, "3-4": 10, "5+": 15 };
   score += autoArtifacts[entry.autoArtifactsScored] || 0;
 
@@ -45,7 +47,6 @@ const scoreEntry = (entry: ScoutingEntry): number => {
   const autoConsistency: Record<string, number> = { "Very Consistent": 10, "Mostly Consistent": 6, "Inconsistent": 2, "No Auto": 0 };
   score += autoConsistency[entry.autoConsistency] || 0;
 
-  // Teleop scoring
   const shootingAcc: Record<string, number> = { "Very Accurate": 10, "Somewhat Accurate": 6, "Inaccurate": 2, "No Shooting": 0 };
   score += shootingAcc[entry.teleopShootingAccuracy] || 0;
 
@@ -64,14 +65,12 @@ const scoreEntry = (entry: ScoutingEntry): number => {
   const ballCap: Record<string, number> = { "1": 2, "2": 5, "3": 8 };
   score += ballCap[entry.teleopBallCapacity] || 0;
 
-  // Endgame
   const parking: Record<string, number> = { "Yes – Full Park": 10, "Partial": 5, "No": 0 };
   score += parking[entry.endgameParking] || 0;
 
   const assist: Record<string, number> = { "Yes": 8, "Attempted": 4, "No": 0 };
   score += assist[entry.endgameAllianceAssist] || 0;
 
-  // Penalty deductions
   const penalties = entry.penalties || [];
   const penaltyCount = penalties.filter((p) => p !== "None observed").length;
   score -= penaltyCount * 5;
@@ -87,56 +86,101 @@ interface TeamSummary {
 }
 
 const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
+  const [entries, setEntries] = useState<ScoutingEntry[]>([]);
+  const [loading, setLoading] = useState(true);
   const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<{ teamNumber: string; matchIndex: number } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string } | null>(null);
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState("");
-  const [refreshKey, setRefreshKey] = useState(0);
 
-  const handleDelete = () => {
+  const fetchEntries = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("scouting_entries")
+      .select("*")
+      .order("timestamp", { ascending: true });
+
+    if (error) {
+      toast.error("Failed to load data.");
+      console.error(error);
+    } else {
+      const mapped: ScoutingEntry[] = (data || []).map((row) => ({
+        id: row.id,
+        teamNumber: row.team_number,
+        matchNumber: row.match_number || "",
+        scouterName: row.scouter_name,
+        timestamp: row.timestamp,
+        autoArtifactsScored: row.auto_artifacts_scored || "",
+        autoPatternAlignment: row.auto_pattern_alignment || "",
+        autoLaunchLine: row.auto_launch_line || "",
+        autoLeave: row.auto_leave || "",
+        autoConsistency: row.auto_consistency || "",
+        teleopIntakeMethod: row.teleop_intake_method || "",
+        teleopBallCapacity: row.teleop_ball_capacity || "",
+        teleopShootingAccuracy: row.teleop_shooting_accuracy || "",
+        teleopGateInteraction: row.teleop_gate_interaction || "",
+        teleopOverflowManagement: row.teleop_overflow_management || "",
+        teleopCycleSpeed: row.teleop_cycle_speed || "",
+        teleopArtifactClassification: row.teleop_artifact_classification || "",
+        endgameParking: row.endgame_parking || "",
+        endgameAllianceAssist: row.endgame_alliance_assist || "",
+        penalties: row.penalties || [],
+        specialFeatures: row.special_features || "",
+        goodMatch: row.good_match || "",
+      }));
+      setEntries(mapped);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchEntries();
+  }, []);
+
+  const handleDelete = async () => {
     if (deletePassword !== "Group Leader") {
       setDeleteError("Incorrect password.");
       return;
     }
     if (!deleteTarget) return;
 
-    const raw: ScoutingEntry[] = JSON.parse(localStorage.getItem("scoutingData") || "[]");
-    const teamEntries = raw.filter((e) => e.teamNumber === deleteTarget.teamNumber);
-    const entryToRemove = teamEntries[deleteTarget.matchIndex];
-    if (entryToRemove) {
-      const idx = raw.indexOf(entryToRemove);
-      if (idx !== -1) raw.splice(idx, 1);
-      localStorage.setItem("scoutingData", JSON.stringify(raw));
+    const { error } = await supabase
+      .from("scouting_entries")
+      .delete()
+      .eq("id", deleteTarget.id);
+
+    if (error) {
+      toast.error("Failed to delete entry.");
+      console.error(error);
+      return;
     }
+
+    setEntries((prev) => prev.filter((e) => e.id !== deleteTarget.id));
     setDeleteTarget(null);
     setDeletePassword("");
     setDeleteError("");
-    setRefreshKey((k) => k + 1);
+    toast.success("Entry deleted.");
   };
 
   const teamSummaries = useMemo(() => {
-    const raw: ScoutingEntry[] = JSON.parse(localStorage.getItem("scoutingData") || "[]");
     const byTeam: Record<string, ScoutingEntry[]> = {};
-
-    raw.forEach((entry) => {
-      const team = entry.teamNumber;
-      if (!byTeam[team]) byTeam[team] = [];
-      byTeam[team].push(entry);
+    entries.forEach((entry) => {
+      if (!byTeam[entry.teamNumber]) byTeam[entry.teamNumber] = [];
+      byTeam[entry.teamNumber].push(entry);
     });
 
-    const summaries: TeamSummary[] = Object.entries(byTeam).map(([teamNumber, entries]) => {
-      const totalScore = entries.reduce((sum, e) => sum + scoreEntry(e), 0);
-      const avgScore = totalScore / entries.length;
-      const goodMatchResponses = entries
+    const summaries: TeamSummary[] = Object.entries(byTeam).map(([teamNumber, teamEntries]) => {
+      const totalScore = teamEntries.reduce((sum, e) => sum + scoreEntry(e), 0);
+      const avgScore = totalScore / teamEntries.length;
+      const goodMatchResponses = teamEntries
         .filter((e) => e.goodMatch?.trim())
         .map((e) => ({ scouter: e.scouterName, response: e.goodMatch }));
-
-      return { teamNumber, avgScore, entries, goodMatchResponses };
+      return { teamNumber, avgScore, entries: teamEntries, goodMatchResponses };
     });
 
     summaries.sort((a, b) => b.avgScore - a.avgScore);
     return summaries;
-  }, [refreshKey]);
+  }, [entries]);
 
   const getRankColor = (rank: number) => {
     if (rank === 1) return "text-yellow-400";
@@ -165,17 +209,30 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
             </h1>
             <p className="text-xs text-muted-foreground font-body">Team Rankings Dashboard</p>
           </div>
-          <button
-            onClick={onLogout}
-            className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-destructive hover:text-destructive transition-all duration-200"
-          >
-            LOGOUT
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={fetchEntries}
+              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200"
+            >
+              ↻ REFRESH
+            </button>
+            <button
+              onClick={onLogout}
+              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-destructive hover:text-destructive transition-all duration-200"
+            >
+              LOGOUT
+            </button>
+          </div>
         </div>
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-4">
-        {teamSummaries.length === 0 ? (
+        {loading ? (
+          <div className="glass rounded-xl p-12 text-center">
+            <p className="text-4xl mb-4 animate-pulse">📡</p>
+            <p className="text-muted-foreground font-body">Loading scouting data...</p>
+          </div>
+        ) : teamSummaries.length === 0 ? (
           <div className="glass rounded-xl p-12 text-center">
             <p className="text-4xl mb-4">📭</p>
             <p className="text-muted-foreground font-body">No scouting data yet. Teams will appear here once scouts submit data.</p>
@@ -193,21 +250,17 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               return (
                 <div
                   key={team.teamNumber}
-                  className={`glass rounded-xl overflow-hidden transition-all duration-300 ${
-                    rank <= 3 ? "glow-primary" : ""
-                  }`}
+                  className={`glass rounded-xl overflow-hidden transition-all duration-300 ${rank <= 3 ? "glow-primary" : ""}`}
                 >
-                  {/* Main row - always visible */}
+                  {/* Main row */}
                   <button
                     onClick={() => setExpandedTeam(isExpanded ? null : team.teamNumber)}
                     className="w-full px-6 py-5 flex items-center gap-4 text-left hover:bg-muted/30 transition-colors"
                   >
-                    {/* Rank */}
                     <div className={`text-2xl font-display font-bold w-12 text-center ${getRankColor(rank)}`}>
                       {getRankIcon(rank)}
                     </div>
 
-                    {/* Team info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-baseline gap-3">
                         <span className="font-display text-lg text-foreground tracking-wider">
@@ -218,7 +271,6 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                         </span>
                       </div>
 
-                      {/* Good match preview */}
                       {team.goodMatchResponses.length > 0 && (
                         <p className="text-sm text-primary font-body mt-1 truncate">
                           💬 "{team.goodMatchResponses[0].response}"
@@ -226,13 +278,11 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                       )}
                     </div>
 
-                    {/* Score */}
                     <div className="text-right">
                       <p className="font-display text-xl text-primary text-glow">{Math.round(team.avgScore)}</p>
                       <p className="text-xs text-muted-foreground font-body">pts avg</p>
                     </div>
 
-                    {/* Expand icon */}
                     <span className={`text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}>
                       ▼
                     </span>
@@ -241,7 +291,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                   {/* Expanded details */}
                   {isExpanded && (
                     <div className="px-6 pb-6 space-y-6 border-t border-border/50">
-                      {/* Good Match Section - PROMINENT */}
+                      {/* Good Match Section */}
                       {team.goodMatchResponses.length > 0 && (
                         <div className="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/30">
                           <h4 className="font-display text-sm text-primary tracking-wider mb-3">
@@ -258,22 +308,22 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                         </div>
                       )}
 
-                  {/* All match entries */}
-                  {team.entries.map((entry, i) => (
-                    <div key={i} className="p-4 rounded-lg bg-muted/30 border border-border/50 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="font-display text-sm text-foreground tracking-wider">
-                            Match {entry.matchNumber || "N/A"} • Score: {scoreEntry(entry)}
-                          </span>
-                          <p className="text-xs text-muted-foreground font-body mt-0.5">
-                            🧑‍💻 Scouted by <span className="text-foreground">{entry.scouterName || "Unknown"}</span> • {new Date(entry.timestamp).toLocaleDateString()}
-                          </p>
-                        </div>
-                            <div className="flex items-center gap-3">
+                      {/* All match entries */}
+                      {team.entries.map((entry, i) => (
+                        <div key={i} className="p-4 rounded-lg bg-muted/30 border border-border/50 space-y-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <span className="font-display text-sm text-foreground tracking-wider">
+                                Match {entry.matchNumber || "N/A"} • Score: {scoreEntry(entry)}
+                              </span>
+                              <p className="text-xs text-muted-foreground font-body mt-0.5">
+                                🧑‍💻 Scouted by <span className="text-foreground">{entry.scouterName || "Unknown"}</span> • {new Date(entry.timestamp).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-3 shrink-0">
                               <button
                                 onClick={() => {
-                                  setDeleteTarget({ teamNumber: team.teamNumber, matchIndex: i });
+                                  setDeleteTarget({ id: entry.id });
                                   setDeletePassword("");
                                   setDeleteError("");
                                 }}
@@ -301,7 +351,6 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                             <DataCell label="Alliance Assist" value={entry.endgameAllianceAssist} />
                           </div>
 
-                          {/* Penalties */}
                           {(entry.penalties || []).length > 0 && (
                             <div>
                               <span className="text-xs text-muted-foreground font-body">Penalties: </span>
@@ -320,7 +369,6 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                             </div>
                           )}
 
-                          {/* Special features */}
                           {entry.specialFeatures && (
                             <div>
                               <span className="text-xs text-muted-foreground font-body">Notes: </span>

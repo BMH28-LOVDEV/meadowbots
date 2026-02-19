@@ -14,7 +14,81 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      scouting_entries: {
+        Row: {
+          auto_artifacts_scored: string | null
+          auto_consistency: string | null
+          auto_launch_line: string | null
+          auto_leave: string | null
+          auto_pattern_alignment: string | null
+          endgame_alliance_assist: string | null
+          endgame_parking: string | null
+          good_match: string | null
+          id: string
+          match_number: string | null
+          penalties: string[] | null
+          scouter_name: string
+          special_features: string | null
+          team_number: string
+          teleop_artifact_classification: string | null
+          teleop_ball_capacity: string | null
+          teleop_cycle_speed: string | null
+          teleop_gate_interaction: string | null
+          teleop_intake_method: string | null
+          teleop_overflow_management: string | null
+          teleop_shooting_accuracy: string | null
+          timestamp: string
+        }
+        Insert: {
+          auto_artifacts_scored?: string | null
+          auto_consistency?: string | null
+          auto_launch_line?: string | null
+          auto_leave?: string | null
+          auto_pattern_alignment?: string | null
+          endgame_alliance_assist?: string | null
+          endgame_parking?: string | null
+          good_match?: string | null
+          id?: string
+          match_number?: string | null
+          penalties?: string[] | null
+          scouter_name: string
+          special_features?: string | null
+          team_number: string
+          teleop_artifact_classification?: string | null
+          teleop_ball_capacity?: string | null
+          teleop_cycle_speed?: string | null
+          teleop_gate_interaction?: string | null
+          teleop_intake_method?: string | null
+          teleop_overflow_management?: string | null
+          teleop_shooting_accuracy?: string | null
+          timestamp?: string
+        }
+        Update: {
+          auto_artifacts_scored?: string | null
+          auto_consistency?: string | null
+          auto_launch_line?: string | null
+          auto_leave?: string | null
+          auto_pattern_alignment?: string | null
+          endgame_alliance_assist?: string | null
+          endgame_parking?: string | null
+          good_match?: string | null
+          id?: string
+          match_number?: string | null
+          penalties?: string[] | null
+          scouter_name?: string
+          special_features?: string | null
+          team_number?: string
+          teleop_artifact_classification?: string | null
+          teleop_ball_capacity?: string | null
+          teleop_cycle_speed?: string | null
+          teleop_gate_interaction?: string | null
+          teleop_intake_method?: string | null
+          teleop_overflow_management?: string | null
+          teleop_shooting_accuracy?: string | null
+          timestamp?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
