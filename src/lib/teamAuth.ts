@@ -59,14 +59,25 @@ export function findTeamMember(input: string): string | null {
 
   for (const member of TEAM_MEMBERS) {
     const normalizedMember = normalize(member);
-    const distance = levenshtein(normalizedInput, normalizedMember);
-    
-    // Allow up to ~30% character difference
-    const threshold = Math.max(3, Math.floor(normalizedMember.length * 0.35));
-    
-    if (distance < bestScore && distance <= threshold) {
-      bestScore = distance;
-      bestMatch = member;
+    const parts = normalizedMember.split(" ");
+    const firstName = parts[0];
+    const lastInitial = parts[parts.length - 1]?.[0] ?? "";
+
+    // Build candidate strings to match against
+    const candidates = [
+      normalizedMember,                        // full name
+      `${firstName} ${lastInitial}`,           // first name + last initial
+      firstName,                               // first name only
+    ];
+
+    for (const candidate of candidates) {
+      const distance = levenshtein(normalizedInput, candidate);
+      const threshold = Math.max(2, Math.floor(candidate.length * 0.35));
+
+      if (distance < bestScore && distance <= threshold) {
+        bestScore = distance;
+        bestMatch = member;
+      }
     }
   }
 
