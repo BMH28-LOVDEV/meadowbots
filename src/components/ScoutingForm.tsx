@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -9,6 +9,7 @@ interface ScoutingFormProps {
 
 interface FormData {
   teamNumber: string;
+  teamName: string;
   matchNumber: string;
   // Autonomous
   autoArtifactsScored: string;
@@ -49,6 +50,7 @@ const PENALTY_OPTIONS = [
 
 const INITIAL_FORM: FormData = {
   teamNumber: "",
+  teamName: "",
   matchNumber: "",
   autoArtifactsScored: "",
   autoPatternAlignment: "",
@@ -110,6 +112,24 @@ const SectionHeader = ({ title, icon }: { title: string; icon: string }) => (
 const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
+  const [assignment, setAssignment] = useState<{ team_number: string; team_name: string } | null>(null);
+
+  // Fetch this scout's assignment on mount
+  useEffect(() => {
+    const fetchAssignment = async () => {
+      const { data } = await supabase
+        .from("team_assignments")
+        .select("team_number, team_name")
+        .eq("scout_name", scouterName)
+        .maybeSingle();
+
+      if (data) {
+        setAssignment(data);
+        setForm((prev) => ({ ...prev, teamNumber: data.team_number, teamName: data.team_name }));
+      }
+    };
+    fetchAssignment();
+  }, [scouterName]);
 
   const handleChange = (name: keyof FormData, value: string) => {
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -155,7 +175,12 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
     }
 
     toast.success(`Scouting data for Team ${form.teamNumber} saved!`);
-    setForm(INITIAL_FORM);
+    // Reset but keep assignment-filled fields
+    setForm((prev) => ({
+      ...INITIAL_FORM,
+      teamNumber: assignment?.team_number || "",
+      teamName: assignment?.team_name || "",
+    }));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -189,9 +214,45 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+
+        {/* Assignment Banner */}
+        {assignment && (
+          <div className="glass rounded-xl p-4 border border-primary/40 glow-primary">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🎯</span>
+              <div>
+                <p className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-0.5">Your Assigned Team</p>
+                <p className="font-display text-lg text-primary tracking-wider">
+                  {assignment.team_name ? (
+                    <>
+                      {assignment.team_name}{" "}
+                      <span className="text-foreground/60 text-base">#{assignment.team_number}</span>
+                    </>
+                  ) : (
+                    <>Team #{assignment.team_number}</>
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Team Info */}
         <div className="glass rounded-xl p-6 glow-primary space-y-4">
           <SectionHeader title="TEAM INFO" icon="🤖" />
+
+          {/* Official Team Name */}
+          <div>
+            <label className="block text-sm text-muted-foreground font-body mb-1">Official Team Name</label>
+            <input
+              type="text"
+              value={form.teamName}
+              onChange={(e) => handleChange("teamName", e.target.value)}
+              placeholder="e.g. The Cheesy Poofs"
+              className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm text-muted-foreground font-body mb-1">Team Number *</label>

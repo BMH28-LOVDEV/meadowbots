@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { TEAM_MEMBERS } from "@/lib/teamAuth";
 
 interface MasterDashboardProps {
   onLogout: () => void;
@@ -29,6 +30,13 @@ interface ScoutingEntry {
   penalties: string[];
   specialFeatures: string;
   goodMatch: string;
+}
+
+interface TeamAssignment {
+  id?: string;
+  scout_name: string;
+  team_number: string;
+  team_name: string;
 }
 
 // Scoring system to rank teams
@@ -93,6 +101,14 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState("");
 
+  // Assignments tab
+  const [activeTab, setActiveTab] = useState<"rankings" | "assignments">("rankings");
+  const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(false);
+  const [savingAssignment, setSavingAssignment] = useState<string | null>(null);
+  // Local editable state for assignments
+  const [editedAssignments, setEditedAssignments] = useState<Record<string, { team_number: string; team_name: string }>>({});
+
   const fetchEntries = async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -133,9 +149,69 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
     setLoading(false);
   };
 
+  const fetchAssignments = async () => {
+    setAssignmentsLoading(true);
+    const { data, error } = await supabase.from("team_assignments").select("*");
+    if (!error && data) {
+      setAssignments(data);
+      const edited: Record<string, { team_number: string; team_name: string }> = {};
+      data.forEach((a) => {
+        edited[a.scout_name] = { team_number: a.team_number, team_name: a.team_name };
+      });
+      setEditedAssignments(edited);
+    }
+    setAssignmentsLoading(false);
+  };
+
   useEffect(() => {
     fetchEntries();
+    fetchAssignments();
   }, []);
+
+  const handleSaveAssignment = async (scoutName: string) => {
+    const edited = editedAssignments[scoutName];
+    if (!edited) return;
+    setSavingAssignment(scoutName);
+
+    const existing = assignments.find((a) => a.scout_name === scoutName);
+
+    if (existing) {
+      const { error } = await supabase
+        .from("team_assignments")
+        .update({ team_number: edited.team_number, team_name: edited.team_name })
+        .eq("scout_name", scoutName);
+      if (error) {
+        toast.error("Failed to save assignment.");
+        console.error(error);
+      } else {
+        toast.success(`Assignment saved for ${scoutName}!`);
+        await fetchAssignments();
+      }
+    } else {
+      const { error } = await supabase
+        .from("team_assignments")
+        .insert({ scout_name: scoutName, team_number: edited.team_number, team_name: edited.team_name });
+      if (error) {
+        toast.error("Failed to save assignment.");
+        console.error(error);
+      } else {
+        toast.success(`Assignment saved for ${scoutName}!`);
+        await fetchAssignments();
+      }
+    }
+
+    setSavingAssignment(null);
+  };
+
+  const handleClearAssignment = async (scoutName: string) => {
+    const existing = assignments.find((a) => a.scout_name === scoutName);
+    if (existing) {
+      await supabase.from("team_assignments").delete().eq("scout_name", scoutName);
+      await fetchAssignments();
+      toast.success(`Assignment cleared for ${scoutName}.`);
+    }
+    setEditedAssignments((prev) => ({ ...prev, [scoutName]: { team_number: "", team_name: "" } }));
+  };
 
   const handleDelete = async () => {
     if (deletePassword !== "Group Leader") {
@@ -211,7 +287,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={fetchEntries}
+              onClick={() => { fetchEntries(); fetchAssignments(); }}
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200"
             >
               ↻ REFRESH
@@ -224,165 +300,291 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
             </button>
           </div>
         </div>
+
+        {/* Tabs */}
+        <div className="max-w-4xl mx-auto px-4 flex gap-1 pb-2">
+          <button
+            onClick={() => setActiveTab("rankings")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 ${
+              activeTab === "rankings"
+                ? "bg-primary/20 text-primary border border-primary/40"
+                : "text-muted-foreground hover:text-foreground border border-transparent"
+            }`}
+          >
+            📊 RANKINGS
+          </button>
+          <button
+            onClick={() => setActiveTab("assignments")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 ${
+              activeTab === "assignments"
+                ? "bg-primary/20 text-primary border border-primary/40"
+                : "text-muted-foreground hover:text-foreground border border-transparent"
+            }`}
+          >
+            📋 SCOUT ASSIGNMENTS
+          </button>
+        </div>
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-4">
-        {loading ? (
-          <div className="glass rounded-xl p-12 text-center">
-            <p className="text-4xl mb-4 animate-pulse">📡</p>
-            <p className="text-muted-foreground font-body">Loading scouting data...</p>
-          </div>
-        ) : teamSummaries.length === 0 ? (
-          <div className="glass rounded-xl p-12 text-center">
-            <p className="text-4xl mb-4">📭</p>
-            <p className="text-muted-foreground font-body">No scouting data yet. Teams will appear here once scouts submit data.</p>
-          </div>
-        ) : (
+
+        {/* ── RANKINGS TAB ── */}
+        {activeTab === "rankings" && (
           <>
-            <p className="text-sm text-muted-foreground font-body mb-2">
-              {teamSummaries.length} team{teamSummaries.length !== 1 ? "s" : ""} scouted • Ranked by composite score
-            </p>
+            {loading ? (
+              <div className="glass rounded-xl p-12 text-center">
+                <p className="text-4xl mb-4 animate-pulse">📡</p>
+                <p className="text-muted-foreground font-body">Loading scouting data...</p>
+              </div>
+            ) : teamSummaries.length === 0 ? (
+              <div className="glass rounded-xl p-12 text-center">
+                <p className="text-4xl mb-4">📭</p>
+                <p className="text-muted-foreground font-body">No scouting data yet. Teams will appear here once scouts submit data.</p>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground font-body mb-2">
+                  {teamSummaries.length} team{teamSummaries.length !== 1 ? "s" : ""} scouted • Ranked by composite score
+                </p>
 
-            {teamSummaries.map((team, index) => {
-              const rank = index + 1;
-              const isExpanded = expandedTeam === team.teamNumber;
+                {teamSummaries.map((team, index) => {
+                  const rank = index + 1;
+                  const isExpanded = expandedTeam === team.teamNumber;
 
-              return (
-                <div
-                  key={team.teamNumber}
-                  className={`glass rounded-xl overflow-hidden transition-all duration-300 ${rank <= 3 ? "glow-primary" : ""}`}
-                >
-                  {/* Main row */}
-                  <button
-                    onClick={() => setExpandedTeam(isExpanded ? null : team.teamNumber)}
-                    className="w-full px-6 py-5 flex items-center gap-4 text-left hover:bg-muted/30 transition-colors"
-                  >
-                    <div className={`text-2xl font-display font-bold w-12 text-center ${getRankColor(rank)}`}>
-                      {getRankIcon(rank)}
-                    </div>
+                  return (
+                    <div
+                      key={team.teamNumber}
+                      className={`glass rounded-xl overflow-hidden transition-all duration-300 ${rank <= 3 ? "glow-primary" : ""}`}
+                    >
+                      {/* Main row */}
+                      <button
+                        onClick={() => setExpandedTeam(isExpanded ? null : team.teamNumber)}
+                        className="w-full px-6 py-5 flex items-center gap-4 text-left hover:bg-muted/30 transition-colors"
+                      >
+                        <div className={`text-2xl font-display font-bold w-12 text-center ${getRankColor(rank)}`}>
+                          {getRankIcon(rank)}
+                        </div>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-baseline gap-3">
-                        <span className="font-display text-lg text-foreground tracking-wider">
-                          Team {team.teamNumber}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-baseline gap-3">
+                            <span className="font-display text-lg text-foreground tracking-wider">
+                              Team {team.teamNumber}
+                            </span>
+                            <span className="text-xs text-muted-foreground font-body">
+                              {team.entries.length} match{team.entries.length !== 1 ? "es" : ""} scouted
+                            </span>
+                          </div>
+
+                          {team.goodMatchResponses.length > 0 && (
+                            <p className="text-sm text-primary font-body mt-1 truncate">
+                              💬 "{team.goodMatchResponses[0].response}"
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="text-right">
+                          <p className="font-display text-xl text-primary text-glow">{Math.round(team.avgScore)}</p>
+                          <p className="text-xs text-muted-foreground font-body">pts avg</p>
+                        </div>
+
+                        <span className={`text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}>
+                          ▼
                         </span>
-                        <span className="text-xs text-muted-foreground font-body">
-                          {team.entries.length} match{team.entries.length !== 1 ? "es" : ""} scouted
-                        </span>
-                      </div>
+                      </button>
 
-                      {team.goodMatchResponses.length > 0 && (
-                        <p className="text-sm text-primary font-body mt-1 truncate">
-                          💬 "{team.goodMatchResponses[0].response}"
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="text-right">
-                      <p className="font-display text-xl text-primary text-glow">{Math.round(team.avgScore)}</p>
-                      <p className="text-xs text-muted-foreground font-body">pts avg</p>
-                    </div>
-
-                    <span className={`text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}>
-                      ▼
-                    </span>
-                  </button>
-
-                  {/* Expanded details */}
-                  {isExpanded && (
-                    <div className="px-6 pb-6 space-y-6 border-t border-border/50">
-                      {/* Good Match Section */}
-                      {team.goodMatchResponses.length > 0 && (
-                        <div className="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/30">
-                          <h4 className="font-display text-sm text-primary tracking-wider mb-3">
-                            🌟 "DO YOU THINK THIS TEAM WILL BE A GOOD MATCH FOR US?"
-                          </h4>
-                          <div className="space-y-2">
-                            {team.goodMatchResponses.map((r, i) => (
-                              <div key={i} className="flex gap-2">
-                                <span className="text-xs text-muted-foreground font-body shrink-0">{r.scouter}:</span>
-                                <p className="text-sm text-foreground font-body">{r.response}</p>
+                      {/* Expanded details */}
+                      {isExpanded && (
+                        <div className="px-6 pb-6 space-y-6 border-t border-border/50">
+                          {/* Good Match Section */}
+                          {team.goodMatchResponses.length > 0 && (
+                            <div className="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/30">
+                              <h4 className="font-display text-sm text-primary tracking-wider mb-3">
+                                🌟 "DO YOU THINK THIS TEAM WILL BE A GOOD MATCH FOR US?"
+                              </h4>
+                              <div className="space-y-2">
+                                {team.goodMatchResponses.map((r, i) => (
+                                  <div key={i} className="flex gap-2">
+                                    <span className="text-xs text-muted-foreground font-body shrink-0">{r.scouter}:</span>
+                                    <p className="text-sm text-foreground font-body">{r.response}</p>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
+                            </div>
+                          )}
+
+                          {/* All match entries */}
+                          {team.entries.map((entry, i) => (
+                            <div key={i} className="p-4 rounded-lg bg-muted/30 border border-border/50 space-y-3">
+                              <div className="flex items-start justify-between gap-3">
+                                <div>
+                                  <span className="font-display text-sm text-foreground tracking-wider">
+                                    Match {entry.matchNumber || "N/A"} • Score: {scoreEntry(entry)}
+                                  </span>
+                                  <p className="text-xs text-muted-foreground font-body mt-0.5">
+                                    🧑‍💻 Scouted by <span className="text-foreground">{entry.scouterName || "Unknown"}</span> • {new Date(entry.timestamp).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-3 shrink-0">
+                                  <button
+                                    onClick={() => {
+                                      setDeleteTarget({ id: entry.id });
+                                      setDeletePassword("");
+                                      setDeleteError("");
+                                    }}
+                                    className="px-3 py-1 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all duration-200"
+                                  >
+                                    DELETE
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-body">
+                                <DataCell label="Auto Artifacts" value={entry.autoArtifactsScored} />
+                                <DataCell label="Auto Pattern" value={entry.autoPatternAlignment} />
+                                <DataCell label="Launch Line" value={entry.autoLaunchLine} />
+                                <DataCell label="Auto Leave" value={entry.autoLeave} />
+                                <DataCell label="Auto Consistency" value={entry.autoConsistency} />
+                                <DataCell label="Intake" value={entry.teleopIntakeMethod} />
+                                <DataCell label="Ball Capacity" value={entry.teleopBallCapacity} />
+                                <DataCell label="Shooting" value={entry.teleopShootingAccuracy} />
+                                <DataCell label="Gate" value={entry.teleopGateInteraction} />
+                                <DataCell label="Overflow" value={entry.teleopOverflowManagement} />
+                                <DataCell label="Cycle Speed" value={entry.teleopCycleSpeed} />
+                                <DataCell label="Classification" value={entry.teleopArtifactClassification} />
+                                <DataCell label="Parking" value={entry.endgameParking} />
+                                <DataCell label="Alliance Assist" value={entry.endgameAllianceAssist} />
+                              </div>
+
+                              {(entry.penalties || []).length > 0 && (
+                                <div>
+                                  <span className="text-xs text-muted-foreground font-body">Penalties: </span>
+                                  {(entry.penalties || []).map((p, j) => (
+                                    <span
+                                      key={j}
+                                      className={`inline-block text-xs px-2 py-0.5 rounded mr-1 mt-1 ${
+                                        p === "None observed"
+                                          ? "bg-glow-success/20 text-glow-success"
+                                          : "bg-destructive/20 text-destructive"
+                                      }`}
+                                    >
+                                      {p}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+
+                              {entry.specialFeatures && (
+                                <div>
+                                  <span className="text-xs text-muted-foreground font-body">Notes: </span>
+                                  <span className="text-xs text-foreground font-body">{entry.specialFeatures}</span>
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       )}
+                    </div>
+                  );
+                })}
+              </>
+            )}
+          </>
+        )}
 
-                      {/* All match entries */}
-                      {team.entries.map((entry, i) => (
-                        <div key={i} className="p-4 rounded-lg bg-muted/30 border border-border/50 space-y-3">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <span className="font-display text-sm text-foreground tracking-wider">
-                                Match {entry.matchNumber || "N/A"} • Score: {scoreEntry(entry)}
-                              </span>
-                              <p className="text-xs text-muted-foreground font-body mt-0.5">
-                                🧑‍💻 Scouted by <span className="text-foreground">{entry.scouterName || "Unknown"}</span> • {new Date(entry.timestamp).toLocaleDateString()}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-3 shrink-0">
-                              <button
-                                onClick={() => {
-                                  setDeleteTarget({ id: entry.id });
-                                  setDeletePassword("");
-                                  setDeleteError("");
-                                }}
-                                className="px-3 py-1 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all duration-200"
-                              >
-                                DELETE
-                              </button>
-                            </div>
-                          </div>
+        {/* ── ASSIGNMENTS TAB ── */}
+        {activeTab === "assignments" && (
+          <div className="space-y-4">
+            <div className="glass rounded-xl p-4 border border-primary/20">
+              <p className="text-sm text-muted-foreground font-body">
+                📋 Assign each scout their team to watch. Once set, the scout's form will auto-fill their team number and show their assignment at the top.
+              </p>
+            </div>
 
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-body">
-                            <DataCell label="Auto Artifacts" value={entry.autoArtifactsScored} />
-                            <DataCell label="Auto Pattern" value={entry.autoPatternAlignment} />
-                            <DataCell label="Launch Line" value={entry.autoLaunchLine} />
-                            <DataCell label="Auto Leave" value={entry.autoLeave} />
-                            <DataCell label="Auto Consistency" value={entry.autoConsistency} />
-                            <DataCell label="Intake" value={entry.teleopIntakeMethod} />
-                            <DataCell label="Ball Capacity" value={entry.teleopBallCapacity} />
-                            <DataCell label="Shooting" value={entry.teleopShootingAccuracy} />
-                            <DataCell label="Gate" value={entry.teleopGateInteraction} />
-                            <DataCell label="Overflow" value={entry.teleopOverflowManagement} />
-                            <DataCell label="Cycle Speed" value={entry.teleopCycleSpeed} />
-                            <DataCell label="Classification" value={entry.teleopArtifactClassification} />
-                            <DataCell label="Parking" value={entry.endgameParking} />
-                            <DataCell label="Alliance Assist" value={entry.endgameAllianceAssist} />
-                          </div>
+            {assignmentsLoading ? (
+              <div className="glass rounded-xl p-12 text-center">
+                <p className="text-4xl mb-4 animate-pulse">📡</p>
+                <p className="text-muted-foreground font-body">Loading assignments...</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {TEAM_MEMBERS.map((scoutName) => {
+                  const current = editedAssignments[scoutName] || { team_number: "", team_name: "" };
+                  const saved = assignments.find((a) => a.scout_name === scoutName);
+                  const isDirty =
+                    current.team_number !== (saved?.team_number || "") ||
+                    current.team_name !== (saved?.team_name || "");
+                  const hasAssignment = !!(saved?.team_number);
 
-                          {(entry.penalties || []).length > 0 && (
-                            <div>
-                              <span className="text-xs text-muted-foreground font-body">Penalties: </span>
-                              {(entry.penalties || []).map((p, j) => (
-                                <span
-                                  key={j}
-                                  className={`inline-block text-xs px-2 py-0.5 rounded mr-1 mt-1 ${
-                                    p === "None observed"
-                                      ? "bg-glow-success/20 text-glow-success"
-                                      : "bg-destructive/20 text-destructive"
-                                  }`}
-                                >
-                                  {p}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-
-                          {entry.specialFeatures && (
-                            <div>
-                              <span className="text-xs text-muted-foreground font-body">Notes: </span>
-                              <span className="text-xs text-foreground font-body">{entry.specialFeatures}</span>
-                            </div>
+                  return (
+                    <div key={scoutName} className={`glass rounded-xl p-4 transition-all duration-200 ${hasAssignment ? "border border-primary/30" : "border border-border/30"}`}>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {/* Scout name */}
+                        <div className="min-w-[140px]">
+                          <p className="font-display text-sm text-foreground tracking-wide">{scoutName}</p>
+                          {hasAssignment && (
+                            <p className="text-xs text-primary font-body mt-0.5">✓ Assigned</p>
                           )}
                         </div>
-                      ))}
+
+                        {/* Team number */}
+                        <div className="flex-1 min-w-[100px]">
+                          <label className="block text-xs text-muted-foreground font-body mb-1">Team #</label>
+                          <input
+                            type="text"
+                            value={current.team_number}
+                            onChange={(e) =>
+                              setEditedAssignments((prev) => ({
+                                ...prev,
+                                [scoutName]: { ...current, team_number: e.target.value },
+                              }))
+                            }
+                            placeholder="e.g. 254"
+                            className="w-full px-3 py-1.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body text-sm outline-none transition-all"
+                          />
+                        </div>
+
+                        {/* Team name */}
+                        <div className="flex-[2] min-w-[160px]">
+                          <label className="block text-xs text-muted-foreground font-body mb-1">Official Team Name</label>
+                          <input
+                            type="text"
+                            value={current.team_name}
+                            onChange={(e) =>
+                              setEditedAssignments((prev) => ({
+                                ...prev,
+                                [scoutName]: { ...current, team_name: e.target.value },
+                              }))
+                            }
+                            placeholder="e.g. The Cheesy Poofs"
+                            className="w-full px-3 py-1.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body text-sm outline-none transition-all"
+                          />
+                        </div>
+
+                        {/* Action buttons */}
+                        <div className="flex gap-2 items-end pb-0.5">
+                          <button
+                            onClick={() => handleSaveAssignment(scoutName)}
+                            disabled={!isDirty || savingAssignment === scoutName || !current.team_number}
+                            className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider bg-primary text-primary-foreground hover:bg-primary/80 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            {savingAssignment === scoutName ? "SAVING..." : "SAVE"}
+                          </button>
+                          {hasAssignment && (
+                            <button
+                              onClick={() => handleClearAssignment(scoutName)}
+                              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/50 text-destructive hover:bg-destructive/10 transition-all"
+                            >
+                              CLEAR
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
