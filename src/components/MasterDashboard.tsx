@@ -366,13 +366,13 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                               return (
                                 <span
                                   key={match}
-                                  className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-display tracking-wider font-bold transition-all ${
+                                  className={`px-4 py-2 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
                                     done
-                                      ? "bg-green-500/20 border border-green-500/50 text-green-400"
-                                      : "bg-destructive/15 border border-destructive/40 text-destructive"
+                                      ? "bg-glow-success/20 border-glow-success text-glow-success"
+                                      : "bg-destructive/20 border-destructive text-destructive"
                                   }`}
                                 >
-                                  {done ? "✓" : "✗"} {match}
+                                  {match}
                                 </span>
                               );
                             })
@@ -642,12 +642,12 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                           {(saved.qual_matches || []).map((match) => {
                             const done = isMatchDone(saved, match);
                             return (
-                              <span key={match} className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-display tracking-wider font-bold ${
+                              <span key={match} className={`px-4 py-2 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
                                 done
-                                  ? "bg-green-500/20 border border-green-500/50 text-green-400"
-                                  : "bg-destructive/15 border border-destructive/40 text-destructive"
+                                  ? "bg-glow-success/20 border-glow-success text-glow-success"
+                                  : "bg-destructive/20 border-destructive text-destructive"
                               }`}>
-                                {done ? "✓" : "✗"} {match}
+                                {match}
                               </span>
                             );
                           })}
