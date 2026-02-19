@@ -568,7 +568,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               </div>
             ) : (
               <div className="space-y-3">
-                {TEAM_MEMBERS.map((scoutName) => {
+                {[...TEAM_MEMBERS].sort((a, b) => a.localeCompare(b)).map((scoutName) => {
                   const current = editedAssignments[scoutName] || { team_number: "", team_name: "", qual_matches: [] };
                   const saved = assignments.find((a) => a.scout_name === scoutName);
                   const isDirty =
