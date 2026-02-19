@@ -37,52 +37,39 @@ interface TeamAssignment {
   scout_name: string;
   team_number: string;
   team_name: string;
+  qual_matches: string[];
 }
 
 // Scoring system to rank teams
 const scoreEntry = (entry: ScoutingEntry): number => {
   let score = 0;
-
   const autoArtifacts: Record<string, number> = { "0": 0, "1-2": 5, "3-4": 10, "5+": 15 };
   score += autoArtifacts[entry.autoArtifactsScored] || 0;
-
   const autoPattern: Record<string, number> = { "None": 0, "1 Pattern": 5, "2 Patterns": 10, "3+ Patterns": 15 };
   score += autoPattern[entry.autoPatternAlignment] || 0;
-
   if (entry.autoLaunchLine === "Yes") score += 5;
   if (entry.autoLeave === "Yes") score += 3;
-
   const autoConsistency: Record<string, number> = { "Very Consistent": 10, "Mostly Consistent": 6, "Inconsistent": 2, "No Auto": 0 };
   score += autoConsistency[entry.autoConsistency] || 0;
-
   const shootingAcc: Record<string, number> = { "Very Accurate": 10, "Somewhat Accurate": 6, "Inaccurate": 2, "No Shooting": 0 };
   score += shootingAcc[entry.teleopShootingAccuracy] || 0;
-
   const gateInteraction: Record<string, number> = { "Opened Reliably": 10, "Sometimes": 5, "Tried But Failed": 1, "Did Not Attempt": 0 };
   score += gateInteraction[entry.teleopGateInteraction] || 0;
-
   const overflow: Record<string, number> = { "Excellent": 8, "Good": 5, "Poor": 2, "Did Not Collect": 0 };
   score += overflow[entry.teleopOverflowManagement] || 0;
-
   const cycleSpeed: Record<string, number> = { "Very Fast": 10, "Average": 6, "Slow": 3, "Minimal Cycling": 0 };
   score += cycleSpeed[entry.teleopCycleSpeed] || 0;
-
   const classification: Record<string, number> = { "Always": 8, "Mostly": 5, "Rarely": 2, "No Classification": 0 };
   score += classification[entry.teleopArtifactClassification] || 0;
-
   const ballCap: Record<string, number> = { "1": 2, "2": 5, "3": 8 };
   score += ballCap[entry.teleopBallCapacity] || 0;
-
   const parking: Record<string, number> = { "Yes – Full Park": 10, "Partial": 5, "No": 0 };
   score += parking[entry.endgameParking] || 0;
-
   const assist: Record<string, number> = { "Yes": 8, "Attempted": 4, "No": 0 };
   score += assist[entry.endgameAllianceAssist] || 0;
-
   const penalties = entry.penalties || [];
   const penaltyCount = penalties.filter((p) => p !== "None observed").length;
   score -= penaltyCount * 5;
-
   return score;
 };
 
@@ -101,13 +88,11 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState("");
 
-  // Assignments tab
   const [activeTab, setActiveTab] = useState<"rankings" | "assignments">("rankings");
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
   const [savingAssignment, setSavingAssignment] = useState<string | null>(null);
-  // Local editable state for assignments
-  const [editedAssignments, setEditedAssignments] = useState<Record<string, { team_number: string; team_name: string }>>({});
+  const [editedAssignments, setEditedAssignments] = useState<Record<string, { team_number: string; team_name: string; qual_matches_str: string }>>({});
 
   const fetchEntries = async () => {
     setLoading(true);
@@ -153,10 +138,15 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
     setAssignmentsLoading(true);
     const { data, error } = await supabase.from("team_assignments").select("*");
     if (!error && data) {
-      setAssignments(data);
-      const edited: Record<string, { team_number: string; team_name: string }> = {};
-      data.forEach((a) => {
-        edited[a.scout_name] = { team_number: a.team_number, team_name: a.team_name };
+      const typed = data as TeamAssignment[];
+      setAssignments(typed);
+      const edited: Record<string, { team_number: string; team_name: string; qual_matches_str: string }> = {};
+      typed.forEach((a) => {
+        edited[a.scout_name] = {
+          team_number: a.team_number,
+          team_name: a.team_name,
+          qual_matches_str: (a.qual_matches || []).join(", "),
+        };
       });
       setEditedAssignments(edited);
     }
@@ -168,38 +158,45 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
     fetchAssignments();
   }, []);
 
+  // Parse qual matches from a comma/space separated string
+  const parseQualMatches = (str: string): string[] =>
+    str
+      .split(/[\s,]+/)
+      .map((s) => s.trim().toUpperCase())
+      .filter(Boolean);
+
+  // Check if a scout has submitted a specific qual match for their team
+  const isMatchDone = (assignment: TeamAssignment, match: string): boolean => {
+    return entries.some(
+      (e) =>
+        e.scouterName === assignment.scout_name &&
+        e.teamNumber === assignment.team_number &&
+        e.matchNumber.toUpperCase() === match.toUpperCase()
+    );
+  };
+
   const handleSaveAssignment = async (scoutName: string) => {
     const edited = editedAssignments[scoutName];
     if (!edited) return;
     setSavingAssignment(scoutName);
 
+    const qualMatches = parseQualMatches(edited.qual_matches_str);
     const existing = assignments.find((a) => a.scout_name === scoutName);
 
     if (existing) {
       const { error } = await supabase
         .from("team_assignments")
-        .update({ team_number: edited.team_number, team_name: edited.team_name })
+        .update({ team_number: edited.team_number, team_name: edited.team_name, qual_matches: qualMatches })
         .eq("scout_name", scoutName);
-      if (error) {
-        toast.error("Failed to save assignment.");
-        console.error(error);
-      } else {
-        toast.success(`Assignment saved for ${scoutName}!`);
-        await fetchAssignments();
-      }
+      if (error) { toast.error("Failed to save."); console.error(error); }
+      else { toast.success(`Saved for ${scoutName}!`); await fetchAssignments(); }
     } else {
       const { error } = await supabase
         .from("team_assignments")
-        .insert({ scout_name: scoutName, team_number: edited.team_number, team_name: edited.team_name });
-      if (error) {
-        toast.error("Failed to save assignment.");
-        console.error(error);
-      } else {
-        toast.success(`Assignment saved for ${scoutName}!`);
-        await fetchAssignments();
-      }
+        .insert({ scout_name: scoutName, team_number: edited.team_number, team_name: edited.team_name, qual_matches: qualMatches });
+      if (error) { toast.error("Failed to save."); console.error(error); }
+      else { toast.success(`Saved for ${scoutName}!`); await fetchAssignments(); }
     }
-
     setSavingAssignment(null);
   };
 
@@ -210,27 +207,14 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
       await fetchAssignments();
       toast.success(`Assignment cleared for ${scoutName}.`);
     }
-    setEditedAssignments((prev) => ({ ...prev, [scoutName]: { team_number: "", team_name: "" } }));
+    setEditedAssignments((prev) => ({ ...prev, [scoutName]: { team_number: "", team_name: "", qual_matches_str: "" } }));
   };
 
   const handleDelete = async () => {
-    if (deletePassword !== "Group Leader") {
-      setDeleteError("Incorrect password.");
-      return;
-    }
+    if (deletePassword !== "Group Leader") { setDeleteError("Incorrect password."); return; }
     if (!deleteTarget) return;
-
-    const { error } = await supabase
-      .from("scouting_entries")
-      .delete()
-      .eq("id", deleteTarget.id);
-
-    if (error) {
-      toast.error("Failed to delete entry.");
-      console.error(error);
-      return;
-    }
-
+    const { error } = await supabase.from("scouting_entries").delete().eq("id", deleteTarget.id);
+    if (error) { toast.error("Failed to delete entry."); console.error(error); return; }
     setEntries((prev) => prev.filter((e) => e.id !== deleteTarget.id));
     setDeleteTarget(null);
     setDeletePassword("");
@@ -244,7 +228,6 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
       if (!byTeam[entry.teamNumber]) byTeam[entry.teamNumber] = [];
       byTeam[entry.teamNumber].push(entry);
     });
-
     const summaries: TeamSummary[] = Object.entries(byTeam).map(([teamNumber, teamEntries]) => {
       const totalScore = teamEntries.reduce((sum, e) => sum + scoreEntry(e), 0);
       const avgScore = totalScore / teamEntries.length;
@@ -253,10 +236,12 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
         .map((e) => ({ scouter: e.scouterName, response: e.goodMatch }));
       return { teamNumber, avgScore, entries: teamEntries, goodMatchResponses };
     });
-
     summaries.sort((a, b) => b.avgScore - a.avgScore);
     return summaries;
   }, [entries]);
+
+  // Only show scouts that have an assignment
+  const assignedScouts = assignments.filter((a) => a.team_number);
 
   const getRankColor = (rank: number) => {
     if (rank === 1) return "text-yellow-400";
@@ -326,11 +311,104 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-8 space-y-4">
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
 
         {/* ── RANKINGS TAB ── */}
         {activeTab === "rankings" && (
           <>
+            {/* ── SCOUT PROGRESS CHART ── */}
+            {assignedScouts.length > 0 && (
+              <div className="glass rounded-xl overflow-hidden border border-border/50">
+                {/* Chart header */}
+                <div className="px-5 py-4 border-b border-border/50 flex items-center gap-3">
+                  <span className="text-xl">📡</span>
+                  <div>
+                    <h2 className="font-display text-base text-foreground tracking-wider">SCOUT PROGRESS</h2>
+                    <p className="text-xs text-muted-foreground font-body mt-0.5">
+                      Live status — green = submitted, red = not yet scouted
+                    </p>
+                  </div>
+                </div>
+
+                {/* Scout rows */}
+                <div className="divide-y divide-border/30">
+                  {assignedScouts.map((assignment) => {
+                    const matches = assignment.qual_matches || [];
+                    const doneCount = matches.filter((m) => isMatchDone(assignment, m)).length;
+                    const allDone = matches.length > 0 && doneCount === matches.length;
+
+                    return (
+                      <div
+                        key={assignment.scout_name}
+                        className={`px-5 py-3.5 flex items-center gap-4 flex-wrap transition-colors ${
+                          allDone ? "bg-green-500/5" : ""
+                        }`}
+                      >
+                        {/* Scout info */}
+                        <div className="min-w-[130px]">
+                          <p className="font-display text-sm text-foreground tracking-wide leading-tight">
+                            {assignment.scout_name}
+                          </p>
+                          <p className="text-xs text-muted-foreground font-body mt-0.5">
+                            {assignment.team_name
+                              ? `${assignment.team_name} #${assignment.team_number}`
+                              : `Team #${assignment.team_number}`}
+                          </p>
+                        </div>
+
+                        {/* Match chips */}
+                        <div className="flex flex-wrap gap-1.5 flex-1">
+                          {matches.length === 0 ? (
+                            <span className="text-xs text-muted-foreground/50 font-body italic">No matches assigned</span>
+                          ) : (
+                            matches.map((match) => {
+                              const done = isMatchDone(assignment, match);
+                              return (
+                                <span
+                                  key={match}
+                                  className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-display tracking-wider font-bold transition-all ${
+                                    done
+                                      ? "bg-green-500/20 border border-green-500/50 text-green-400"
+                                      : "bg-destructive/15 border border-destructive/40 text-destructive"
+                                  }`}
+                                >
+                                  {done ? "✓" : "✗"} {match}
+                                </span>
+                              );
+                            })
+                          )}
+                        </div>
+
+                        {/* Progress count */}
+                        {matches.length > 0 && (
+                          <div className="text-right shrink-0">
+                            <p className={`font-display text-sm font-bold ${allDone ? "text-green-400" : "text-muted-foreground"}`}>
+                              {doneCount}/{matches.length}
+                            </p>
+                            <p className="text-xs text-muted-foreground font-body">done</p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Summary footer */}
+                <div className="px-5 py-3 border-t border-border/50 bg-muted/20 flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground font-body">
+                    {assignedScouts.filter((a) => {
+                      const m = a.qual_matches || [];
+                      return m.length > 0 && m.every((q) => isMatchDone(a, q));
+                    }).length} / {assignedScouts.length} scouts complete
+                  </p>
+                  <p className="text-xs text-muted-foreground font-body">
+                    {entries.length} total entries submitted
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* ── TEAM RANKINGS ── */}
             {loading ? (
               <div className="glass rounded-xl p-12 text-center">
                 <p className="text-4xl mb-4 animate-pulse">📡</p>
@@ -343,7 +421,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               </div>
             ) : (
               <>
-                <p className="text-sm text-muted-foreground font-body mb-2">
+                <p className="text-sm text-muted-foreground font-body">
                   {teamSummaries.length} team{teamSummaries.length !== 1 ? "s" : ""} scouted • Ranked by composite score
                 </p>
 
@@ -356,7 +434,6 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                       key={team.teamNumber}
                       className={`glass rounded-xl overflow-hidden transition-all duration-300 ${rank <= 3 ? "glow-primary" : ""}`}
                     >
-                      {/* Main row */}
                       <button
                         onClick={() => setExpandedTeam(isExpanded ? null : team.teamNumber)}
                         className="w-full px-6 py-5 flex items-center gap-4 text-left hover:bg-muted/30 transition-colors"
@@ -364,38 +441,28 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                         <div className={`text-2xl font-display font-bold w-12 text-center ${getRankColor(rank)}`}>
                           {getRankIcon(rank)}
                         </div>
-
                         <div className="flex-1 min-w-0">
                           <div className="flex items-baseline gap-3">
-                            <span className="font-display text-lg text-foreground tracking-wider">
-                              Team {team.teamNumber}
-                            </span>
+                            <span className="font-display text-lg text-foreground tracking-wider">Team {team.teamNumber}</span>
                             <span className="text-xs text-muted-foreground font-body">
                               {team.entries.length} match{team.entries.length !== 1 ? "es" : ""} scouted
                             </span>
                           </div>
-
                           {team.goodMatchResponses.length > 0 && (
                             <p className="text-sm text-primary font-body mt-1 truncate">
                               💬 "{team.goodMatchResponses[0].response}"
                             </p>
                           )}
                         </div>
-
                         <div className="text-right">
                           <p className="font-display text-xl text-primary text-glow">{Math.round(team.avgScore)}</p>
                           <p className="text-xs text-muted-foreground font-body">pts avg</p>
                         </div>
-
-                        <span className={`text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}>
-                          ▼
-                        </span>
+                        <span className={`text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}>▼</span>
                       </button>
 
-                      {/* Expanded details */}
                       {isExpanded && (
                         <div className="px-6 pb-6 space-y-6 border-t border-border/50">
-                          {/* Good Match Section */}
                           {team.goodMatchResponses.length > 0 && (
                             <div className="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/30">
                               <h4 className="font-display text-sm text-primary tracking-wider mb-3">
@@ -412,7 +479,6 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                             </div>
                           )}
 
-                          {/* All match entries */}
                           {team.entries.map((entry, i) => (
                             <div key={i} className="p-4 rounded-lg bg-muted/30 border border-border/50 space-y-3">
                               <div className="flex items-start justify-between gap-3">
@@ -424,18 +490,12 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                                     🧑‍💻 Scouted by <span className="text-foreground">{entry.scouterName || "Unknown"}</span> • {new Date(entry.timestamp).toLocaleDateString()}
                                   </p>
                                 </div>
-                                <div className="flex items-center gap-3 shrink-0">
-                                  <button
-                                    onClick={() => {
-                                      setDeleteTarget({ id: entry.id });
-                                      setDeletePassword("");
-                                      setDeleteError("");
-                                    }}
-                                    className="px-3 py-1 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all duration-200"
-                                  >
-                                    DELETE
-                                  </button>
-                                </div>
+                                <button
+                                  onClick={() => { setDeleteTarget({ id: entry.id }); setDeletePassword(""); setDeleteError(""); }}
+                                  className="px-3 py-1 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all duration-200 shrink-0"
+                                >
+                                  DELETE
+                                </button>
                               </div>
 
                               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-body">
@@ -459,16 +519,9 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                                 <div>
                                   <span className="text-xs text-muted-foreground font-body">Penalties: </span>
                                   {(entry.penalties || []).map((p, j) => (
-                                    <span
-                                      key={j}
-                                      className={`inline-block text-xs px-2 py-0.5 rounded mr-1 mt-1 ${
-                                        p === "None observed"
-                                          ? "bg-glow-success/20 text-glow-success"
-                                          : "bg-destructive/20 text-destructive"
-                                      }`}
-                                    >
-                                      {p}
-                                    </span>
+                                    <span key={j} className={`inline-block text-xs px-2 py-0.5 rounded mr-1 mt-1 ${
+                                      p === "None observed" ? "bg-glow-success/20 text-glow-success" : "bg-destructive/20 text-destructive"
+                                    }`}>{p}</span>
                                   ))}
                                 </div>
                               )}
@@ -496,7 +549,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
           <div className="space-y-4">
             <div className="glass rounded-xl p-4 border border-primary/20">
               <p className="text-sm text-muted-foreground font-body">
-                📋 Assign each scout their team to watch. Once set, the scout's form will auto-fill their team number and show their assignment at the top.
+                📋 Assign each scout their team and qualification matches (e.g. <span className="text-foreground font-mono">Q5, Q7, Q12</span>). The progress chart will update live as scouts submit.
               </p>
             </div>
 
@@ -508,60 +561,63 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
             ) : (
               <div className="space-y-3">
                 {TEAM_MEMBERS.map((scoutName) => {
-                  const current = editedAssignments[scoutName] || { team_number: "", team_name: "" };
+                  const current = editedAssignments[scoutName] || { team_number: "", team_name: "", qual_matches_str: "" };
                   const saved = assignments.find((a) => a.scout_name === scoutName);
                   const isDirty =
                     current.team_number !== (saved?.team_number || "") ||
-                    current.team_name !== (saved?.team_name || "");
+                    current.team_name !== (saved?.team_name || "") ||
+                    current.qual_matches_str !== (saved?.qual_matches || []).join(", ");
                   const hasAssignment = !!(saved?.team_number);
 
                   return (
                     <div key={scoutName} className={`glass rounded-xl p-4 transition-all duration-200 ${hasAssignment ? "border border-primary/30" : "border border-border/30"}`}>
-                      <div className="flex items-center gap-3 flex-wrap">
+                      <div className="flex items-start gap-3 flex-wrap">
                         {/* Scout name */}
-                        <div className="min-w-[140px]">
+                        <div className="min-w-[140px] pt-1">
                           <p className="font-display text-sm text-foreground tracking-wide">{scoutName}</p>
                           {hasAssignment && (
                             <p className="text-xs text-primary font-body mt-0.5">✓ Assigned</p>
                           )}
                         </div>
 
-                        {/* Team number */}
-                        <div className="flex-1 min-w-[100px]">
-                          <label className="block text-xs text-muted-foreground font-body mb-1">Team #</label>
-                          <input
-                            type="text"
-                            value={current.team_number}
-                            onChange={(e) =>
-                              setEditedAssignments((prev) => ({
-                                ...prev,
-                                [scoutName]: { ...current, team_number: e.target.value },
-                              }))
-                            }
-                            placeholder="e.g. 254"
-                            className="w-full px-3 py-1.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body text-sm outline-none transition-all"
-                          />
+                        {/* Fields */}
+                        <div className="flex-1 space-y-2 min-w-[260px]">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-xs text-muted-foreground font-body mb-1">Team #</label>
+                              <input
+                                type="text"
+                                value={current.team_number}
+                                onChange={(e) => setEditedAssignments((prev) => ({ ...prev, [scoutName]: { ...current, team_number: e.target.value } }))}
+                                placeholder="e.g. 254"
+                                className="w-full px-3 py-1.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body text-sm outline-none transition-all"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-muted-foreground font-body mb-1">Official Team Name</label>
+                              <input
+                                type="text"
+                                value={current.team_name}
+                                onChange={(e) => setEditedAssignments((prev) => ({ ...prev, [scoutName]: { ...current, team_name: e.target.value } }))}
+                                placeholder="e.g. The Cheesy Poofs"
+                                className="w-full px-3 py-1.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body text-sm outline-none transition-all"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-xs text-muted-foreground font-body mb-1">Qual Matches to Scout</label>
+                            <input
+                              type="text"
+                              value={current.qual_matches_str}
+                              onChange={(e) => setEditedAssignments((prev) => ({ ...prev, [scoutName]: { ...current, qual_matches_str: e.target.value } }))}
+                              placeholder="e.g. Q5, Q7, Q12, Q18"
+                              className="w-full px-3 py-1.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body text-sm outline-none transition-all"
+                            />
+                          </div>
                         </div>
 
-                        {/* Team name */}
-                        <div className="flex-[2] min-w-[160px]">
-                          <label className="block text-xs text-muted-foreground font-body mb-1">Official Team Name</label>
-                          <input
-                            type="text"
-                            value={current.team_name}
-                            onChange={(e) =>
-                              setEditedAssignments((prev) => ({
-                                ...prev,
-                                [scoutName]: { ...current, team_name: e.target.value },
-                              }))
-                            }
-                            placeholder="e.g. The Cheesy Poofs"
-                            className="w-full px-3 py-1.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body text-sm outline-none transition-all"
-                          />
-                        </div>
-
-                        {/* Action buttons */}
-                        <div className="flex gap-2 items-end pb-0.5">
+                        {/* Buttons */}
+                        <div className="flex gap-2 items-start pt-5 shrink-0">
                           <button
                             onClick={() => handleSaveAssignment(scoutName)}
                             disabled={!isDirty || savingAssignment === scoutName || !current.team_number}
@@ -579,6 +635,24 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                           )}
                         </div>
                       </div>
+
+                      {/* Live preview of match chips for this scout */}
+                      {saved && (saved.qual_matches || []).length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-border/30 flex flex-wrap gap-1.5">
+                          {(saved.qual_matches || []).map((match) => {
+                            const done = isMatchDone(saved, match);
+                            return (
+                              <span key={match} className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-display tracking-wider font-bold ${
+                                done
+                                  ? "bg-green-500/20 border border-green-500/50 text-green-400"
+                                  : "bg-destructive/15 border border-destructive/40 text-destructive"
+                              }`}>
+                                {done ? "✓" : "✗"} {match}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -588,36 +662,25 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
         )}
       </div>
 
-      {/* Delete confirmation modal */}
+      {/* Delete modal */}
       {deleteTarget && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="glass rounded-xl p-6 w-full max-w-sm mx-4 border border-border space-y-4">
             <h3 className="font-display text-lg text-destructive tracking-wider">CONFIRM DELETE</h3>
-            <p className="text-sm text-muted-foreground font-body">
-              Enter the password to delete this match entry.
-            </p>
+            <p className="text-sm text-muted-foreground font-body">Enter the password to delete this match entry.</p>
             <input
               type="password"
               value={deletePassword}
-              onChange={(e) => {
-                setDeletePassword(e.target.value);
-                setDeleteError("");
-              }}
+              onChange={(e) => { setDeletePassword(e.target.value); setDeleteError(""); }}
               onKeyDown={(e) => { if (e.key === "Enter") handleDelete(); }}
               placeholder="Enter password"
               autoFocus
               className="w-full px-3 py-2 rounded-lg bg-background border border-border text-foreground text-sm font-body focus:outline-none focus:ring-2 focus:ring-destructive/50"
             />
-            {deleteError && (
-              <p className="text-xs text-destructive font-body">{deleteError}</p>
-            )}
+            {deleteError && <p className="text-xs text-destructive font-body">{deleteError}</p>}
             <div className="flex gap-3 justify-end">
               <button
-                onClick={() => {
-                  setDeleteTarget(null);
-                  setDeletePassword("");
-                  setDeleteError("");
-                }}
+                onClick={() => { setDeleteTarget(null); setDeletePassword(""); setDeleteError(""); }}
                 className="px-4 py-2 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:bg-muted/30 transition-all"
               >
                 CANCEL

@@ -1,0 +1,1 @@
+ALTER TABLE public.team_assignments ADD COLUMN IF NOT EXISTS qual_matches text[] DEFAULT '{}'::text[];

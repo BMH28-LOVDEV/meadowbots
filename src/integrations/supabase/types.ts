@@ -93,6 +93,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          qual_matches: string[] | null
           scout_name: string
           team_name: string
           team_number: string
@@ -101,6 +102,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          qual_matches?: string[] | null
           scout_name: string
           team_name?: string
           team_number: string
@@ -109,6 +111,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          qual_matches?: string[] | null
           scout_name?: string
           team_name?: string
           team_number?: string
