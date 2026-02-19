@@ -205,21 +205,21 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
           <MCQuestion
             label="Did their robot cross the Launch Line?"
             name="autoLaunchLine"
-            options={["Yes", "No"]}
+            options={["No", "Yes"]}
             value={form.autoLaunchLine}
             onChange={handleChange}
           />
           <MCQuestion
             label="Did they leave (move from the depot line) at the end of Autonomous?"
             name="autoLeave"
-            options={["Yes", "No"]}
+            options={["No", "Yes"]}
             value={form.autoLeave}
             onChange={handleChange}
           />
           <MCQuestion
             label="How consistent was their Autonomous routine?"
             name="autoConsistency"
-            options={["Very Consistent", "Mostly Consistent", "Inconsistent", "No Auto"]}
+            options={["No Auto", "Inconsistent", "Mostly Consistent", "Very Consistent"]}
             value={form.autoConsistency}
             onChange={handleChange}
           />
@@ -231,7 +231,7 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
           <MCQuestion
             label="What intake method did they use?"
             name="teleopIntakeMethod"
-            options={["Floor Intake", "Pushing", "Both", "No Intake"]}
+            options={["No Intake", "Pushing", "Floor Intake", "Both"]}
             value={form.teleopIntakeMethod}
             onChange={handleChange}
           />
@@ -245,35 +245,35 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
           <MCQuestion
             label="How accurate was their shooting?"
             name="teleopShootingAccuracy"
-            options={["Very Accurate", "Somewhat Accurate", "Inaccurate", "No Shooting"]}
+            options={["No Shooting", "Inaccurate", "Somewhat Accurate", "Very Accurate"]}
             value={form.teleopShootingAccuracy}
             onChange={handleChange}
           />
           <MCQuestion
             label="Did they interact with the Gate?"
             name="teleopGateInteraction"
-            options={["Opened Reliably", "Sometimes", "Tried But Failed", "Did Not Attempt"]}
+            options={["Did Not Attempt", "Tried But Failed", "Sometimes", "Opened Reliably"]}
             value={form.teleopGateInteraction}
             onChange={handleChange}
           />
           <MCQuestion
             label="How well did they manage Overflow artifacts?"
             name="teleopOverflowManagement"
-            options={["Excellent", "Good", "Poor", "Did Not Collect"]}
+            options={["Did Not Collect", "Poor", "Good", "Excellent"]}
             value={form.teleopOverflowManagement}
             onChange={handleChange}
           />
           <MCQuestion
             label="How fast were their scoring cycles?"
             name="teleopCycleSpeed"
-            options={["Very Fast", "Average", "Slow", "Minimal Cycling"]}
+            options={["Minimal Cycling", "Slow", "Average", "Very Fast"]}
             value={form.teleopCycleSpeed}
             onChange={handleChange}
           />
           <MCQuestion
             label="Did they classify artifacts (purple vs green) correctly?"
             name="teleopArtifactClassification"
-            options={["Always", "Mostly", "Rarely", "No Classification"]}
+            options={["No Classification", "Rarely", "Mostly", "Always"]}
             value={form.teleopArtifactClassification}
             onChange={handleChange}
           />
@@ -285,14 +285,14 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
           <MCQuestion
             label="Did they park in the Base Zone?"
             name="endgameParking"
-            options={["Yes – Full Park", "Partial", "No"]}
+            options={["No", "Partial", "Yes – Full Park"]}
             value={form.endgameParking}
             onChange={handleChange}
           />
           <MCQuestion
             label="Did they assist their alliance partner in Endgame?"
             name="endgameAllianceAssist"
-            options={["Yes", "Attempted", "No"]}
+            options={["No", "Attempted", "Yes"]}
             value={form.endgameAllianceAssist}
             onChange={handleChange}
           />

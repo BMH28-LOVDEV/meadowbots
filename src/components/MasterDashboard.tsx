@@ -258,17 +258,19 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                         </div>
                       )}
 
-                      {/* All match entries */}
-                      {team.entries.map((entry, i) => (
-                        <div key={i} className="p-4 rounded-lg bg-muted/30 border border-border/50 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="font-display text-sm text-foreground tracking-wider">
-                              Match {entry.matchNumber || "N/A"} • Score: {scoreEntry(entry)}
-                            </span>
+                  {/* All match entries */}
+                  {team.entries.map((entry, i) => (
+                    <div key={i} className="p-4 rounded-lg bg-muted/30 border border-border/50 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-display text-sm text-foreground tracking-wider">
+                            Match {entry.matchNumber || "N/A"} • Score: {scoreEntry(entry)}
+                          </span>
+                          <p className="text-xs text-muted-foreground font-body mt-0.5">
+                            🧑‍💻 Scouted by <span className="text-foreground">{entry.scouterName || "Unknown"}</span> • {new Date(entry.timestamp).toLocaleDateString()}
+                          </p>
+                        </div>
                             <div className="flex items-center gap-3">
-                              <span className="text-xs text-muted-foreground font-body">
-                                by {entry.scouterName} • {new Date(entry.timestamp).toLocaleDateString()}
-                              </span>
                               <button
                                 onClick={() => {
                                   setDeleteTarget({ teamNumber: team.teamNumber, matchIndex: i });
@@ -351,7 +353,9 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                 setDeletePassword(e.target.value);
                 setDeleteError("");
               }}
+              onKeyDown={(e) => { if (e.key === "Enter") handleDelete(); }}
               placeholder="Enter password"
+              autoFocus
               className="w-full px-3 py-2 rounded-lg bg-background border border-border text-foreground text-sm font-body focus:outline-none focus:ring-2 focus:ring-destructive/50"
             />
             {deleteError && (
