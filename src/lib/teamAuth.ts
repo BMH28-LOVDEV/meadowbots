@@ -59,6 +59,12 @@ export function findTeamMember(input: string): string | null {
     normalizedInput === "viewer"
   ) return "Scout Dashboard";
 
+  if (
+    normalizedInput === "lockdown" ||
+    normalizedInput === "lock down" ||
+    normalizedInput === "emergency"
+  ) return "Lockdown";
+
   // Check explicit aliases
   if (ALIASES[normalizedInput]) return ALIASES[normalizedInput];
 
