@@ -611,7 +611,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
               userRole === "driveteam" ? "hsl(220 80% 65%)" :
               "hsl(var(--muted-foreground))"
             }}>
-              {userRole === "bluedriver" ? "Drive Team Data Collector" :
+              {userRole === "bluedriver" ? "Drive Data Collector" :
                userRole === "driveteam" ? "Drive Team" :
                "Scouter"}
             </p>
