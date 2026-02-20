@@ -86,7 +86,7 @@ interface TeamSummary {
 }
 
 const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
-  const { celebrating } = useCelebration();
+  const { celebrating, triggerCelebration } = useCelebration();
   const [entries, setEntries] = useState<ScoutingEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
@@ -403,6 +403,12 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
             <p className="text-xs text-muted-foreground font-body">Team Rankings Dashboard</p>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => triggerCelebration()}
+              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-green-500/50 text-green-400 hover:border-green-400 hover:bg-green-500/10 transition-all duration-200"
+            >
+              🎉 LET'S GO!
+            </button>
             <button
               onClick={() => { fetchEntries(); fetchAssignments(); fetchDriveData(); }}
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200"
