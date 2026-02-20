@@ -24,9 +24,11 @@ function detectEmailType(prefix: string): EmailType {
 // Special role assignments by email prefix (case-insensitive)
 const BLUE_DRIVER_PREFIXES = ["zoe_khansevahn", "chantelle_wong"];
 const COACH_PREFIXES = ["devin_allen"];
+const MASTER_PREFIXES = ["max_tran"];
 
 function getAssignedRole(prefix: string): string {
   const lower = prefix.trim().toLowerCase();
+  if (MASTER_PREFIXES.includes(lower)) return "master";
   if (COACH_PREFIXES.includes(lower)) return "coach";
   if (BLUE_DRIVER_PREFIXES.includes(lower)) return "bluedriver";
   return "scout";
