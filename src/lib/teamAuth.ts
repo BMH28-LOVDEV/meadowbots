@@ -47,7 +47,11 @@ export function findTeamMember(input: string): string | null {
   const normalizedInput = normalize(input);
   if (!normalizedInput) return null;
 
-  if (normalizedInput === "master data" || normalizedInput === "master") return "Master Data";
+  if (
+    normalizedInput === "meadowbot master" ||
+    normalizedInput === "master meadowbot" ||
+    normalizedInput === "master"
+  ) return "MeadowBot Master";
 
   // Check explicit aliases
   if (ALIASES[normalizedInput]) return ALIASES[normalizedInput];
