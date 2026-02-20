@@ -488,7 +488,7 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
           {/* Match Score */}
           <div className="space-y-2">
             <label className="block text-sm font-body text-foreground font-medium">
-              What was the final score of the alliance you were scouting?
+              What was the final score of the Alliance that the Team you were Scouting was on?
             </label>
             <input
               type="number"
