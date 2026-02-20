@@ -11,6 +11,7 @@ type Mode = "login" | "signup";
 
 const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [mode, setMode] = useState<Mode>("login");
+  const [accountCreated, setAccountCreated] = useState(false);
 
   // Login fields
   const [loginPrefix, setLoginPrefix] = useState("");
@@ -111,7 +112,8 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     }
 
     setSignupLoading(false);
-    onLogin();
+    setAccountCreated(true);
+    setMode("login");
   };
 
   return (
@@ -139,18 +141,24 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         <div className="glass rounded-xl p-8 glow-primary">
           <div className="flex mb-6 rounded-lg bg-muted p-1 gap-1">
             <button
-              onClick={() => { setMode("login"); setLoginError(""); }}
+              onClick={() => { setMode("login"); }}
               className={`flex-1 py-2 rounded-md font-display text-sm tracking-wider transition-all ${mode === "login" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
               LOG IN
             </button>
             <button
-              onClick={() => { setMode("signup"); setSignupError(""); }}
+              onClick={() => { setMode("signup"); setSignupError(""); setAccountCreated(false); }}
               className={`flex-1 py-2 rounded-md font-display text-sm tracking-wider transition-all ${mode === "signup" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
               CREATE ACCOUNT
             </button>
           </div>
+
+          {accountCreated && mode === "login" && (
+            <div className="mb-5 px-4 py-3 rounded-lg border border-blue-500/50 bg-blue-500/10 text-blue-400 text-sm font-body text-center">
+              ✅ Account Created. Please now log in with your new account.
+            </div>
+          )}
 
           {mode === "login" ? (
             <form onSubmit={handleLogin} className="space-y-5">
