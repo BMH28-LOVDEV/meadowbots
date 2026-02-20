@@ -261,7 +261,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                     type="text"
                     value={loginPrefix}
                     onChange={e => { setLoginPrefix(e.target.value); setLoginError(""); }}
-                    placeholder="first_last or BHale"
+                    placeholder="first_last or JSmith"
                     className="flex-1 px-4 py-3 bg-transparent text-foreground placeholder:text-muted-foreground/50 font-body outline-none"
                     autoComplete="username"
                     autoCapitalize="none"
