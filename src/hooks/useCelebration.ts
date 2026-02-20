@@ -61,7 +61,7 @@ export function useCelebration() {
       .on("broadcast", { event: "lets_go" }, () => {
         setCelebrating(true);
         fireCelebration();
-        setTimeout(() => setCelebrating(false), 6000);
+        // No timeout — overlay stays on scouter screens until they log out or refresh
       })
       .subscribe();
 
