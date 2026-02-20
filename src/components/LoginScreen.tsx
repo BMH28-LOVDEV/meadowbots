@@ -37,9 +37,9 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       return;
     }
 
-    // Step 2b: Lockdown password (14841)
+    // Step 2b: Lockdown password
     if (pendingLockdown) {
-      if (masterPassword === "14841") {
+      if (masterPassword === "BennyGF28!") {
         onLogin("Lockdown");
       } else {
         setMasterError("Incorrect password.");
