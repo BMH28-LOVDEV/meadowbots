@@ -75,18 +75,12 @@ const Index = () => {
     return <MasterDashboard onLogout={handleLogout} />;
   }
 
-  if (profile.role === "viewer") {
-    return <ScoutDashboard scouterName={profile.display_name} onLogout={handleLogout} />;
-  }
-
-
-
   if (profile.role === "letsgo") {
     return <LetsGoDashboard onLogout={handleLogout} />;
   }
 
-  // Default: scout
-  return <ScoutDashboard scouterName={profile.display_name} onLogout={handleLogout} />;
+  // scout, viewer, bluedriver — all get ScoutDashboard (with role passed for Drive Data access)
+  return <ScoutDashboard scouterName={profile.display_name} onLogout={handleLogout} userRole={profile.role} />;
 };
 
 export default Index;
