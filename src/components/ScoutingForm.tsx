@@ -69,6 +69,7 @@ const PENALTY_OPTIONS = [
   "Shooting outside the Shooting Zone",
   "Pinning / trapping opponent",
   "Turned off a robot",
+  "Holding more than 3 artifacts",
   "None observed",
 ];
 
@@ -160,6 +161,7 @@ const DD_PENALTY_OPTIONS = [
   "Shooting outside the Shooting Zone",
   "Pinning / trapping opponent",
   "Turned off a robot",
+  "Holding more than 3 artifacts",
   "None observed",
 ];
 
