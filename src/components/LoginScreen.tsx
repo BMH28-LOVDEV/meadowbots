@@ -173,21 +173,8 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       return;
     }
 
-    if (data.user) {
-      const { error: profileError } = await supabase.from("profiles").insert({
-        user_id: data.user.id,
-        username: prefix.toLowerCase().replace(/[^a-z0-9_]/g, ""),
-        display_name: displayName,
-        role: assignedRole,
-      });
-
-      if (profileError) {
-        setSignupError(profileError.message.includes("unique") ? "An account with this email already exists." : profileError.message);
-        setSignupLoading(false);
-        shake();
-        return;
-      }
-    }
+    // Profile is auto-created by a database trigger (handle_new_user)
+    // No client-side insert needed — avoids RLS issues before session is established
 
     setSignupLoading(false);
     setAccountCreated(true);
