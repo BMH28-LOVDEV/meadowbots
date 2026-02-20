@@ -456,8 +456,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Silver Drive Team */}
               <div className="glass rounded-xl overflow-hidden border border-zinc-400/40">
-                <div className="px-5 py-3.5 border-b border-zinc-400/30 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(180,180,180,0.12), rgba(120,120,120,0.06))" }}>
-                  <span style={{ color: "#C0C0C0", fontSize: "1.25rem", lineHeight: 1 }}>⬤</span>
+                <div className="px-5 py-3.5 border-b border-zinc-400/30" style={{ background: "linear-gradient(135deg, rgba(180,180,180,0.12), rgba(120,120,120,0.06))" }}>
                   <h3 className="font-display text-sm tracking-wider" style={{ color: "#C0C0C0", textShadow: "0 0 8px rgba(192,192,192,0.5)" }}>SILVER DRIVE TEAM</h3>
                 </div>
                 <div className="divide-y divide-zinc-400/20">
@@ -477,8 +476,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
 
               {/* Blue Drive Team */}
               <div className="glass rounded-xl overflow-hidden border border-blue-400/40">
-                <div className="px-5 py-3.5 border-b border-blue-400/30 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.12), rgba(37,99,235,0.06))" }}>
-                  <span className="text-lg">🔵</span>
+                <div className="px-5 py-3.5 border-b border-blue-400/30" style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.12), rgba(37,99,235,0.06))" }}>
                   <h3 className="font-display text-sm tracking-wider" style={{ color: "#60a5fa", textShadow: "0 0 8px rgba(96,165,250,0.5)" }}>BLUE DRIVE TEAM</h3>
                 </div>
                 <div className="divide-y divide-blue-400/20">
