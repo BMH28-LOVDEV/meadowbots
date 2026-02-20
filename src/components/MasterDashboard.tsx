@@ -307,7 +307,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   };
 
   const handlePendingAction = async () => {
-    if (pendingPassword !== "Team Leader") { setPendingError("Incorrect password."); return; }
+    if (pendingPassword !== "BennyGF28!") { setPendingError("Incorrect password."); return; }
     if (!pendingAction) return;
     if (pendingAction.type === "clearAssignment") {
       await executeClearAssignment(pendingAction.scoutName);
@@ -329,7 +329,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   };
 
   const handleClearAll = async () => {
-    if (clearAllPassword !== "Team Leader") { setClearAllError("Incorrect password."); return; }
+    if (clearAllPassword !== "BennyGF28!") { setClearAllError("Incorrect password."); return; }
     setClearingAll(true);
     const { error } = await supabase.from("scouting_entries").delete().neq("id", "00000000-0000-0000-0000-000000000000");
     if (error) { toast.error("Failed to clear entries."); console.error(error); }
@@ -344,7 +344,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   };
 
   const handleDelete = async () => {
-    if (deletePassword !== "Team Leader") { setDeleteError("Incorrect password."); return; }
+    if (deletePassword !== "BennyGF28!") { setDeleteError("Incorrect password."); return; }
     if (!deleteTarget) return;
     const { error } = await supabase.from("scouting_entries").delete().eq("id", deleteTarget.id);
     if (error) { toast.error("Failed to delete entry."); console.error(error); return; }
@@ -416,12 +416,6 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               🎉 LET'S GO!
             </button>
             <button
-              onClick={() => { fetchEntries(); fetchAssignments(); fetchDriveData(); }}
-              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200"
-            >
-              ↻ REFRESH
-            </button>
-            <button
               onClick={() => { setShowClearAll(true); setClearAllPassword(""); setClearAllError(""); }}
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/40 text-destructive/70 hover:border-destructive hover:text-destructive transition-all duration-200"
             >
@@ -432,6 +426,12 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/60 text-destructive hover:bg-destructive/10 transition-all duration-200"
             >
               🔴 LOCKDOWN
+            </button>
+            <button
+              onClick={() => { fetchEntries(); fetchAssignments(); fetchDriveData(); }}
+              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200"
+            >
+              ↻ REFRESH
             </button>
             <button
               onClick={onLogout}
@@ -637,8 +637,8 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                 </div>
                 <div className="divide-y divide-blue-400/20">
                   {[
-                    { name: "Max Tran", role: "Driver 1" },
-                    { name: "Cole Schubert", role: "Driver 1 / Human Player" },
+                    { name: "Max Tran", role: "Driver 1 / Human Player" },
+                    { name: "Cole Schubert", role: "Driver 1" },
                     { name: "Benjamin Hale", role: "Driver 2" },
                     { name: "Travis Quinn", role: "Human Player" },
                     { name: "Aiden Rubbo", role: "Drive Coach" },
