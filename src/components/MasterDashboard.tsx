@@ -30,6 +30,9 @@ interface ScoutingEntry {
   penalties: string[];
   specialFeatures: string;
   goodMatch: string;
+  matchScore: number | null;
+  allianceWon: string;
+  penaltyPointsGiven: number | null;
 }
 
 interface TeamAssignment {
@@ -138,6 +141,9 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
         penalties: row.penalties || [],
         specialFeatures: row.special_features || "",
         goodMatch: row.good_match || "",
+        matchScore: (row as any).match_score ?? null,
+        allianceWon: (row as any).alliance_won || "",
+        penaltyPointsGiven: (row as any).penalty_points_given ?? null,
       }));
       setEntries(mapped);
     }
@@ -714,6 +720,14 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                                 <div>
                                   <span className="font-display text-sm text-foreground tracking-wider">
                                     Match {entry.matchNumber || "N/A"} • Score: {scoreEntry(entry)}
+                                    {entry.matchScore != null ? (
+                                      <span className="ml-2 text-primary/80">· Solo: ~{entry.matchScore}</span>
+                                    ) : null}
+                                    {entry.allianceWon ? (
+                                      <span className={`ml-2 text-xs ${entry.allianceWon === "Yes – Won" ? "text-green-400" : entry.allianceWon === "No – Lost" ? "text-destructive" : "text-muted-foreground"}`}>
+                                        {entry.allianceWon === "Yes – Won" ? "🏆 Won" : entry.allianceWon === "No – Lost" ? "❌ Lost" : "🤝 Tie"}
+                                      </span>
+                                    ) : null}
                                   </span>
                                   <p className="text-xs text-muted-foreground font-body mt-0.5">
                                     🧑‍💻 Scouted by <span className="text-foreground">{entry.scouterName || "Unknown"}</span> • {new Date(entry.timestamp).toLocaleDateString()}

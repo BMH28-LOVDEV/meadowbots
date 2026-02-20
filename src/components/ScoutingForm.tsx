@@ -193,7 +193,8 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
     }
 
     setSubmitting(true);
-    const { error } = await supabase.from("scouting_entries").insert({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.from("scouting_entries") as any).insert({
       scouter_name: scouterName,
       team_number: form.teamNumber,
       match_number: form.matchNumber || null,
