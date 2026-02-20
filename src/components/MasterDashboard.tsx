@@ -214,8 +214,20 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
 
   const handleRoleUpdate = async (userId: string, newRole: string) => {
     setUpdatingRole(userId);
-    const { error } = await supabase.from("profiles").update({ role: newRole }).eq("user_id", userId);
-    if (error) { toast.error("Failed to update role."); }
+    const { data: { session } } = await supabase.auth.getSession();
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/update-user-role`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ targetUserId: userId, newRole }),
+      }
+    );
+    const result = await response.json();
+    if (!response.ok) { toast.error(result.error || "Failed to update role."); }
     else { toast.success(`Role updated to ${newRole}!`); await fetchDriveData(); }
     setUpdatingRole(null);
   };
