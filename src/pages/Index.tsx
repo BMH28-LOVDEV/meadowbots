@@ -32,16 +32,21 @@ const Index = () => {
 
   useEffect(() => {
     let isMounted = true;
+    let initialLoadDone = false;
 
-    // Only handle SUBSEQUENT auth changes (logout, token refresh)
-    // This does NOT control the loading state
+    // Listener for ONGOING auth changes (logout, token refresh)
+    // Uses setTimeout to avoid Supabase deadlock on awaiting inside this callback
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        if (!isMounted) return;
-        // Only react after initial load is done
+        if (!isMounted || !initialLoadDone) return;
         setUser(session?.user ?? null);
         if (!session?.user) {
           setProfile(null);
+        } else {
+          // Non-blocking profile refresh after auth change
+          setTimeout(() => {
+            if (isMounted) fetchProfile(session.user.id);
+          }, 0);
         }
       }
     );
@@ -56,7 +61,10 @@ const Index = () => {
           await fetchProfile(session.user.id);
         }
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          initialLoadDone = true;
+          setLoading(false);
+        }
       }
     };
 
