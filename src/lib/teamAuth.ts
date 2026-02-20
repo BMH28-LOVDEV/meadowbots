@@ -83,6 +83,8 @@ export const DRIVE_TEAM = [
   "Benjamin Hale",
   "Max Tran",
   "Cole Schubert",
+  "Travis Quinn",
+  "Mason Howard",
 ];
 
 export { TEAM_MEMBERS };
