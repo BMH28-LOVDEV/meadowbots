@@ -487,70 +487,70 @@ const MasterDashboard = ({ onLogout, username }: MasterDashboardProps) => {
         </div>
 
         {/* Tabs */}
-        <div className="max-w-4xl mx-auto px-4 flex gap-1 pb-2 overflow-x-auto">
+        <div className="px-4 flex gap-1 pb-2 overflow-x-auto" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
           <button
             onClick={() => setActiveTab("dashboard")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 ${
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 ${
               activeTab === "dashboard"
                 ? "bg-primary/20 text-primary border border-primary/40"
                 : "text-muted-foreground hover:text-foreground border border-transparent"
             }`}
           >
-            🏠 DASHBOARD
+            DASHBOARD
           </button>
           <button
             onClick={() => setActiveTab("rankings")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 ${
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 ${
               activeTab === "rankings"
                 ? "bg-primary/20 text-primary border border-primary/40"
                 : "text-muted-foreground hover:text-foreground border border-transparent"
             }`}
           >
-            📊 RANKINGS
+            RANKINGS
           </button>
           <button
             onClick={() => setActiveTab("progress")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 ${
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 ${
               activeTab === "progress"
                 ? "bg-primary/20 text-primary border border-primary/40"
                 : "text-muted-foreground hover:text-foreground border border-transparent"
             }`}
           >
-            📡 SCOUT PROGRESS
+            SCOUT PROGRESS
           </button>
           <button
             onClick={() => setActiveTab("assignments")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 ${
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 ${
               activeTab === "assignments"
                 ? "bg-primary/20 text-primary border border-primary/40"
                 : "text-muted-foreground hover:text-foreground border border-transparent"
             }`}
           >
-            📋 SCOUT ASSIGNMENTS
+            ASSIGNMENTS
           </button>
           <button
             onClick={() => setActiveTab("bluedrivedata")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap ${
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 ${
               activeTab === "bluedrivedata"
                 ? "bg-blue-500/20 text-blue-400 border border-blue-500/40"
                 : "text-muted-foreground hover:text-foreground border border-transparent"
             }`}
           >
-            🔷 BLUE DATA
+            BLUE DATA
           </button>
           <button
             onClick={() => setActiveTab("silverdrivedata")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap ${
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 ${
               activeTab === "silverdrivedata"
                 ? "bg-slate-400/20 text-slate-300 border border-slate-400/40"
                 : "text-muted-foreground hover:text-foreground border border-transparent"
             }`}
           >
-            ⚪ SILVER DATA
+            SILVER DATA
           </button>
           <button
             onClick={() => setActiveTab("livestream")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 ${
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 ${
               activeTab === "livestream"
                 ? "bg-red-500/20 text-red-400 border border-red-500/40"
                 : "text-muted-foreground hover:text-foreground border border-transparent"
