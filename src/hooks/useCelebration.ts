@@ -14,7 +14,9 @@ export function useCelebration() {
       payload: { message: "Good Job Team, We Won!!" },
     });
     channel.unsubscribe();
+    setCelebrating(true);
     fireCelebration();
+    setTimeout(() => setCelebrating(false), 6000);
   };
 
   const fireCelebration = () => {
@@ -57,7 +59,9 @@ export function useCelebration() {
     const channel = supabase
       .channel("celebration")
       .on("broadcast", { event: "lets_go" }, () => {
+        setCelebrating(true);
         fireCelebration();
+        setTimeout(() => setCelebrating(false), 6000);
       })
       .subscribe();
 
