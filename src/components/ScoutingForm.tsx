@@ -251,7 +251,7 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="font-display text-xl text-primary text-glow tracking-wider">
-              MEADOWBOTS <span className="text-foreground/60">#14841</span>
+              MEADOWBOTS <span className="text-primary">#14841</span>
             </h1>
             <p className="text-xs text-muted-foreground font-body">DECODE Scouting Form</p>
           </div>
