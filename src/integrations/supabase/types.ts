@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       scouting_entries: {
         Row: {
+          alliance_won: string | null
           auto_artifacts_scored: string | null
           auto_consistency: string | null
           auto_launch_line: string | null
@@ -26,7 +27,9 @@ export type Database = {
           good_match: string | null
           id: string
           match_number: string | null
+          match_score: number | null
           penalties: string[] | null
+          penalty_points_given: number | null
           scouter_name: string
           special_features: string | null
           team_number: string
@@ -40,6 +43,7 @@ export type Database = {
           timestamp: string
         }
         Insert: {
+          alliance_won?: string | null
           auto_artifacts_scored?: string | null
           auto_consistency?: string | null
           auto_launch_line?: string | null
@@ -50,7 +54,9 @@ export type Database = {
           good_match?: string | null
           id?: string
           match_number?: string | null
+          match_score?: number | null
           penalties?: string[] | null
+          penalty_points_given?: number | null
           scouter_name: string
           special_features?: string | null
           team_number: string
@@ -64,6 +70,7 @@ export type Database = {
           timestamp?: string
         }
         Update: {
+          alliance_won?: string | null
           auto_artifacts_scored?: string | null
           auto_consistency?: string | null
           auto_launch_line?: string | null
@@ -74,7 +81,9 @@ export type Database = {
           good_match?: string | null
           id?: string
           match_number?: string | null
+          match_score?: number | null
           penalties?: string[] | null
+          penalty_points_given?: number | null
           scouter_name?: string
           special_features?: string | null
           team_number?: string
