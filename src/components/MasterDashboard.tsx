@@ -457,18 +457,18 @@ const MasterDashboard = ({ onLogout, username }: MasterDashboardProps) => {
             )}
             {isBen && (
               <button
-                onClick={() => { setShowClearAll(true); setClearAllPassword(""); setClearAllError(""); }}
-                className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/40 text-destructive/70 hover:border-destructive hover:text-destructive transition-all duration-200"
-              >
-                🗑 CLEAR ALL
-              </button>
-            )}
-            {isBen && (
-              <button
                 onClick={() => setShowLockdown(true)}
                 className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/60 text-destructive hover:bg-destructive/10 transition-all duration-200"
               >
                 🔴 LOCKDOWN
+              </button>
+            )}
+            {isBen && (
+              <button
+                onClick={() => { setShowClearAll(true); setClearAllPassword(""); setClearAllError(""); }}
+                className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/40 text-destructive/70 hover:border-destructive hover:text-destructive transition-all duration-200"
+              >
+                🗑 CLEAR ALL
               </button>
             )}
             <button
