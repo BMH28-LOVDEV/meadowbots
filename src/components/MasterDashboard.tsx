@@ -97,7 +97,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   const [pendingPassword, setPendingPassword] = useState("");
   const [pendingError, setPendingError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments" | "livestream">("dashboard");
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
   const [savingAssignment, setSavingAssignment] = useState<string | null>(null);
@@ -378,6 +378,16 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
             }`}
           >
             📋 SCOUT ASSIGNMENTS
+          </button>
+          <button
+            onClick={() => setActiveTab("livestream")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 ${
+              activeTab === "livestream"
+                ? "bg-red-500/20 text-red-400 border border-red-500/40"
+                : "text-muted-foreground hover:text-foreground border border-transparent"
+            }`}
+          >
+            🔴 LIVE STREAM
           </button>
         </div>
       </header>
@@ -999,6 +1009,27 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                 {clearingAll ? "CLEARING..." : "CLEAR ALL"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── LIVESTREAM TAB content is rendered inside main scroll area ── */}
+      {activeTab === "livestream" && (
+        <div className="max-w-4xl mx-auto px-4 py-8 space-y-4">
+          <div className="glass rounded-xl p-4 border border-red-500/30">
+            <div className="flex items-center gap-3 mb-1">
+              <span className="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <h2 className="font-display text-sm tracking-wider text-red-400">LIVE — FIRSTNevadaSouth</h2>
+            </div>
+            <p className="text-xs text-muted-foreground font-body">Official FIRST Nevada South Twitch stream</p>
+          </div>
+          <div className="glass rounded-xl overflow-hidden border border-border/50" style={{ aspectRatio: "16/9" }}>
+            <iframe
+              src="https://player.twitch.tv/?channel=FIRSTNevadaSouth&parent=meadowbots.lovable.app&parent=id-preview--507347b5-b304-47c7-a618-7ba9a3c5c371.lovable.app"
+              allowFullScreen
+              className="w-full h-full"
+              title="FIRSTNevadaSouth Live Stream"
+            />
           </div>
         </div>
       )}
