@@ -23,23 +23,7 @@ const LockdownDashboard = ({ onLogout }: LockdownDashboardProps) => {
     setLoading(true);
     setError("");
 
-    // Re-authenticate with Supabase using their actual credentials
-    const { data: sessionData } = await supabase.auth.getSession();
-    const email = sessionData?.session?.user?.email;
-
-    if (!email) {
-      setError("Session expired. Please log out and back in.");
-      setLoading(false);
-      shake();
-      return;
-    }
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (signInError) {
+    if (password !== "BennyGFLockdown") {
       setError("Wrong password. Access denied.");
       setPassword("");
       setLoading(false);
@@ -47,11 +31,19 @@ const LockdownDashboard = ({ onLogout }: LockdownDashboardProps) => {
       return;
     }
 
-    // Verify the user has master role
+    // Verify the user has master role via Supabase
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData?.session?.user?.id) {
+      setError("Session expired. Please log out and back in.");
+      setLoading(false);
+      shake();
+      return;
+    }
+
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
-      .eq("user_id", sessionData.session!.user.id)
+      .eq("user_id", sessionData.session.user.id)
       .single();
 
     if (profile?.role !== "master") {
