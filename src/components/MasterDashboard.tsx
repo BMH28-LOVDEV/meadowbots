@@ -638,7 +638,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                 <div className="divide-y divide-blue-400/20">
                   {[
                     { name: "Max Tran", role: "Driver 1 / Human Player" },
-                    { name: "Cole Schubert", role: "Driver 1" },
+                    { name: "Cole Schubert", role: "Driver 1 / Human Player" },
                     { name: "Benjamin Hale", role: "Driver 2" },
                     { name: "Travis Quinn", role: "Human Player" },
                     { name: "Aiden Rubbo", role: "Drive Coach" },
