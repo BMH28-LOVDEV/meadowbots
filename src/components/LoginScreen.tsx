@@ -1,98 +1,117 @@
 import { useState } from "react";
-import { findTeamMember } from "@/lib/teamAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LoginScreenProps {
-  onLogin: (name: string) => void;
+  onLogin: () => void;
 }
 
+const EMAIL_DOMAIN = "@themeadowsschool.org";
+
+type Mode = "login" | "signup";
+
 const LoginScreen = ({ onLogin }: LoginScreenProps) => {
-  const [name, setName] = useState("");
-  const [error, setError] = useState("");
+  const [mode, setMode] = useState<Mode>("login");
+
+  // Login fields
+  const [loginPrefix, setLoginPrefix] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  // Signup fields
+  const [signupPrefix, setSignupPrefix] = useState("");
+  const [signupUsername, setSignupUsername] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [signupConfirm, setSignupConfirm] = useState("");
+  const [signupError, setSignupError] = useState("");
+  const [signupLoading, setSignupLoading] = useState(false);
+
   const [isShaking, setIsShaking] = useState(false);
-  const [pendingMaster, setPendingMaster] = useState(false);
-  const [pendingScout, setPendingScout] = useState<string | null>(null);
-  const [pendingLockdown, setPendingLockdown] = useState(false);
-  const [pendingLetsGo, setPendingLetsGo] = useState(false);
-  const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [masterPassword, setMasterPassword] = useState("");
-  const [masterError, setMasterError] = useState("");
 
   const shake = () => {
     setIsShaking(true);
     setTimeout(() => setIsShaking(false), 500);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Step 2a: Master password
-    if (pendingMaster) {
-      if (masterPassword === "MeadowBots") {
-        onLogin("MeadowBot Master");
-      } else {
-        setMasterError("Incorrect password.");
-        shake();
-      }
-      return;
-    }
-
-    // Step 2b: Lockdown password
-    if (pendingLockdown) {
-      if (masterPassword === "BennyGF28!") {
-        onLogin("Lockdown");
-      } else {
-        setMasterError("Incorrect password.");
-        shake();
-      }
-      return;
-    }
-
-    // Step 2c: Let's Go password (14841)
-    if (pendingLetsGo) {
-      if (masterPassword === "14841") {
-        onLogin("Lets Go");
-      } else {
-        setMasterError("Incorrect password.");
-        shake();
-      }
-      return;
-    }
-
-    // Step 2d: Scout password
-    if (pendingScout) {
-      if (password.toLowerCase() === "meadowbots") {
-        onLogin(pendingScout);
-      } else {
-        setPasswordError("Incorrect password.");
-        shake();
-      }
-      return;
-    }
-
-    // Step 1: Name lookup
-    const match = findTeamMember(name);
-    if (match === "MeadowBot Master") {
-      setPendingMaster(true);
-      setMasterPassword("");
-      setMasterError("");
-    } else if (match === "Lockdown") {
-      setPendingLockdown(true);
-      setMasterPassword("");
-      setMasterError("");
-    } else if (match === "Lets Go") {
-      setPendingLetsGo(true);
-      setMasterPassword("");
-      setMasterError("");
-    } else if (match) {
-      setPendingScout(match);
-      setPassword("");
-      setPasswordError("");
-      setError("");
-    } else {
-      setError("Name not recognized. Please enter your team name.");
+    if (!loginPrefix.trim()) {
+      setLoginError("Please enter your school email prefix.");
       shake();
+      return;
     }
+    const email = loginPrefix.trim().toLowerCase() + EMAIL_DOMAIN;
+    setLoginLoading(true);
+    setLoginError("");
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password: loginPassword });
+    setLoginLoading(false);
+
+    if (error) {
+      setLoginError("Incorrect email or password.");
+      shake();
+    } else {
+      onLogin();
+    }
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSignupError("");
+
+    if (!signupPrefix.trim()) {
+      setSignupError("Please enter your school email prefix.");
+      shake(); return;
+    }
+    if (!signupUsername.trim()) {
+      setSignupError("Please choose a username.");
+      shake(); return;
+    }
+    if (signupPassword.length < 6) {
+      setSignupError("Password must be at least 6 characters.");
+      shake(); return;
+    }
+    if (signupPassword !== signupConfirm) {
+      setSignupError("Passwords do not match.");
+      shake(); return;
+    }
+
+    const email = signupPrefix.trim().toLowerCase() + EMAIL_DOMAIN;
+    setSignupLoading(true);
+
+    const { data, error } = await supabase.auth.signUp({ email, password: signupPassword });
+
+    if (error) {
+      setSignupError(error.message);
+      setSignupLoading(false);
+      shake();
+      return;
+    }
+
+    if (data.user) {
+      // Build display name from prefix: first_last → First Last
+      const displayName = signupPrefix
+        .split("_")
+        .map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
+        .join(" ");
+
+      const { error: profileError } = await supabase.from("profiles").insert({
+        user_id: data.user.id,
+        username: signupUsername.trim(),
+        display_name: displayName,
+        role: "scout",
+      });
+
+      if (profileError) {
+        setSignupError(profileError.message.includes("unique") ? "That username is already taken." : profileError.message);
+        setSignupLoading(false);
+        shake();
+        return;
+      }
+    }
+
+    setSignupLoading(false);
+    onLogin();
   };
 
   return (
@@ -116,132 +135,153 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
           </p>
         </div>
 
-        {/* Login card */}
+        {/* Card */}
         <div className="glass rounded-xl p-8 glow-primary">
-          <h2 className="text-xl font-display text-foreground mb-6 text-center tracking-wide">
-            {pendingMaster ? "MASTER ACCESS" : pendingLockdown ? "🔒 LOCKDOWN ACCESS" : pendingLetsGo ? "🎉 LET'S GO! ACCESS" : pendingScout ? "TEAM PASSWORD" : "AUTHENTICATION"}
-          </h2>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {!pendingMaster && !pendingLockdown && !pendingLetsGo && !pendingScout ? (
-              <div>
-                <label htmlFor="name" className="block text-sm font-body text-muted-foreground mb-2">
-                  Enter your full name
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => { setName(e.target.value); setError(""); }}
-                  placeholder="First Last"
-                  className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all duration-300"
-                  autoComplete="off"
-                />
-                {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
-              </div>
-            ) : pendingScout ? (
-              <div>
-                <p className="text-sm font-body text-foreground mb-1">Welcome, <span className="text-primary font-semibold">{pendingScout}</span>!</p>
-                <label htmlFor="scout-pw" className="block text-sm font-body text-muted-foreground mb-2">
-                  Enter the team password
-                </label>
-                <input
-                  id="scout-pw"
-                  type="password"
-                  value={password}
-                  onChange={(e) => { setPassword(e.target.value); setPasswordError(""); }}
-                  placeholder="Password"
-                  autoFocus
-                  className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all duration-300"
-                />
-                {passwordError && <p className="mt-2 text-sm text-destructive">{passwordError}</p>}
-                <button
-                  type="button"
-                  onClick={() => { setPendingScout(null); setName(""); setPassword(""); setPasswordError(""); }}
-                  className="mt-2 text-xs text-muted-foreground hover:text-foreground font-body transition-colors"
-                >
-                  ← Back
-                </button>
-              </div>
-            ) : pendingLockdown ? (
-              <div>
-                <p className="text-sm font-body text-destructive mb-3">⚠️ Lockdown requires master authorization.</p>
-                <label htmlFor="lockdown-pw" className="block text-sm font-body text-muted-foreground mb-2">
-                  Enter the master password
-                </label>
-                <input
-                  id="lockdown-pw"
-                  type="password"
-                  value={masterPassword}
-                  onChange={(e) => { setMasterPassword(e.target.value); setMasterError(""); }}
-                  placeholder="Password"
-                  autoFocus
-                  className="w-full px-4 py-3 rounded-lg bg-muted border border-destructive/40 focus:border-destructive focus:ring-1 focus:ring-destructive text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all duration-300"
-                />
-                {masterError && <p className="mt-2 text-sm text-destructive">{masterError}</p>}
-                <button
-                  type="button"
-                  onClick={() => { setPendingLockdown(false); setName(""); setMasterPassword(""); setMasterError(""); }}
-                  className="mt-2 text-xs text-muted-foreground hover:text-foreground font-body transition-colors"
-                >
-                  ← Back
-                </button>
-              </div>
-            ) : pendingLetsGo ? (
-              <div>
-                <p className="text-sm font-body mb-3" style={{ color: "#4ade80" }}>🎉 Let's celebrate — enter the password!</p>
-                <label htmlFor="letsgo-pw" className="block text-sm font-body text-muted-foreground mb-2">
-                  Enter the password
-                </label>
-                <input
-                  id="letsgo-pw"
-                  type="password"
-                  value={masterPassword}
-                  onChange={(e) => { setMasterPassword(e.target.value); setMasterError(""); }}
-                  placeholder="Password"
-                  autoFocus
-                  className="w-full px-4 py-3 rounded-lg bg-muted border focus:ring-1 text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all duration-300"
-                  style={{ borderColor: "rgba(74,222,128,0.4)" }}
-                />
-                {masterError && <p className="mt-2 text-sm text-destructive">{masterError}</p>}
-                <button
-                  type="button"
-                  onClick={() => { setPendingLetsGo(false); setName(""); setMasterPassword(""); setMasterError(""); }}
-                  className="mt-2 text-xs text-muted-foreground hover:text-foreground font-body transition-colors"
-                >
-                  ← Back
-                </button>
-              </div>
-            ) : (
-              <div>
-                <label htmlFor="master-pw" className="block text-sm font-body text-muted-foreground mb-2">
-                  Enter the MeadowBot Master password
-                </label>
-                <input
-                  id="master-pw"
-                  type="password"
-                  value={masterPassword}
-                  onChange={(e) => { setMasterPassword(e.target.value); setMasterError(""); }}
-                  placeholder="Password"
-                  autoFocus
-                  className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all duration-300"
-                />
-                {masterError && <p className="mt-2 text-sm text-destructive">{masterError}</p>}
-                <button
-                  type="button"
-                  onClick={() => { setPendingMaster(false); setName(""); setMasterPassword(""); setMasterError(""); }}
-                  className="mt-2 text-xs text-muted-foreground hover:text-foreground font-body transition-colors"
-                >
-                  ← Back
-                </button>
-              </div>
-            )}
+          <div className="flex mb-6 rounded-lg bg-muted p-1 gap-1">
             <button
-              type="submit"
-              className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-display font-semibold tracking-wider hover:glow-primary-strong transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              onClick={() => { setMode("login"); setLoginError(""); }}
+              className={`flex-1 py-2 rounded-md font-display text-sm tracking-wider transition-all ${mode === "login" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
-              {pendingMaster || pendingScout || pendingLockdown || pendingLetsGo ? "UNLOCK" : "ENTER"}
+              SIGN IN
             </button>
-          </form>
+            <button
+              onClick={() => { setMode("signup"); setSignupError(""); }}
+              className={`flex-1 py-2 rounded-md font-display text-sm tracking-wider transition-all ${mode === "signup" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              CREATE ACCOUNT
+            </button>
+          </div>
+
+          {mode === "login" ? (
+            <form onSubmit={handleLogin} className="space-y-5">
+              {/* Email prefix */}
+              <div>
+                <label className="block text-sm font-body text-muted-foreground mb-2">
+                  School Email
+                </label>
+                <div className="flex items-stretch rounded-lg overflow-hidden border border-border focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all duration-300 bg-muted">
+                  <input
+                    type="text"
+                    value={loginPrefix}
+                    onChange={e => { setLoginPrefix(e.target.value); setLoginError(""); }}
+                    placeholder="first_last"
+                    className="flex-1 px-4 py-3 bg-transparent text-foreground placeholder:text-muted-foreground/50 font-body outline-none"
+                    autoComplete="username"
+                    autoCapitalize="none"
+                  />
+                  <span className="flex items-center px-3 text-muted-foreground/60 font-body text-sm bg-muted/50 border-l border-border select-none whitespace-nowrap">
+                    {EMAIL_DOMAIN}
+                  </span>
+                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-body text-muted-foreground mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={loginPassword}
+                  onChange={e => { setLoginPassword(e.target.value); setLoginError(""); }}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all duration-300"
+                  autoComplete="current-password"
+                />
+              </div>
+
+              {loginError && <p className="text-sm text-destructive">{loginError}</p>}
+
+              <button
+                type="submit"
+                disabled={loginLoading}
+                className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-display font-semibold tracking-wider hover:glow-primary-strong transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+              >
+                {loginLoading ? "SIGNING IN..." : "SIGN IN"}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleSignup} className="space-y-5">
+              {/* Email prefix */}
+              <div>
+                <label className="block text-sm font-body text-muted-foreground mb-2">
+                  School Email
+                </label>
+                <div className="flex items-stretch rounded-lg overflow-hidden border border-border focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all duration-300 bg-muted">
+                  <input
+                    type="text"
+                    value={signupPrefix}
+                    onChange={e => { setSignupPrefix(e.target.value); setSignupError(""); }}
+                    placeholder="first_last"
+                    className="flex-1 px-4 py-3 bg-transparent text-foreground placeholder:text-muted-foreground/50 font-body outline-none"
+                    autoComplete="username"
+                    autoCapitalize="none"
+                  />
+                  <span className="flex items-center px-3 text-muted-foreground/60 font-body text-sm bg-muted/50 border-l border-border select-none whitespace-nowrap">
+                    {EMAIL_DOMAIN}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground/60 font-body">
+                  e.g. <span className="text-primary/70">benjamin_hale</span>{EMAIL_DOMAIN}
+                </p>
+              </div>
+
+              {/* Username */}
+              <div>
+                <label className="block text-sm font-body text-muted-foreground mb-2">
+                  Username <span className="text-muted-foreground/50">(you choose this)</span>
+                </label>
+                <input
+                  type="text"
+                  value={signupUsername}
+                  onChange={e => { setSignupUsername(e.target.value); setSignupError(""); }}
+                  placeholder="e.g. BMH28"
+                  className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all duration-300"
+                  autoCapitalize="none"
+                />
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-body text-muted-foreground mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={signupPassword}
+                  onChange={e => { setSignupPassword(e.target.value); setSignupError(""); }}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all duration-300"
+                  autoComplete="new-password"
+                />
+              </div>
+
+              {/* Confirm */}
+              <div>
+                <label className="block text-sm font-body text-muted-foreground mb-2">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  value={signupConfirm}
+                  onChange={e => { setSignupConfirm(e.target.value); setSignupError(""); }}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all duration-300"
+                  autoComplete="new-password"
+                />
+              </div>
+
+              {signupError && <p className="text-sm text-destructive">{signupError}</p>}
+
+              <button
+                type="submit"
+                disabled={signupLoading}
+                className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-display font-semibold tracking-wider hover:glow-primary-strong transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+              >
+                {signupLoading ? "CREATING..." : "CREATE ACCOUNT"}
+              </button>
+            </form>
+          )}
         </div>
 
         <p className="text-center text-muted-foreground/40 text-xs mt-6 font-body">
