@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LockdownDashboardProps {
   onLogout: () => void;
@@ -10,21 +11,59 @@ const LockdownDashboard = ({ onLogout }: LockdownDashboardProps) => {
   const [error, setError] = useState("");
   const [locked, setLocked] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const shake = () => {
     setIsShaking(true);
     setTimeout(() => setIsShaking(false), 500);
   };
 
-  const handleConfirm = (e: React.FormEvent) => {
+  const handleConfirm = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "BennyGF28!") {
-      setLocked(true);
-    } else {
+    setLoading(true);
+    setError("");
+
+    // Re-authenticate with Supabase using their actual credentials
+    const { data: sessionData } = await supabase.auth.getSession();
+    const email = sessionData?.session?.user?.email;
+
+    if (!email) {
+      setError("Session expired. Please log out and back in.");
+      setLoading(false);
+      shake();
+      return;
+    }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (signInError) {
       setError("Wrong password. Access denied.");
       setPassword("");
+      setLoading(false);
       shake();
+      return;
     }
+
+    // Verify the user has master role
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("user_id", sessionData.session!.user.id)
+      .single();
+
+    if (profile?.role !== "master") {
+      setError("Insufficient permissions. Master role required.");
+      setPassword("");
+      setLoading(false);
+      shake();
+      return;
+    }
+
+    setLoading(false);
+    setLocked(true);
   };
 
   if (locked) {
@@ -107,9 +146,10 @@ const LockdownDashboard = ({ onLogout }: LockdownDashboardProps) => {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-3 rounded-lg bg-destructive text-white font-display font-bold tracking-wider hover:bg-destructive/80 transition-all duration-200"
+                    disabled={loading}
+                    className="flex-1 py-3 rounded-lg bg-destructive text-white font-display font-bold tracking-wider hover:bg-destructive/80 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    CONFIRM LOCKDOWN
+                    {loading ? "VERIFYING..." : "CONFIRM LOCKDOWN"}
                   </button>
                 </div>
               </form>
