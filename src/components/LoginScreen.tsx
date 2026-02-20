@@ -24,7 +24,7 @@ function detectEmailType(prefix: string): EmailType {
 // Special role assignments by email prefix (case-insensitive)
 const BLUE_DRIVER_PREFIXES = ["zoe_khansevahn", "chantelle_wong"];
 const COACH_PREFIXES = ["devin_allen"];
-const MASTER_PREFIXES = ["max_tran"];
+const MASTER_PREFIXES = ["maxwell_tran", "benjamin_hale"];
 
 function getAssignedRole(prefix: string): string {
   const lower = prefix.trim().toLowerCase();
@@ -271,7 +271,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground/50 font-body">
-                  Students: <span className="text-primary/60">first_last</span> · Teachers: <span className="text-primary/60">BHale</span>
+                  Students: <span className="text-primary/60">first_last</span> · Teachers: <span className="text-primary/60">JSmith</span>
                 </p>
               </div>
 
@@ -334,7 +334,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                         type="text"
                         value={forgotPrefix}
                         onChange={e => { setForgotPrefix(e.target.value); setForgotError(""); }}
-                        placeholder="first_last or BHale"
+                        placeholder="first_last or JSmith"
                         className="flex-1 px-4 py-3 bg-transparent text-foreground placeholder:text-muted-foreground/50 font-body outline-none"
                         autoComplete="username"
                         autoCapitalize="none"
@@ -379,7 +379,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                     type="text"
                     value={signupPrefix}
                     onChange={e => { setSignupPrefix(e.target.value); setSignupError(""); }}
-                    placeholder="first_last or BHale"
+                    placeholder="first_last or JSmith"
                     className="flex-1 px-4 py-3 bg-transparent text-foreground placeholder:text-muted-foreground/50 font-body outline-none"
                     autoComplete="username"
                     autoCapitalize="none"
@@ -389,7 +389,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                   </span>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground/50 font-body">
-                  Students: <span className="text-primary/60">first_last</span> · Teachers: <span className="text-primary/60">BHale</span>
+                  Students: <span className="text-primary/60">first_last</span> · Teachers: <span className="text-primary/60">JSmith</span>
                 </p>
               </div>
 
