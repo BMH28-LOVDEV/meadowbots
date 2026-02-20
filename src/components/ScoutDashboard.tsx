@@ -1,5 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useCelebration } from "@/hooks/useCelebration";
+import CelebrationOverlay from "@/components/CelebrationOverlay";
 
 interface ScoutDashboardProps {
   onLogout: () => void;
@@ -69,6 +71,7 @@ const scoreEntry = (entry: ScoutingEntry): number => {
 };
 
 const ScoutDashboard = ({ onLogout }: ScoutDashboardProps) => {
+  const { celebrating } = useCelebration();
   const [entries, setEntries] = useState<ScoutingEntry[]>([]);
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -136,6 +139,7 @@ const ScoutDashboard = ({ onLogout }: ScoutDashboardProps) => {
 
   return (
     <div className="min-h-screen bg-background relative">
+      <CelebrationOverlay visible={celebrating} />
       <div className="fixed top-0 left-0 w-full h-64 bg-gradient-to-b from-accent/5 to-transparent pointer-events-none" />
 
       {/* Header */}

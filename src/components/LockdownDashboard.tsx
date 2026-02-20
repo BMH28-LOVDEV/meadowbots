@@ -18,7 +18,7 @@ const LockdownDashboard = ({ onLogout }: LockdownDashboardProps) => {
 
   const handleConfirm = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "MeadowBots") {
+    if (password === "14841") {
       setLocked(true);
     } else {
       setError("Wrong password. Access denied.");

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useCelebration } from "@/hooks/useCelebration";
+import CelebrationOverlay from "@/components/CelebrationOverlay";
 
 interface ScoutingFormProps {
   scouterName: string;
@@ -119,6 +121,7 @@ const SectionHeader = ({ title, icon }: { title: string; icon: string }) => (
 );
 
 const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
+  const { celebrating } = useCelebration();
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [assignment, setAssignment] = useState<{ team_number: string; team_name: string; qual_matches: string[] } | null>(null);
@@ -244,6 +247,7 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
 
   return (
     <div className="min-h-screen bg-background relative">
+      <CelebrationOverlay visible={celebrating} />
       <div className="fixed top-0 left-0 w-full h-64 bg-gradient-to-b from-primary/3 to-transparent pointer-events-none" />
 
       {/* Header */}
