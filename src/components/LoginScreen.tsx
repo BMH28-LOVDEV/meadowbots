@@ -9,6 +9,45 @@ const EMAIL_DOMAIN = "@themeadowsschool.org";
 
 type Mode = "login" | "signup" | "forgot";
 
+// Detect email type from prefix
+// Student: first_last (contains underscore)
+// Teacher/Coach: BHale (starts with capital letter, no underscore)
+type EmailType = "student" | "staff";
+
+function detectEmailType(prefix: string): EmailType {
+  if (prefix.includes("_")) return "student";
+  // Single capital letter followed by lowercase last name (teacher format)
+  if (/^[A-Za-z][a-z]+$/.test(prefix) && prefix.length >= 3) return "staff";
+  return "student";
+}
+
+// Special role assignments by email prefix (case-insensitive)
+const BLUE_DRIVER_PREFIXES = ["zoe_khansevahn", "chantelle_wong"];
+const COACH_PREFIXES = ["devin_allen"];
+
+function getAssignedRole(prefix: string): string {
+  const lower = prefix.trim().toLowerCase();
+  if (COACH_PREFIXES.includes(lower)) return "coach";
+  if (BLUE_DRIVER_PREFIXES.includes(lower)) return "bluedriver";
+  return "scout";
+}
+
+// Build display name from email prefix
+// Student: first_last → "First Last"
+// Teacher: BHale → "B. Hale" isn't ideal — we'll just title-case: "Bhale" → store as-is
+// Actually for staff we can't reliably parse first/last without separator, so store prefix capitalized
+function buildDisplayName(prefix: string, emailType: EmailType): string {
+  if (emailType === "student") {
+    return prefix
+      .split("_")
+      .map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
+      .join(" ");
+  } else {
+    // Teacher format e.g. BHale → capitalize first letter
+    return prefix.charAt(0).toUpperCase() + prefix.slice(1);
+  }
+}
+
 const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [mode, setMode] = useState<Mode>("login");
   const [accountCreated, setAccountCreated] = useState(false);
@@ -21,7 +60,6 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
   // Signup fields
   const [signupPrefix, setSignupPrefix] = useState("");
-  const [signupUsername, setSignupUsername] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirm, setSignupConfirm] = useState("");
   const [signupError, setSignupError] = useState("");
@@ -40,6 +78,20 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     setTimeout(() => setIsShaking(false), 500);
   };
 
+  // Auto-derived display name (read-only preview during signup)
+  const signupEmailType = detectEmailType(signupPrefix);
+  const signupDisplayName = signupPrefix.trim()
+    ? buildDisplayName(signupPrefix.trim(), signupEmailType)
+    : "";
+
+  // Staff-type accounts get teacher role unless they're a known coach/bluedriver
+  function resolveRole(prefix: string, emailType: EmailType): string {
+    const special = getAssignedRole(prefix);
+    if (special !== "scout") return special; // coach or bluedriver takes priority
+    if (emailType === "staff") return "teacher";
+    return "scout";
+  }
+
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setForgotError("");
@@ -48,7 +100,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       shake();
       return;
     }
-    const email = forgotPrefix.trim().toLowerCase() + EMAIL_DOMAIN;
+    const email = forgotPrefix.trim() + EMAIL_DOMAIN;
     setForgotLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
@@ -69,7 +121,8 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       shake();
       return;
     }
-    const email = loginPrefix.trim().toLowerCase() + EMAIL_DOMAIN;
+    // Preserve exact casing for login (teacher emails are case-sensitive like BHale)
+    const email = loginPrefix.trim() + EMAIL_DOMAIN;
     setLoginLoading(true);
     setLoginError("");
 
@@ -92,10 +145,6 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       setSignupError("Please enter your school email prefix.");
       shake(); return;
     }
-    if (!signupUsername.trim()) {
-      setSignupError("Please choose a username.");
-      shake(); return;
-    }
     if (signupPassword.length < 6) {
       setSignupError("Password must be at least 6 characters.");
       shake(); return;
@@ -105,7 +154,12 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       shake(); return;
     }
 
-    const email = signupPrefix.trim().toLowerCase() + EMAIL_DOMAIN;
+    const prefix = signupPrefix.trim();
+    const email = prefix + EMAIL_DOMAIN;
+    const emailType = detectEmailType(prefix);
+    const displayName = buildDisplayName(prefix, emailType);
+    const assignedRole = resolveRole(prefix, emailType);
+
     setSignupLoading(true);
 
     const { data, error } = await supabase.auth.signUp({ email, password: signupPassword });
@@ -118,27 +172,15 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     }
 
     if (data.user) {
-      // Build display name from prefix: first_last → First Last
-      const displayName = signupPrefix
-        .split("_")
-        .map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
-        .join(" ");
-
-      // Certain prefixes get special roles automatically
-      const BLUE_DRIVER_PREFIXES = ["zoe_khansevahn", "chantelle_wong"];
-      const assignedRole = BLUE_DRIVER_PREFIXES.includes(signupPrefix.trim().toLowerCase())
-        ? "bluedriver"
-        : "scout";
-
       const { error: profileError } = await supabase.from("profiles").insert({
         user_id: data.user.id,
-        username: signupUsername.trim(),
+        username: prefix.toLowerCase().replace(/[^a-z0-9_]/g, ""),
         display_name: displayName,
         role: assignedRole,
       });
 
       if (profileError) {
-        setSignupError(profileError.message.includes("unique") ? "That username is already taken." : profileError.message);
+        setSignupError(profileError.message.includes("unique") ? "An account with this email already exists." : profileError.message);
         setSignupLoading(false);
         shake();
         return;
@@ -148,6 +190,16 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     setSignupLoading(false);
     setAccountCreated(true);
     setMode("login");
+  };
+
+  // Role label for preview
+  const rolePreviewLabel = () => {
+    const prefix = signupPrefix.trim().toLowerCase();
+    if (COACH_PREFIXES.includes(prefix)) return "🏆 Coach";
+    if (BLUE_DRIVER_PREFIXES.includes(prefix)) return "🔵 Drive Team Data Collector";
+    const emailType = detectEmailType(signupPrefix.trim());
+    if (emailType === "staff") return "👩‍🏫 Teacher";
+    return "🔍 Scouter";
   };
 
   return (
@@ -198,7 +250,6 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
           {mode === "login" ? (
             <form onSubmit={handleLogin} className="space-y-5">
-              {/* Email prefix */}
               <div>
                 <label className="block text-sm font-body text-muted-foreground mb-2">
                   School Email
@@ -208,7 +259,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                     type="text"
                     value={loginPrefix}
                     onChange={e => { setLoginPrefix(e.target.value); setLoginError(""); }}
-                    placeholder="first_last"
+                    placeholder="first_last or BHale"
                     className="flex-1 px-4 py-3 bg-transparent text-foreground placeholder:text-muted-foreground/50 font-body outline-none"
                     autoComplete="username"
                     autoCapitalize="none"
@@ -217,9 +268,11 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                     {EMAIL_DOMAIN}
                   </span>
                 </div>
+                <p className="mt-1 text-xs text-muted-foreground/50 font-body">
+                  Students: <span className="text-primary/60">first_last</span> · Teachers: <span className="text-primary/60">BHale</span>
+                </p>
               </div>
 
-              {/* Password */}
               <div>
                 <label className="block text-sm font-body text-muted-foreground mb-2">
                   Password
@@ -259,7 +312,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               <div className="text-center mb-2">
                 <h2 className="text-foreground font-display tracking-wider">FORGOT PASSWORD</h2>
                 <p className="text-muted-foreground text-xs font-body mt-1">
-                  Enter your school email and we'll send a reset link.
+                  Enter your school email prefix and we'll send a reset link.
                 </p>
               </div>
 
@@ -279,7 +332,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                         type="text"
                         value={forgotPrefix}
                         onChange={e => { setForgotPrefix(e.target.value); setForgotError(""); }}
-                        placeholder="first_last"
+                        placeholder="first_last or BHale"
                         className="flex-1 px-4 py-3 bg-transparent text-foreground placeholder:text-muted-foreground/50 font-body outline-none"
                         autoComplete="username"
                         autoCapitalize="none"
@@ -324,7 +377,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                     type="text"
                     value={signupPrefix}
                     onChange={e => { setSignupPrefix(e.target.value); setSignupError(""); }}
-                    placeholder="first_last"
+                    placeholder="first_last or BHale"
                     className="flex-1 px-4 py-3 bg-transparent text-foreground placeholder:text-muted-foreground/50 font-body outline-none"
                     autoComplete="username"
                     autoCapitalize="none"
@@ -333,25 +386,30 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                     {EMAIL_DOMAIN}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground/60 font-body">
-                  e.g. <span className="text-primary/70">benjamin_hale</span>{EMAIL_DOMAIN}
+                <p className="mt-1 text-xs text-muted-foreground/50 font-body">
+                  Students: <span className="text-primary/60">first_last</span> · Teachers: <span className="text-primary/60">BHale</span>
                 </p>
               </div>
 
-              {/* Username */}
-              <div>
-                <label className="block text-sm font-body text-muted-foreground mb-2">
-                  Username <span className="text-muted-foreground/50">(you choose this)</span>
-                </label>
-                <input
-                  type="text"
-                  value={signupUsername}
-                  onChange={e => { setSignupUsername(e.target.value); setSignupError(""); }}
-                  placeholder="e.g. ScoutName1"
-                  className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all duration-300"
-                  autoCapitalize="none"
-                />
-              </div>
+              {/* Auto-filled display name — read only */}
+              {signupPrefix.trim() && (
+                <div>
+                  <label className="block text-sm font-body text-muted-foreground mb-2">
+                    Your Name <span className="text-muted-foreground/40 text-xs">(auto-filled)</span>
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="text"
+                      value={signupDisplayName}
+                      readOnly
+                      className="flex-1 px-4 py-3 rounded-lg bg-muted/50 border border-border text-foreground font-body outline-none cursor-not-allowed opacity-80"
+                    />
+                    <span className="text-xs font-body px-2 py-1 rounded-md bg-primary/10 text-primary border border-primary/20 whitespace-nowrap">
+                      {rolePreviewLabel()}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Password */}
               <div>

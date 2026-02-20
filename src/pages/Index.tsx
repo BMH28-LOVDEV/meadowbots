@@ -70,7 +70,7 @@ const Index = () => {
     return <LoginScreen onLogin={() => {}} />;
   }
 
-  if (profile.role === "master") {
+  if (profile.role === "master" || profile.role === "coach") {
     return <MasterDashboard onLogout={handleLogout} />;
   }
 
