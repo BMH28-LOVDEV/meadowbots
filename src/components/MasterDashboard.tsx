@@ -1019,13 +1019,13 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
           <div className="glass rounded-xl p-4 border border-red-500/30">
             <div className="flex items-center gap-3 mb-1">
               <span className="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <h2 className="font-display text-sm tracking-wider text-red-400">LIVE — FIRSTNevadaSouth</h2>
+              <h2 className="font-display text-sm tracking-wider text-red-400">LIVE — FirstNevada</h2>
             </div>
-            <p className="text-xs text-muted-foreground font-body">Official FIRST Nevada South Twitch stream</p>
+            <p className="text-xs text-muted-foreground font-body">Official FIRST Nevada Twitch stream</p>
           </div>
           <div className="glass rounded-xl overflow-hidden border border-border/50" style={{ aspectRatio: "16/9" }}>
             <iframe
-              src="https://player.twitch.tv/?channel=FIRSTNevadaSouth&parent=meadowbots.lovable.app&parent=id-preview--507347b5-b304-47c7-a618-7ba9a3c5c371.lovable.app"
+              src="https://player.twitch.tv/?channel=FirstNevada&parent=meadowbots.lovable.app&parent=id-preview--507347b5-b304-47c7-a618-7ba9a3c5c371.lovable.app"
               allowFullScreen
               className="w-full h-full"
               title="FIRSTNevadaSouth Live Stream"
