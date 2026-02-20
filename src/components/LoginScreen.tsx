@@ -27,7 +27,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     // Step 2a: Master password
     if (pendingMaster) {
       if (masterPassword === "MeadowBots") {
-        onLogin("Master MeadowBot");
+        onLogin("Master Data");
       } else {
         setMasterError("Incorrect password.");
         shake();
@@ -48,7 +48,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
     // Step 1: Name lookup
     const match = findTeamMember(name);
-    if (match === "Master MeadowBot") {
+    if (match === "Master Data") {
       setPendingMaster(true);
       setMasterPassword("");
       setMasterError("");
@@ -133,7 +133,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
             ) : (
               <div>
                 <label htmlFor="master-pw" className="block text-sm font-body text-muted-foreground mb-2">
-                  Enter the Master MeadowBot password
+                  Enter the Master Data password
                 </label>
                 <input
                   id="master-pw"

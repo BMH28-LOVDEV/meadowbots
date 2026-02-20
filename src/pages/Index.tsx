@@ -22,7 +22,7 @@ const Index = () => {
     return <LoginScreen onLogin={handleLogin} />;
   }
 
-  if (user === "Master MeadowBot") {
+  if (user === "Master Data") {
     return <MasterDashboard onLogout={handleLogout} />;
   }
 
