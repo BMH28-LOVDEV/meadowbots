@@ -260,7 +260,7 @@ const DriveDataForm = ({ scouterName, teamSummaries, loadingData }: {
           <SectionHeader title="TEAM INFO" icon="🤖" />
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-muted-foreground font-body mb-1">Team Number *</label>
+              <label className="block text-sm text-muted-foreground font-body mb-1">Our Team Number *</label>
               <input type="text" value={ddForm.teamNumber} onChange={(e) => handleDd("teamNumber", e.target.value)} placeholder="e.g. 14841" className={inputCls} />
             </div>
             <div>
@@ -274,7 +274,7 @@ const DriveDataForm = ({ scouterName, teamSummaries, loadingData }: {
         <div className="glass rounded-xl p-6 border border-blue-500/20 space-y-4">
           <SectionHeader title="AUTONOMOUS" icon="⚡" />
           <div className="space-y-2">
-            <label className="block text-sm font-body text-foreground font-medium"># of Artifacts Scored in Auto</label>
+            <label className="block text-sm font-body text-foreground font-medium"># of Artifacts WE Scored in Auto</label>
             <input type="text" value={ddForm.autoArtifacts} onChange={(e) => handleDd("autoArtifacts", e.target.value)} placeholder="e.g. 3" className={shortInputCls} />
           </div>
         </div>
@@ -283,15 +283,15 @@ const DriveDataForm = ({ scouterName, teamSummaries, loadingData }: {
         <div className="glass rounded-xl p-6 border border-blue-500/20 space-y-4">
           <SectionHeader title="TELE-OP" icon="🎮" />
           <div className="space-y-2">
-            <label className="block text-sm font-body text-foreground font-medium"># of Artifacts Scored in Teleop</label>
+            <label className="block text-sm font-body text-foreground font-medium"># of Artifacts WE Scored in Teleop</label>
             <input type="text" value={ddForm.teleopArtifacts} onChange={(e) => handleDd("teleopArtifacts", e.target.value)} placeholder="e.g. 12" className={shortInputCls} />
           </div>
           <div className="space-y-2">
-            <label className="block text-sm font-body text-foreground font-medium">Cycles — # of times it took to intake and shoot 3</label>
+            <label className="block text-sm font-body text-foreground font-medium">Our Cycles — # of times it took us to intake and shoot 3</label>
             <input type="text" value={ddForm.cycles} onChange={(e) => handleDd("cycles", e.target.value)} placeholder="e.g. 4" className={shortInputCls} />
           </div>
           <div className="space-y-2">
-            <label className="block text-sm font-body text-foreground font-medium">Cycle Time</label>
+            <label className="block text-sm font-body text-foreground font-medium">Our Cycle Time</label>
             <div className="flex items-center gap-3">
               <input type="number" min="0" value={ddForm.cycleTime} onChange={(e) => handleDd("cycleTime", e.target.value)} placeholder="e.g. 8" className={shortInputCls} />
               <span className="text-sm text-muted-foreground font-body">seconds</span>
@@ -303,10 +303,10 @@ const DriveDataForm = ({ scouterName, teamSummaries, loadingData }: {
         <div className="glass rounded-xl p-6 border border-blue-500/20 space-y-5">
           <SectionHeader title="PENALTIES" icon="🚨" />
           <div className="space-y-3">
-            <p className="text-sm font-body text-foreground font-medium">Did this team receive penalties?</p>
+            <p className="text-sm font-body text-foreground font-medium">Did WE receive any penalties?</p>
             <div className="flex gap-3">
-              {[{ val: "yes", label: "Yes – Had Penalties" }, { val: "no", label: "No Penalties" }].map(({ val, label }) => (
-                <button key={val} type="button" onClick={() => setDdForm((prev) => ({ ...prev, hasPenalties: val as "yes" | "no", penalties: val === "no" ? ["None observed"] : prev.penalties.filter(p => p !== "None observed") }))}
+              {[{ val: "yes", label: "Yes – We Had Penalties" }, { val: "no", label: "No Penalties" }].map(({ val, label }) => (
+                <button key={val} type="button" onClick={() => setDdForm((prev) => ({ ...prev, hasPenalties: val as "yes" | "no", penaltyPts: val === "no" ? "" : prev.penaltyPts, penalties: val === "no" ? ["None observed"] : prev.penalties.filter(p => p !== "None observed") }))}
                   className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
                     ddForm.hasPenalties === val
                       ? val === "yes" ? "bg-destructive/20 border-destructive text-destructive" : "bg-green-500/20 border-green-500 text-green-400"
@@ -319,7 +319,7 @@ const DriveDataForm = ({ scouterName, teamSummaries, loadingData }: {
           {ddForm.hasPenalties === "yes" && (
             <>
               <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-              <p className="text-sm font-body text-foreground font-medium">Which penalties did this team receive? (Select all that apply)</p>
+              <p className="text-sm font-body text-foreground font-medium">Which penalties did WE receive? (Select all that apply)</p>
               <div className="flex flex-wrap gap-2">
                 {DD_PENALTY_OPTIONS.filter(p => p !== "None observed").map((penalty) => (
                   <button key={penalty} type="button"
@@ -335,22 +335,12 @@ const DriveDataForm = ({ scouterName, teamSummaries, loadingData }: {
                 ))}
               </div>
               <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="block text-sm font-body text-foreground font-medium">Total Penalty Points Given</label>
-                  <div className="flex items-center gap-2">
-                    <input type="number" min="0" value={ddForm.penaltyPts} onChange={(e) => handleDd("penaltyPts", e.target.value)} placeholder="0"
-                      className="w-24 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all" />
-                    <span className="text-sm text-muted-foreground font-body">pts</span>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-body text-foreground font-medium">Major Penalty Points</label>
-                  <div className="flex items-center gap-2">
-                    <input type="number" min="0" value={ddForm.majorPts} onChange={(e) => handleDd("majorPts", e.target.value)} placeholder="0"
-                      className="w-24 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all" />
-                    <span className="text-sm text-muted-foreground font-body">pts, major</span>
-                  </div>
+              <div className="space-y-2">
+                <label className="block text-sm font-body text-foreground font-medium">How many penalty points did WE receive?</label>
+                <div className="flex items-center gap-2">
+                  <input type="number" min="0" value={ddForm.penaltyPts} onChange={(e) => handleDd("penaltyPts", e.target.value)} placeholder="0"
+                    className="w-24 px-4 py-2.5 rounded-lg bg-muted border border-destructive/50 focus:border-destructive focus:ring-1 focus:ring-destructive text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all" />
+                  <span className="text-sm text-muted-foreground font-body">pts received</span>
                 </div>
               </div>
             </>
@@ -361,7 +351,7 @@ const DriveDataForm = ({ scouterName, teamSummaries, loadingData }: {
         <div className="glass rounded-xl p-6 border border-blue-500/20 space-y-4">
           <SectionHeader title="ENDGAME" icon="🏁" />
           <div className="space-y-3">
-            <p className="text-sm font-body text-foreground font-medium">Did they park in the Base Zone?</p>
+            <p className="text-sm font-body text-foreground font-medium">Did WE park in the Base Zone?</p>
             <div className="flex flex-wrap gap-2">
               {["None", "Partial", "Full"].map((option) => (
                 <button key={option} type="button" onClick={() => handleDd("park", option)}
@@ -383,12 +373,12 @@ const DriveDataForm = ({ scouterName, teamSummaries, loadingData }: {
         <div className="glass rounded-xl p-6 border border-blue-500/20 space-y-5">
           <SectionHeader title="MATCH RESULT" icon="🏆" />
           <div className="space-y-2">
-            <label className="block text-sm font-body text-foreground font-medium">What was the final score of the Alliance?</label>
+            <label className="block text-sm font-body text-foreground font-medium">What was the final score of OUR Alliance?</label>
             <input type="number" min="0" value={ddForm.matchScore} onChange={(e) => handleDd("matchScore", e.target.value)} placeholder="e.g. 85"
               className="w-full sm:w-48 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all" />
           </div>
           <div className="space-y-3">
-            <p className="text-sm font-body text-foreground font-medium">Did the alliance / team you are scouting win the match?</p>
+            <p className="text-sm font-body text-foreground font-medium">Did OUR alliance win the match?</p>
             <div className="flex flex-wrap gap-3">
               {["No – Lost", "Tie", "Yes – Won"].map((option) => (
                 <button key={option} type="button" onClick={() => handleDd("allianceWon", option)}
