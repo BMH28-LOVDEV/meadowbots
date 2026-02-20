@@ -84,11 +84,11 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     ? buildDisplayName(signupPrefix.trim(), signupEmailType)
     : "";
 
-  // Staff-type accounts get teacher role unless they're a known coach/bluedriver
+  // Staff-type accounts get coach role unless they're a known bluedriver
   function resolveRole(prefix: string, emailType: EmailType): string {
     const special = getAssignedRole(prefix);
     if (special !== "scout") return special; // coach or bluedriver takes priority
-    if (emailType === "staff") return "teacher";
+    if (emailType === "staff") return "coach";
     return "scout";
   }
 
@@ -196,9 +196,9 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const rolePreviewLabel = () => {
     const prefix = signupPrefix.trim().toLowerCase();
     if (COACH_PREFIXES.includes(prefix)) return "🏆 Coach";
-    if (BLUE_DRIVER_PREFIXES.includes(prefix)) return "🔵 Drive Team Data Collector";
+    if (BLUE_DRIVER_PREFIXES.includes(prefix)) return "🔵 Drive Data Collector";
     const emailType = detectEmailType(signupPrefix.trim());
-    if (emailType === "staff") return "👩‍🏫 Teacher";
+    if (emailType === "staff") return "🏆 Coach";
     return "🔍 Scouter";
   };
 

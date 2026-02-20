@@ -1173,7 +1173,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               {driveProfiles.filter(p => p.role !== "master").map((profile) => {
                 const roleLabels: Record<string, string> = {
                   scout: "Scouter",
-                  bluedriver: "Drive Team Data Collector",
+                  bluedriver: "Drive Data Collector",
                   driveteam: "Drive Team",
                   viewer: "Viewer",
                   letsgo: "Let's Go",
