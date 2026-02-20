@@ -462,10 +462,10 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                 </div>
                 <div className="divide-y divide-zinc-400/20">
                   {[
-                    { name: "—", role: "Driver 1" },
-                    { name: "—", role: "Driver 2" },
-                    { name: "—", role: "Operator" },
-                    { name: "—", role: "Human Player" },
+                    { name: "William Hu", role: "Driver 1" },
+                    { name: "Rock Kuperman", role: "Drive Coach" },
+                    { name: "Devin Allen", role: "Drive Coach" },
+                    { name: "Isabelle Liang", role: "Human Player" },
                   ].map(({ name, role }) => (
                     <div key={role} className="px-5 py-2.5 flex items-center justify-between">
                       <span className="font-body text-sm" style={{ color: "#A0A0A0" }}>{name}</span>
