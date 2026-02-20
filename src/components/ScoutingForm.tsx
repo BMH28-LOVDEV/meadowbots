@@ -151,6 +151,274 @@ const getRankIcon = (rank: number) => {
   return `#${rank}`;
 };
 
+// ── Drive Data Scouting Form ──────────────────────────────────────────────────
+const DD_PENALTY_OPTIONS = [
+  "Clearing the Gate illegally",
+  "Touching opposing robot in Endgame zone",
+  "Entering opposing Alliance's Human Player zone",
+  "Entering opposing Alliance's Secret Tunnel",
+  "Shooting outside the Shooting Zone",
+  "Pinning / trapping opponent",
+  "Turned off a robot",
+  "None observed",
+];
+
+const DriveDataForm = ({ scouterName, teamSummaries, loadingData }: {
+  scouterName: string;
+  teamSummaries: { teamNumber: string; avgScore: number; entries: ScoutingEntry[] }[];
+  loadingData: boolean;
+}) => {
+  const [ddForm, setDdForm] = useState({
+    teamNumber: "",
+    matchNumber: "",
+    autoArtifacts: "",
+    teleopArtifacts: "",
+    cycles: "",
+    cycleTime: "",
+    hasPenalties: "" as "" | "yes" | "no",
+    penaltyPts: "",
+    majorPts: "",
+    penalties: [] as string[],
+    park: "",
+    matchScore: "",
+    allianceWon: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleDd = (field: string, value: string) => setDdForm((prev) => ({ ...prev, [field]: value }));
+
+  const handleDdSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    const { error } = await supabase.from("scouting_entries").insert({
+      scouter_name: scouterName,
+      team_number: ddForm.teamNumber,
+      match_number: ddForm.matchNumber || null,
+      auto_artifacts_scored: ddForm.autoArtifacts || null,
+      teleop_artifact_classification: ddForm.teleopArtifacts || null,
+      teleop_cycle_speed: ddForm.cycles || null,
+      teleop_ball_capacity: ddForm.cycleTime ? `${ddForm.cycleTime}s` : null,
+      penalties: ddForm.penalties.length > 0 ? ddForm.penalties : null,
+      penalty_points_given: ddForm.penaltyPts ? parseInt(ddForm.penaltyPts) : null,
+      endgame_parking: ddForm.park || null,
+      match_score: ddForm.matchScore ? parseInt(ddForm.matchScore) : null,
+      alliance_won: ddForm.allianceWon || null,
+    });
+    setSubmitting(false);
+    if (error) { toast.error("Failed to save. Please try again."); return; }
+    toast.success("Drive Data submitted!");
+    setDdForm({ teamNumber: "", matchNumber: "", autoArtifacts: "", teleopArtifacts: "", cycles: "", cycleTime: "", hasPenalties: "", penaltyPts: "", majorPts: "", penalties: [], park: "", matchScore: "", allianceWon: "" });
+  };
+
+  const inputCls = "w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all";
+  const shortInputCls = "w-32 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all";
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="glass rounded-xl p-6 border border-blue-500/40" style={{ boxShadow: "0 0 20px hsl(220 100% 60% / 0.15)" }}>
+        <div className="flex items-center gap-4">
+          <span className="text-4xl">🔵</span>
+          <div>
+            <h2 className="font-display text-xl tracking-wider text-blue-400">DRIVE DATA SCOUTING</h2>
+            <p className="text-xs text-muted-foreground font-body mt-1">Restricted — Drive Team Access Only</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Full Rankings */}
+      <div className="glass rounded-xl p-6 border border-border/50">
+        <h3 className="font-display text-sm tracking-wider text-foreground mb-4">📊 FULL TEAM RANKINGS</h3>
+        {loadingData ? (
+          <p className="text-muted-foreground text-sm font-body">Loading...</p>
+        ) : teamSummaries.length === 0 ? (
+          <p className="text-muted-foreground text-sm font-body text-center py-4">No scouting data yet.</p>
+        ) : (
+          <div className="space-y-3">
+            {teamSummaries.map((team, i) => (
+              <div key={team.teamNumber} className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 border border-border/30">
+                <span className="font-display text-sm w-8 text-center text-blue-400">{getRankIcon(i + 1)}</span>
+                <div className="flex-1">
+                  <p className="font-display text-sm text-foreground">Team {team.teamNumber}</p>
+                  <p className="text-xs text-muted-foreground font-body">{team.entries.length} match{team.entries.length !== 1 ? "es" : ""} scouted</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-display text-sm text-blue-400">{Math.round(team.avgScore)}</p>
+                  <p className="text-xs text-muted-foreground font-body">avg score</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Drive Data Form */}
+      <form onSubmit={handleDdSubmit} className="space-y-6">
+
+        {/* Team Info */}
+        <div className="glass rounded-xl p-6 border border-blue-500/20 space-y-4">
+          <SectionHeader title="TEAM INFO" icon="🤖" />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm text-muted-foreground font-body mb-1">Team Number *</label>
+              <input type="text" value={ddForm.teamNumber} onChange={(e) => handleDd("teamNumber", e.target.value)} placeholder="e.g. 14841" className={inputCls} />
+            </div>
+            <div>
+              <label className="block text-sm text-muted-foreground font-body mb-1">Match Number</label>
+              <input type="text" value={ddForm.matchNumber} onChange={(e) => handleDd("matchNumber", e.target.value)} placeholder="e.g. Q5" className={inputCls} />
+            </div>
+          </div>
+        </div>
+
+        {/* Autonomous */}
+        <div className="glass rounded-xl p-6 border border-blue-500/20 space-y-4">
+          <SectionHeader title="AUTONOMOUS" icon="⚡" />
+          <div className="space-y-2">
+            <label className="block text-sm font-body text-foreground font-medium"># of Artifacts Scored in Auto</label>
+            <input type="text" value={ddForm.autoArtifacts} onChange={(e) => handleDd("autoArtifacts", e.target.value)} placeholder="e.g. 3" className={shortInputCls} />
+          </div>
+        </div>
+
+        {/* Teleop */}
+        <div className="glass rounded-xl p-6 border border-blue-500/20 space-y-4">
+          <SectionHeader title="TELE-OP" icon="🎮" />
+          <div className="space-y-2">
+            <label className="block text-sm font-body text-foreground font-medium"># of Artifacts Scored in Teleop</label>
+            <input type="text" value={ddForm.teleopArtifacts} onChange={(e) => handleDd("teleopArtifacts", e.target.value)} placeholder="e.g. 12" className={shortInputCls} />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-sm font-body text-foreground font-medium">Cycles — # of times it took to intake and shoot 3</label>
+            <input type="text" value={ddForm.cycles} onChange={(e) => handleDd("cycles", e.target.value)} placeholder="e.g. 4" className={shortInputCls} />
+          </div>
+          <div className="space-y-2">
+            <label className="block text-sm font-body text-foreground font-medium">Cycle Time</label>
+            <div className="flex items-center gap-3">
+              <input type="number" min="0" value={ddForm.cycleTime} onChange={(e) => handleDd("cycleTime", e.target.value)} placeholder="e.g. 8" className={shortInputCls} />
+              <span className="text-sm text-muted-foreground font-body">seconds</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Penalties */}
+        <div className="glass rounded-xl p-6 border border-blue-500/20 space-y-5">
+          <SectionHeader title="PENALTIES" icon="🚨" />
+          <div className="space-y-3">
+            <p className="text-sm font-body text-foreground font-medium">Did this team receive penalties?</p>
+            <div className="flex gap-3">
+              {[{ val: "yes", label: "Yes – Had Penalties" }, { val: "no", label: "No Penalties" }].map(({ val, label }) => (
+                <button key={val} type="button" onClick={() => setDdForm((prev) => ({ ...prev, hasPenalties: val as "yes" | "no", penalties: val === "no" ? ["None observed"] : prev.penalties.filter(p => p !== "None observed") }))}
+                  className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                    ddForm.hasPenalties === val
+                      ? val === "yes" ? "bg-destructive/20 border-destructive text-destructive" : "bg-green-500/20 border-green-500 text-green-400"
+                      : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                  }`}>{val === "yes" ? "🚨 " : "✅ "}{label}</button>
+              ))}
+            </div>
+          </div>
+
+          {ddForm.hasPenalties === "yes" && (
+            <>
+              <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+              <p className="text-sm font-body text-foreground font-medium">Which penalties did this team receive? (Select all that apply)</p>
+              <div className="flex flex-wrap gap-2">
+                {DD_PENALTY_OPTIONS.filter(p => p !== "None observed").map((penalty) => (
+                  <button key={penalty} type="button"
+                    onClick={() => setDdForm((prev) => {
+                      const has = prev.penalties.includes(penalty);
+                      return { ...prev, penalties: has ? prev.penalties.filter(p => p !== penalty) : [...prev.penalties, penalty] };
+                    })}
+                    className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                      ddForm.penalties.includes(penalty)
+                        ? "bg-destructive/20 border-destructive text-destructive"
+                        : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                    }`}>{penalty}</button>
+                ))}
+              </div>
+              <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-body text-foreground font-medium">Total Penalty Points Given</label>
+                  <div className="flex items-center gap-2">
+                    <input type="number" min="0" value={ddForm.penaltyPts} onChange={(e) => handleDd("penaltyPts", e.target.value)} placeholder="0"
+                      className="w-24 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all" />
+                    <span className="text-sm text-muted-foreground font-body">pts</span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-body text-foreground font-medium">Major Penalty Points</label>
+                  <div className="flex items-center gap-2">
+                    <input type="number" min="0" value={ddForm.majorPts} onChange={(e) => handleDd("majorPts", e.target.value)} placeholder="0"
+                      className="w-24 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all" />
+                    <span className="text-sm text-muted-foreground font-body">pts, major</span>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Endgame / Park */}
+        <div className="glass rounded-xl p-6 border border-blue-500/20 space-y-4">
+          <SectionHeader title="ENDGAME" icon="🏁" />
+          <div className="space-y-3">
+            <p className="text-sm font-body text-foreground font-medium">Did they park in the Base Zone?</p>
+            <div className="flex flex-wrap gap-2">
+              {["None", "Partial", "Full"].map((option) => (
+                <button key={option} type="button" onClick={() => handleDd("park", option)}
+                  className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                    ddForm.park === option
+                      ? option === "Full" ? "bg-green-500/20 border-green-500 text-green-400 shadow-[0_0_12px_2px_rgba(34,197,94,0.3)]"
+                        : option === "Partial" ? "bg-yellow-500/20 border-yellow-500 text-yellow-400 shadow-[0_0_12px_2px_rgba(234,179,8,0.3)]"
+                        : "bg-destructive/20 border-destructive text-destructive"
+                      : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                  }`}>
+                  {option === "Full" ? "✅ " : option === "Partial" ? "🟡 " : "❌ "}{option}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Match Result */}
+        <div className="glass rounded-xl p-6 border border-blue-500/20 space-y-5">
+          <SectionHeader title="MATCH RESULT" icon="🏆" />
+          <div className="space-y-2">
+            <label className="block text-sm font-body text-foreground font-medium">What was the final score of the Alliance?</label>
+            <input type="number" min="0" value={ddForm.matchScore} onChange={(e) => handleDd("matchScore", e.target.value)} placeholder="e.g. 85"
+              className="w-full sm:w-48 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all" />
+          </div>
+          <div className="space-y-3">
+            <p className="text-sm font-body text-foreground font-medium">Did the alliance / team you are scouting win the match?</p>
+            <div className="flex flex-wrap gap-3">
+              {["No – Lost", "Tie", "Yes – Won"].map((option) => (
+                <button key={option} type="button" onClick={() => handleDd("allianceWon", option)}
+                  className={`px-5 py-2.5 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
+                    ddForm.allianceWon === option
+                      ? option === "Yes – Won" ? "bg-green-500/20 border-green-500 text-green-400 shadow-[0_0_12px_2px_rgba(34,197,94,0.3)]"
+                        : option === "No – Lost" ? "bg-destructive/20 border-destructive text-destructive"
+                        : "bg-primary/20 border-primary text-primary"
+                      : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                  }`}>
+                  {option === "Yes – Won" ? "🏆 " : option === "No – Lost" ? "❌ " : "🤝 "}{option}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" disabled={submitting}
+          className="w-full py-4 rounded-xl bg-blue-600 text-white font-display font-bold text-lg tracking-widest hover:bg-blue-500 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed">
+          {submitting ? "SAVING..." : "SUBMIT DRIVE DATA"}
+        </button>
+
+        <p className="text-center text-muted-foreground/30 text-xs font-body pb-8">
+          Drive Team Data • FTC DECODE™ 2025–2026
+        </p>
+      </form>
+    </div>
+  );
+};
+
 const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) => {
   const { celebrating } = useCelebration();
   const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata">("dashboard");
@@ -636,7 +904,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             <div className="space-y-3">
               <p className="text-sm font-body text-foreground font-medium">Did the alliance / team you are scouting win the match?</p>
               <div className="flex flex-wrap gap-3">
-                {["Yes – Won", "No – Lost", "Tie"].map((option) => (
+                {["No – Lost", "Tie", "Yes – Won"].map((option) => (
                   <button key={option} type="button" onClick={() => handleChange("allianceWon", option)}
                     className={`px-5 py-2.5 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
                       form.allianceWon === option
@@ -704,53 +972,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
       {activeTab === "drivedata" && (
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
           {isBlueDriver ? (
-            <>
-              <div className="glass rounded-xl p-6 border border-blue-500/40" style={{ boxShadow: "0 0 20px hsl(220 100% 60% / 0.15)" }}>
-                <div className="flex items-center gap-4">
-                  <span className="text-4xl">🔵</span>
-                  <div>
-                    <h2 className="font-display text-xl tracking-wider" style={{ color: "hsl(220 100% 70%)" }}>BLUE DRIVE DATA</h2>
-                    <p className="text-xs text-muted-foreground font-body mt-1">Restricted — Drive Team Access Only</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="glass rounded-xl p-6 border border-border/50">
-                <h3 className="font-display text-sm tracking-wider text-foreground mb-4">📊 FULL TEAM RANKINGS</h3>
-                {loadingData ? (
-                  <p className="text-muted-foreground text-sm font-body">Loading...</p>
-                ) : teamSummaries.length === 0 ? (
-                  <p className="text-muted-foreground text-sm font-body text-center py-4">No scouting data yet.</p>
-                ) : (
-                  <div className="space-y-3">
-                    {teamSummaries.map((team, i) => (
-                      <div key={team.teamNumber} className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 border border-border/30">
-                        <span className="font-display text-sm w-8 text-center" style={{ color: i < 3 ? "hsl(220 100% 70%)" : undefined }}>
-                          {getRankIcon(i + 1)}
-                        </span>
-                        <div className="flex-1">
-                          <p className="font-display text-sm text-foreground">Team {team.teamNumber}</p>
-                          <p className="text-xs text-muted-foreground font-body">{team.entries.length} match{team.entries.length !== 1 ? "es" : ""} scouted</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-display text-sm" style={{ color: "hsl(220 100% 70%)" }}>{Math.round(team.avgScore)}</p>
-                          <p className="text-xs text-muted-foreground font-body">avg score</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="glass rounded-xl p-6 border border-border/50">
-                <h3 className="font-display text-sm tracking-wider text-foreground mb-3">📝 DRIVE TEAM NOTES</h3>
-                <p className="text-xs text-muted-foreground font-body mb-3">Private notes for drive team planning. (Not saved — refresh to clear.)</p>
-                <textarea
-                  className="w-full h-40 px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/40 font-body text-sm outline-none transition-all duration-300 resize-none"
-                  placeholder="Alliance selection targets, strategy notes, robot observations..."
-                />
-              </div>
-            </>
+            <DriveDataForm scouterName={scouterName} teamSummaries={teamSummaries} loadingData={loadingData} />
           ) : (
             <div className="flex flex-col items-center justify-center py-20 space-y-5 text-center">
               <span className="text-6xl">🔒</span>
