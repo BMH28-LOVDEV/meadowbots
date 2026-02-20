@@ -11,7 +11,7 @@ const CelebrationOverlay = ({ visible }: CelebrationOverlayProps) => {
         <div className="text-7xl mb-4 animate-bounce">🏆</div>
         <h1 className="text-4xl md:text-5xl font-display font-bold text-green-400 tracking-wider mb-3"
           style={{ textShadow: "0 0 30px rgba(74,222,128,0.8)" }}>
-          GOOD JOB TEAM
+          GOOD JOB, TEAM.
         </h1>
         <p className="text-2xl md:text-3xl font-display text-white tracking-widest">
           WE WON!! 🎉
