@@ -36,7 +36,7 @@ const LetsGoDashboard = ({ onLogout }: LetsGoDashboardProps) => {
             onClick={onLogout}
             className="text-xs text-muted-foreground hover:text-foreground font-body transition-colors px-3 py-1 rounded border border-border hover:border-foreground/30"
           >
-            EXIT
+            LOGOUT
           </button>
         </div>
       </div>
