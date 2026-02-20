@@ -71,7 +71,7 @@ const Index = () => {
   }
 
   if (profile.role === "master" || profile.role === "coach") {
-    return <MasterDashboard onLogout={handleLogout} />;
+    return <MasterDashboard onLogout={handleLogout} username={profile.username} />;
   }
 
   if (profile.role === "letsgo") {
