@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      drive_team_matches: {
+        Row: {
+          created_at: string
+          id: string
+          match_label: string
+          sort_order: number
+          team_number: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_label: string
+          sort_order?: number
+          team_number: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_label?: string
+          sort_order?: number
+          team_number?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
