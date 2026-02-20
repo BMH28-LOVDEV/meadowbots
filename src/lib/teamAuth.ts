@@ -53,6 +53,12 @@ export function findTeamMember(input: string): string | null {
     normalizedInput === "master"
   ) return "MeadowBot Master";
 
+  if (
+    normalizedInput === "dashboard" ||
+    normalizedInput === "scout dashboard" ||
+    normalizedInput === "viewer"
+  ) return "Scout Dashboard";
+
   // Check explicit aliases
   if (ALIASES[normalizedInput]) return ALIASES[normalizedInput];
 

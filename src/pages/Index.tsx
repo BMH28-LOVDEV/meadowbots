@@ -2,6 +2,7 @@ import { useState } from "react";
 import LoginScreen from "@/components/LoginScreen";
 import ScoutingForm from "@/components/ScoutingForm";
 import MasterDashboard from "@/components/MasterDashboard";
+import ScoutDashboard from "@/components/ScoutDashboard";
 
 const Index = () => {
   const [user, setUser] = useState<string | null>(() => {
@@ -24,6 +25,10 @@ const Index = () => {
 
   if (user === "MeadowBot Master") {
     return <MasterDashboard onLogout={handleLogout} />;
+  }
+
+  if (user === "Scout Dashboard") {
+    return <ScoutDashboard onLogout={handleLogout} />;
   }
 
   return <ScoutingForm scouterName={user} onLogout={handleLogout} />;
