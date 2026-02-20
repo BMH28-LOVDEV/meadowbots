@@ -11,6 +11,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [isShaking, setIsShaking] = useState(false);
   const [pendingMaster, setPendingMaster] = useState(false);
   const [pendingScout, setPendingScout] = useState<string | null>(null);
+  const [pendingLockdown, setPendingLockdown] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [masterPassword, setMasterPassword] = useState("");
@@ -35,7 +36,18 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       return;
     }
 
-    // Step 2b: Scout password
+    // Step 2b: Lockdown password
+    if (pendingLockdown) {
+      if (masterPassword === "MeadowBots") {
+        onLogin("Lockdown");
+      } else {
+        setMasterError("Incorrect password.");
+        shake();
+      }
+      return;
+    }
+
+    // Step 2c: Scout password
     if (pendingScout) {
       if (password.toLowerCase() === "meadowbots") {
         onLogin(pendingScout);
@@ -50,6 +62,10 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     const match = findTeamMember(name);
     if (match === "MeadowBot Master") {
       setPendingMaster(true);
+      setMasterPassword("");
+      setMasterError("");
+    } else if (match === "Lockdown") {
+      setPendingLockdown(true);
       setMasterPassword("");
       setMasterError("");
     } else if (match) {
@@ -87,10 +103,10 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         {/* Login card */}
         <div className="glass rounded-xl p-8 glow-primary">
           <h2 className="text-xl font-display text-foreground mb-6 text-center tracking-wide">
-            {pendingMaster ? "MASTER ACCESS" : pendingScout ? "TEAM PASSWORD" : "AUTHENTICATION"}
+            {pendingMaster ? "MASTER ACCESS" : pendingLockdown ? "🔒 LOCKDOWN ACCESS" : pendingScout ? "TEAM PASSWORD" : "AUTHENTICATION"}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {!pendingMaster && !pendingScout ? (
+            {!pendingMaster && !pendingLockdown && !pendingScout ? (
               <div>
                 <label htmlFor="name" className="block text-sm font-body text-muted-foreground mb-2">
                   Enter your full name
@@ -125,6 +141,30 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 <button
                   type="button"
                   onClick={() => { setPendingScout(null); setName(""); setPassword(""); setPasswordError(""); }}
+                  className="mt-2 text-xs text-muted-foreground hover:text-foreground font-body transition-colors"
+                >
+                  ← Back
+                </button>
+              </div>
+            ) : pendingLockdown ? (
+              <div>
+                <p className="text-sm font-body text-destructive mb-3">⚠️ Lockdown requires master authorization.</p>
+                <label htmlFor="lockdown-pw" className="block text-sm font-body text-muted-foreground mb-2">
+                  Enter the master password
+                </label>
+                <input
+                  id="lockdown-pw"
+                  type="password"
+                  value={masterPassword}
+                  onChange={(e) => { setMasterPassword(e.target.value); setMasterError(""); }}
+                  placeholder="Password"
+                  autoFocus
+                  className="w-full px-4 py-3 rounded-lg bg-muted border border-destructive/40 focus:border-destructive focus:ring-1 focus:ring-destructive text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all duration-300"
+                />
+                {masterError && <p className="mt-2 text-sm text-destructive">{masterError}</p>}
+                <button
+                  type="button"
+                  onClick={() => { setPendingLockdown(false); setName(""); setMasterPassword(""); setMasterError(""); }}
                   className="mt-2 text-xs text-muted-foreground hover:text-foreground font-body transition-colors"
                 >
                   ← Back

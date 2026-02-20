@@ -3,6 +3,7 @@ import LoginScreen from "@/components/LoginScreen";
 import ScoutingForm from "@/components/ScoutingForm";
 import MasterDashboard from "@/components/MasterDashboard";
 import ScoutDashboard from "@/components/ScoutDashboard";
+import LockdownDashboard from "@/components/LockdownDashboard";
 
 const Index = () => {
   const [user, setUser] = useState<string | null>(() => {
@@ -29,6 +30,10 @@ const Index = () => {
 
   if (user === "Scout Dashboard") {
     return <ScoutDashboard onLogout={handleLogout} />;
+  }
+
+  if (user === "Lockdown") {
+    return <LockdownDashboard onLogout={handleLogout} />;
   }
 
   return <ScoutingForm scouterName={user} onLogout={handleLogout} />;
