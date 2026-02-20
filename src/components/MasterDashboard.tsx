@@ -98,6 +98,9 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   const [clearAllError, setClearAllError] = useState("");
   const [clearingAll, setClearingAll] = useState(false);
 
+  // Active scouts presence
+  const [activeScouts, setActiveScouts] = useState<string[]>([]);
+
   // Shared password modal for assignment CLEAR and qual match removal
   const [pendingAction, setPendingAction] = useState<null | { type: "clearAssignment"; scoutName: string } | { type: "removeMatch"; scoutName: string; match: string }>(null);
   const [pendingPassword, setPendingPassword] = useState("");
@@ -175,6 +178,22 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   useEffect(() => {
     fetchEntries();
     fetchAssignments();
+  }, []);
+
+  // Subscribe to active scouts presence channel
+  useEffect(() => {
+    const channel = supabase.channel("active_scouts");
+    channel
+      .on("presence", { event: "sync" }, () => {
+        const state = channel.presenceState<{ name: string }>();
+        const names = Object.values(state)
+          .flat()
+          .map((p) => p.name)
+          .filter(Boolean);
+        setActiveScouts([...new Set(names)]);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
 
@@ -445,8 +464,39 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               </div>
             </div>
 
+            {/* Active Scouts — Live Presence */}
+            <div className="glass rounded-xl overflow-hidden border border-green-500/30">
+              <div className="px-5 py-3.5 border-b border-green-500/20 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(34,197,94,0.08), rgba(22,163,74,0.04))" }}>
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                </span>
+                <h3 className="font-display text-sm tracking-wider text-green-400" style={{ textShadow: "0 0 8px rgba(74,222,128,0.4)" }}>
+                  ACTIVE SCOUTS
+                </h3>
+                <span className="ml-auto text-xs font-display text-green-400/70">
+                  {activeScouts.length} ONLINE
+                </span>
+              </div>
+              {activeScouts.length === 0 ? (
+                <div className="px-5 py-4 text-sm text-muted-foreground font-body">
+                  No scouts currently active.
+                </div>
+              ) : (
+                <div className="divide-y divide-green-500/10">
+                  {activeScouts.map((name) => (
+                    <div key={name} className="px-5 py-2.5 flex items-center gap-3">
+                      <span className="h-1.5 w-1.5 rounded-full bg-green-400 flex-shrink-0"></span>
+                      <span className="font-body text-sm text-foreground">{name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Top 3 teams */}
             {teamSummaries.length > 0 && (
+
               <div className="glass rounded-xl overflow-hidden border border-border/50">
                 <div className="px-5 py-4 border-b border-border/50 flex items-center gap-3">
                   <span className="text-xl">🏆</span>

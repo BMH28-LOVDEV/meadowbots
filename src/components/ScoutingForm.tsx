@@ -127,6 +127,21 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
   const [assignment, setAssignment] = useState<{ team_number: string; team_name: string; qual_matches: string[] } | null>(null);
   const [completedMatches, setCompletedMatches] = useState<string[]>([]);
 
+  // Broadcast presence so Master can see who is actively scouting
+  useEffect(() => {
+    const channel = supabase.channel("active_scouts", {
+      config: { presence: { key: scouterName } },
+    });
+    channel
+      .on("presence", { event: "sync" }, () => {})
+      .subscribe(async (status) => {
+        if (status === "SUBSCRIBED") {
+          await channel.track({ name: scouterName, online_at: new Date().toISOString() });
+        }
+      });
+    return () => { supabase.removeChannel(channel); };
+  }, [scouterName]);
+
   const fetchAssignmentAndProgress = async () => {
     const [{ data: assignmentData }, { data: entriesData }] = await Promise.all([
       supabase
