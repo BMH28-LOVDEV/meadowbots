@@ -4,7 +4,6 @@ import LoginScreen from "@/components/LoginScreen";
 import ScoutingForm from "@/components/ScoutingForm";
 import MasterDashboard from "@/components/MasterDashboard";
 import ScoutDashboard from "@/components/ScoutDashboard";
-import LockdownDashboard from "@/components/LockdownDashboard";
 import LetsGoDashboard from "@/components/LetsGoDashboard";
 import type { User } from "@supabase/supabase-js";
 
@@ -80,9 +79,7 @@ const Index = () => {
     return <ScoutDashboard onLogout={handleLogout} />;
   }
 
-  if (profile.role === "lockdown") {
-    return <LockdownDashboard onLogout={handleLogout} />;
-  }
+
 
   if (profile.role === "letsgo") {
     return <LetsGoDashboard onLogout={handleLogout} />;
