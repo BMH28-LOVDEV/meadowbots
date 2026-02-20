@@ -452,6 +452,51 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               </div>
             )}
 
+            {/* Drive Teams */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Silver Drive Team */}
+              <div className="glass rounded-xl overflow-hidden border border-zinc-400/40">
+                <div className="px-5 py-3.5 border-b border-zinc-400/30 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(180,180,180,0.12), rgba(120,120,120,0.06))" }}>
+                  <span className="text-lg">🥈</span>
+                  <h3 className="font-display text-sm tracking-wider" style={{ color: "#C0C0C0", textShadow: "0 0 8px rgba(192,192,192,0.5)" }}>SILVER DRIVE TEAM</h3>
+                </div>
+                <div className="divide-y divide-zinc-400/20">
+                  {[
+                    { name: "—", role: "Driver 1" },
+                    { name: "—", role: "Driver 2" },
+                    { name: "—", role: "Operator" },
+                    { name: "—", role: "Human Player" },
+                  ].map(({ name, role }) => (
+                    <div key={role} className="px-5 py-2.5 flex items-center justify-between">
+                      <span className="font-body text-sm" style={{ color: "#A0A0A0" }}>{name}</span>
+                      <span className="text-xs font-display tracking-wider" style={{ color: "#888" }}>{role}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Blue Drive Team */}
+              <div className="glass rounded-xl overflow-hidden border border-blue-400/40">
+                <div className="px-5 py-3.5 border-b border-blue-400/30 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.12), rgba(37,99,235,0.06))" }}>
+                  <span className="text-lg">🔵</span>
+                  <h3 className="font-display text-sm tracking-wider" style={{ color: "#60a5fa", textShadow: "0 0 8px rgba(96,165,250,0.5)" }}>BLUE DRIVE TEAM</h3>
+                </div>
+                <div className="divide-y divide-blue-400/20">
+                  {[
+                    { name: "Max Tran", role: "Driver 1" },
+                    { name: "Benjamin Hale", role: "Driver 2" },
+                    { name: "—", role: "Operator" },
+                    { name: "—", role: "Human Player" },
+                  ].map(({ name, role }) => (
+                    <div key={role} className="px-5 py-2.5 flex items-center justify-between">
+                      <span className="font-body text-sm text-blue-100">{name}</span>
+                      <span className="text-xs font-display tracking-wider text-blue-400">{role}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {/* Quick nav */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button onClick={() => setActiveTab("rankings")} className="glass rounded-xl p-5 text-left border border-border/50 hover:border-primary/40 transition-all group">
