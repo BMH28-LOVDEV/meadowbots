@@ -88,7 +88,8 @@ export function findTeamMember(input: string): string | null {
     if (
       normalizedInput === normalizedMember ||
       normalizedInput === firstName ||
-      normalizedInput === lastName
+      normalizedInput === lastName ||
+      normalizedInput === `${firstName} ${lastName[0]}`
     ) {
       return member;
     }
