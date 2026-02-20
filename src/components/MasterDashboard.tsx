@@ -88,7 +88,7 @@ interface TeamSummary {
 }
 
 const MasterDashboard = ({ onLogout, username }: MasterDashboardProps) => {
-  const isBen = username === "benjamin_hale";
+  const isBen = username === "Benjamin Hale";
   const { celebrating, triggerCelebration } = useCelebration();
   const [showLockdown, setShowLockdown] = useState(false);
   const [entries, setEntries] = useState<ScoutingEntry[]>([]);
@@ -110,7 +110,7 @@ const MasterDashboard = ({ onLogout, username }: MasterDashboardProps) => {
   const [pendingPassword, setPendingPassword] = useState("");
   const [pendingError, setPendingError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments" | "drivedata" | "bluedrivedata" | "silverdrivedata" | "livestream">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments" | "bluedrivedata" | "silverdrivedata" | "livestream">("dashboard");
   const [driveEntries, setDriveEntries] = useState<ScoutingEntry[]>([]);
   const [driveProfiles, setDriveProfiles] = useState<{ display_name: string; username: string; role: string; user_id: string }[]>([]);
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
@@ -529,16 +529,6 @@ const MasterDashboard = ({ onLogout, username }: MasterDashboardProps) => {
             📋 SCOUT ASSIGNMENTS
           </button>
           <button
-            onClick={() => setActiveTab("drivedata")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap ${
-              activeTab === "drivedata"
-                ? "bg-blue-500/20 text-blue-400 border border-blue-500/40"
-                : "text-muted-foreground hover:text-foreground border border-transparent"
-            }`}
-          >
-            🔵 DRIVE DATA
-          </button>
-          <button
             onClick={() => setActiveTab("bluedrivedata")}
             className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap ${
               activeTab === "bluedrivedata"
@@ -707,8 +697,8 @@ const MasterDashboard = ({ onLogout, username }: MasterDashboardProps) => {
                     { name: "Travis Quinn", role: "Human Player" },
                     { name: "Aiden Rubbo", role: "Drive Coach" },
                     { name: "Mason Howard", role: "Build / Drive Coach" },
-                  ].map(({ name, role }) => (
-                    <div key={role} className="px-5 py-2.5 flex items-center justify-between">
+                  ].map(({ name, role }, idx) => (
+                    <div key={`${name}-${idx}`} className="px-5 py-2.5 flex items-center justify-between">
                       <span className="font-body text-sm" style={{ color: "#60a5fa" }}>{name}</span>
                       <span className="text-xs font-display tracking-wider text-blue-400">{role}</span>
                     </div>
@@ -1231,196 +1221,6 @@ const MasterDashboard = ({ onLogout, username }: MasterDashboardProps) => {
         </div>
       )}
 
-      {/* ── DRIVE DATA TAB ── */}
-      {activeTab === "drivedata" && (
-        <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-          {/* Header */}
-          <div className="glass rounded-xl p-6 border border-blue-500/40" style={{ boxShadow: "0 0 20px hsl(220 100% 60% / 0.15)" }}>
-            <div className="flex items-center gap-4">
-              <span className="text-4xl">🔵</span>
-              <div>
-                <h2 className="font-display text-xl tracking-wider text-blue-400">DRIVE DATA HQ</h2>
-                <p className="text-xs text-muted-foreground font-body mt-1">Drive Team Data Collector submissions & role management</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Role Manager */}
-          <div className="glass rounded-xl overflow-hidden border border-blue-500/20">
-            <div className="px-5 py-4 border-b border-blue-500/20 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.08), rgba(37,99,235,0.04))" }}>
-              <span className="text-lg">👥</span>
-              <h3 className="font-display text-sm tracking-wider text-blue-400">TEAM ROLE MANAGER</h3>
-            </div>
-            <div className="divide-y divide-border/30">
-              {driveProfiles.filter(p => p.role !== "master").map((profile) => {
-                const roleLabels: Record<string, string> = {
-                  scout: "Scouter",
-                  bluedriver: "Blue Drive Data Collector",
-                  silverdriver: "Silver Drive Data Collector",
-                  driveteam: "Drive Team",
-                  viewer: "Viewer",
-                  letsgo: "Let's Go",
-                };
-                const roleColors: Record<string, string> = {
-                  scout: "text-muted-foreground",
-                  bluedriver: "text-blue-400",
-                  silverdriver: "text-slate-300",
-                  driveteam: "text-blue-300",
-                  viewer: "text-muted-foreground",
-                  letsgo: "text-primary",
-                };
-                return (
-                  <div key={profile.user_id} className="px-5 py-3.5 flex items-center gap-4 flex-wrap">
-                    <div className="flex-1 min-w-[160px]">
-                      <p className="font-display text-sm text-foreground tracking-wide">{profile.display_name}</p>
-                      <p className={`text-xs font-body mt-0.5 ${roleColors[profile.role] || "text-muted-foreground"}`}>
-                        {roleLabels[profile.role] || profile.role}
-                      </p>
-                    </div>
-                    <div className="flex gap-2 flex-wrap">
-                      {["scout", "driveteam", "bluedriver", "silverdriver"].map((role) => (
-                        <button key={role} type="button"
-                          disabled={profile.role === role || updatingRole === profile.user_id}
-                          onClick={() => handleRoleUpdate(profile.user_id, role)}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 border ${
-                            profile.role === role
-                              ? role === "bluedriver" ? "bg-blue-500/20 border-blue-500 text-blue-400"
-                                : role === "silverdriver" ? "bg-slate-400/20 border-slate-400 text-slate-300"
-                                : role === "driveteam" ? "bg-blue-400/20 border-blue-400 text-blue-300"
-                                : "bg-primary/20 border-primary text-primary"
-                              : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground disabled:opacity-40"
-                          }`}>
-                          {role === "bluedriver" ? "Blue Data" : role === "silverdriver" ? "Silver Data" : role === "driveteam" ? "Drive Team" : "Scout"}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-              {driveProfiles.filter(p => p.role !== "master").length === 0 && (
-                <div className="px-5 py-6 text-sm text-muted-foreground font-body text-center">No user accounts created yet.</div>
-              )}
-            </div>
-          </div>
-
-          {/* Blue Drive Data Entries */}
-          <div className="glass rounded-xl overflow-hidden border border-blue-500/20">
-            <div className="px-5 py-4 border-b border-blue-500/20 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.08), rgba(37,99,235,0.04))" }}>
-              <span className="text-lg">🔵</span>
-              <h3 className="font-display text-sm tracking-wider text-blue-400">BLUE DRIVE DATA SUBMISSIONS</h3>
-              <span className="ml-auto text-xs font-display text-blue-400/70">
-                {driveEntries.filter(e => ["Zoë Khansevahn", "Zoe GK", "Chantelle Wong"].includes(e.scouterName)).length} ENTRIES
-              </span>
-            </div>
-            {driveEntries.filter(e => ["Zoë Khansevahn", "Zoe GK", "Chantelle Wong"].includes(e.scouterName)).length === 0 ? (
-              <div className="px-5 py-10 text-center text-sm text-muted-foreground font-body">No Blue Drive Data submitted yet.</div>
-            ) : (
-              <div className="divide-y divide-border/30">
-                {driveEntries.filter(e => ["Zoë Khansevahn", "Zoe GK", "Chantelle Wong"].includes(e.scouterName)).map((entry) => (
-                  <div key={entry.id} className="px-5 py-4 space-y-3">
-                    <div className="flex items-start justify-between gap-3 flex-wrap">
-                      <div>
-                        <p className="font-display text-sm text-foreground tracking-wide">
-                          Team {entry.teamNumber} — Match {entry.matchNumber || "N/A"}
-                          {entry.allianceWon && (
-                            <span className={`ml-2 text-xs ${entry.allianceWon === "Yes – Won" ? "text-green-400" : entry.allianceWon === "No – Lost" ? "text-destructive" : "text-muted-foreground"}`}>
-                              {entry.allianceWon === "Yes – Won" ? "🏆 Won" : entry.allianceWon === "No – Lost" ? "❌ Lost" : "🤝 Tie"}
-                            </span>
-                          )}
-                        </p>
-                        <p className="text-xs text-muted-foreground font-body mt-0.5">
-                          🔵 <span className="text-blue-400">{entry.scouterName}</span> · {new Date(entry.timestamp).toLocaleDateString()}
-                          {entry.matchScore != null && <span className="ml-2">· Score: {entry.matchScore}</span>}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => { setDeleteTarget({ id: entry.id }); setDeletePassword(""); setDeleteError(""); }}
-                        className="px-3 py-1 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all shrink-0"
-                      >DELETE</button>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-body">
-                      {entry.autoArtifactsScored && <DataCell label="Auto Artifacts" value={entry.autoArtifactsScored} />}
-                      {entry.teleopArtifactClassification && <DataCell label="Teleop Artifacts" value={entry.teleopArtifactClassification} />}
-                      {entry.teleopCycleSpeed && <DataCell label="Cycles" value={entry.teleopCycleSpeed} />}
-                      {entry.teleopBallCapacity && <DataCell label="Cycle Time" value={entry.teleopBallCapacity} />}
-                      {entry.endgameParking && <DataCell label="Park" value={entry.endgameParking} />}
-                      {entry.penaltyPointsGiven != null && <DataCell label="Penalty Pts" value={String(entry.penaltyPointsGiven)} />}
-                    </div>
-                    {(entry.penalties || []).filter(p => p !== "None observed").length > 0 && (
-                      <div>
-                        <span className="text-xs text-muted-foreground font-body">Penalties: </span>
-                        {entry.penalties.map((p, i) => (
-                          <span key={i} className="inline-block text-xs px-2 py-0.5 rounded mr-1 mt-1 bg-destructive/20 text-destructive">{p}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Silver Drive Data Entries */}
-          <div className="glass rounded-xl overflow-hidden border border-slate-400/20">
-            <div className="px-5 py-4 border-b border-slate-400/20 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(148,163,184,0.08), rgba(100,116,139,0.04))" }}>
-              <span className="text-lg">⚪</span>
-              <h3 className="font-display text-sm tracking-wider text-slate-300">SILVER DRIVE DATA SUBMISSIONS</h3>
-              <span className="ml-auto text-xs font-display text-slate-400/70">
-                {driveEntries.filter(e => e.scouterName === "Naila Nauman").length} ENTRIES
-              </span>
-            </div>
-            <div className="px-5 py-3 border-b border-slate-400/10 bg-slate-400/5">
-              <p className="text-xs text-slate-400 font-body">👤 Naila Nauman — Silver Drive Data Collector</p>
-            </div>
-            {driveEntries.filter(e => e.scouterName === "Naila Nauman").length === 0 ? (
-              <div className="px-5 py-10 text-center text-sm text-muted-foreground font-body">No Silver Drive Data submitted yet.</div>
-            ) : (
-              <div className="divide-y divide-border/30">
-                {driveEntries.filter(e => e.scouterName === "Naila Nauman").map((entry) => (
-                  <div key={entry.id} className="px-5 py-4 space-y-3">
-                    <div className="flex items-start justify-between gap-3 flex-wrap">
-                      <div>
-                        <p className="font-display text-sm text-foreground tracking-wide">
-                          Team {entry.teamNumber} — Match {entry.matchNumber || "N/A"}
-                          {entry.allianceWon && (
-                            <span className={`ml-2 text-xs ${entry.allianceWon === "Yes – Won" ? "text-green-400" : entry.allianceWon === "No – Lost" ? "text-destructive" : "text-muted-foreground"}`}>
-                              {entry.allianceWon === "Yes – Won" ? "🏆 Won" : entry.allianceWon === "No – Lost" ? "❌ Lost" : "🤝 Tie"}
-                            </span>
-                          )}
-                        </p>
-                        <p className="text-xs text-muted-foreground font-body mt-0.5">
-                          ⚪ <span className="text-slate-300">{entry.scouterName}</span> · {new Date(entry.timestamp).toLocaleDateString()}
-                          {entry.matchScore != null && <span className="ml-2">· Score: {entry.matchScore}</span>}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => { setDeleteTarget({ id: entry.id }); setDeletePassword(""); setDeleteError(""); }}
-                        className="px-3 py-1 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all shrink-0"
-                      >DELETE</button>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-body">
-                      {entry.autoArtifactsScored && <DataCell label="Auto Artifacts" value={entry.autoArtifactsScored} />}
-                      {entry.teleopArtifactClassification && <DataCell label="Teleop Artifacts" value={entry.teleopArtifactClassification} />}
-                      {entry.teleopCycleSpeed && <DataCell label="Cycles" value={entry.teleopCycleSpeed} />}
-                      {entry.teleopBallCapacity && <DataCell label="Cycle Time" value={entry.teleopBallCapacity} />}
-                      {entry.endgameParking && <DataCell label="Park" value={entry.endgameParking} />}
-                      {entry.penaltyPointsGiven != null && <DataCell label="Penalty Pts" value={String(entry.penaltyPointsGiven)} />}
-                    </div>
-                    {(entry.penalties || []).filter(p => p !== "None observed").length > 0 && (
-                      <div>
-                        <span className="text-xs text-muted-foreground font-body">Penalties: </span>
-                        {entry.penalties.map((p, i) => (
-                          <span key={i} className="inline-block text-xs px-2 py-0.5 rounded mr-1 mt-1 bg-destructive/20 text-destructive">{p}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* ── BLUE DRIVE TEAM DATA TAB ── */}
       {activeTab === "bluedrivedata" && (
