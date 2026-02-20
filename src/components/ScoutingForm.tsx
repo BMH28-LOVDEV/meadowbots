@@ -430,6 +430,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
   const [loadingData, setLoadingData] = useState(true);
 
   const isBlueDriver = userRole === "bluedriver";
+  const isSilverDriver = userRole === "silverdriver";
 
   // Presence tracking
   useEffect(() => {
@@ -608,10 +609,12 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             </p>
             <p className="text-xs font-body" style={{ color:
               userRole === "bluedriver" ? "hsl(220 100% 70%)" :
+              userRole === "silverdriver" ? "hsl(215 20% 75%)" :
               userRole === "driveteam" ? "hsl(220 80% 65%)" :
               "hsl(var(--muted-foreground))"
             }}>
-              {userRole === "bluedriver" ? "Drive Data Collector" :
+              {userRole === "bluedriver" ? "Blue Drive Data Collector" :
+               userRole === "silverdriver" ? "Silver Drive Data Collector" :
                userRole === "driveteam" ? "Drive Team" :
                "Scouter"}
             </p>
@@ -971,7 +974,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
       {/* ══ DRIVE DATA TAB ══ */}
       {activeTab === "drivedata" && (
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-          {isBlueDriver ? (
+          {(isBlueDriver || isSilverDriver) ? (
             <DriveDataForm scouterName={scouterName} teamSummaries={teamSummaries} loadingData={loadingData} />
           ) : (
             <div className="flex flex-col items-center justify-center py-20 space-y-5 text-center">

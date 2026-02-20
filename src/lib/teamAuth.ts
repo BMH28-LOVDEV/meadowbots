@@ -108,6 +108,7 @@ export const DRIVE_TEAM = [
   "Cole Schubert",
   "Travis Quinn",
   "Mason Howard",
+  "Naila Nauman",
 ];
 
 export { TEAM_MEMBERS };

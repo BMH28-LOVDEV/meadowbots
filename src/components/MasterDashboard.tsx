@@ -182,7 +182,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
 
   const fetchDriveData = async () => {
     const [{ data: entriesData }, { data: profilesData }] = await Promise.all([
-      supabase.from("scouting_entries").select("*").in("scouter_name", ["Zoë Khansevahn", "Zoe GK", "Chantelle Wong"]).order("timestamp", { ascending: false }),
+      supabase.from("scouting_entries").select("*").in("scouter_name", ["Zoë Khansevahn", "Zoe GK", "Chantelle Wong", "Naila Nauman"]).order("timestamp", { ascending: false }),
       supabase.from("profiles").select("display_name, username, role, user_id").order("display_name"),
     ]);
     if (entriesData) {
@@ -1191,7 +1191,8 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               {driveProfiles.filter(p => p.role !== "master").map((profile) => {
                 const roleLabels: Record<string, string> = {
                   scout: "Scouter",
-                  bluedriver: "Drive Data Collector",
+                  bluedriver: "Blue Drive Data Collector",
+                  silverdriver: "Silver Drive Data Collector",
                   driveteam: "Drive Team",
                   viewer: "Viewer",
                   letsgo: "Let's Go",
@@ -1199,6 +1200,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                 const roleColors: Record<string, string> = {
                   scout: "text-muted-foreground",
                   bluedriver: "text-blue-400",
+                  silverdriver: "text-slate-300",
                   driveteam: "text-blue-300",
                   viewer: "text-muted-foreground",
                   letsgo: "text-primary",
@@ -1212,18 +1214,19 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                       </p>
                     </div>
                     <div className="flex gap-2 flex-wrap">
-                      {["scout", "driveteam", "bluedriver"].map((role) => (
+                      {["scout", "driveteam", "bluedriver", "silverdriver"].map((role) => (
                         <button key={role} type="button"
                           disabled={profile.role === role || updatingRole === profile.user_id}
                           onClick={() => handleRoleUpdate(profile.user_id, role)}
                           className={`px-3 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 border ${
                             profile.role === role
                               ? role === "bluedriver" ? "bg-blue-500/20 border-blue-500 text-blue-400"
+                                : role === "silverdriver" ? "bg-slate-400/20 border-slate-400 text-slate-300"
                                 : role === "driveteam" ? "bg-blue-400/20 border-blue-400 text-blue-300"
                                 : "bg-primary/20 border-primary text-primary"
                               : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground disabled:opacity-40"
                           }`}>
-                          {role === "bluedriver" ? "Data Collector" : role === "driveteam" ? "Drive Team" : "Scout"}
+                          {role === "bluedriver" ? "Blue Data" : role === "silverdriver" ? "Silver Data" : role === "driveteam" ? "Drive Team" : "Scout"}
                         </button>
                       ))}
                     </div>
@@ -1236,18 +1239,20 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
             </div>
           </div>
 
-          {/* Drive Data Entries */}
+          {/* Blue Drive Data Entries */}
           <div className="glass rounded-xl overflow-hidden border border-blue-500/20">
             <div className="px-5 py-4 border-b border-blue-500/20 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.08), rgba(37,99,235,0.04))" }}>
-              <span className="text-lg">📊</span>
-              <h3 className="font-display text-sm tracking-wider text-blue-400">DRIVE DATA SUBMISSIONS</h3>
-              <span className="ml-auto text-xs font-display text-blue-400/70">{driveEntries.length} ENTRIES</span>
+              <span className="text-lg">🔵</span>
+              <h3 className="font-display text-sm tracking-wider text-blue-400">BLUE DRIVE DATA SUBMISSIONS</h3>
+              <span className="ml-auto text-xs font-display text-blue-400/70">
+                {driveEntries.filter(e => ["Zoë Khansevahn", "Zoe GK", "Chantelle Wong"].includes(e.scouterName)).length} ENTRIES
+              </span>
             </div>
-            {driveEntries.length === 0 ? (
-              <div className="px-5 py-10 text-center text-sm text-muted-foreground font-body">No Drive Data submitted yet.</div>
+            {driveEntries.filter(e => ["Zoë Khansevahn", "Zoe GK", "Chantelle Wong"].includes(e.scouterName)).length === 0 ? (
+              <div className="px-5 py-10 text-center text-sm text-muted-foreground font-body">No Blue Drive Data submitted yet.</div>
             ) : (
               <div className="divide-y divide-border/30">
-                {driveEntries.map((entry) => (
+                {driveEntries.filter(e => ["Zoë Khansevahn", "Zoe GK", "Chantelle Wong"].includes(e.scouterName)).map((entry) => (
                   <div key={entry.id} className="px-5 py-4 space-y-3">
                     <div className="flex items-start justify-between gap-3 flex-wrap">
                       <div>
@@ -1261,6 +1266,66 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                         </p>
                         <p className="text-xs text-muted-foreground font-body mt-0.5">
                           🔵 <span className="text-blue-400">{entry.scouterName}</span> · {new Date(entry.timestamp).toLocaleDateString()}
+                          {entry.matchScore != null && <span className="ml-2">· Score: {entry.matchScore}</span>}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => { setDeleteTarget({ id: entry.id }); setDeletePassword(""); setDeleteError(""); }}
+                        className="px-3 py-1 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all shrink-0"
+                      >DELETE</button>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-body">
+                      {entry.autoArtifactsScored && <DataCell label="Auto Artifacts" value={entry.autoArtifactsScored} />}
+                      {entry.teleopArtifactClassification && <DataCell label="Teleop Artifacts" value={entry.teleopArtifactClassification} />}
+                      {entry.teleopCycleSpeed && <DataCell label="Cycles" value={entry.teleopCycleSpeed} />}
+                      {entry.teleopBallCapacity && <DataCell label="Cycle Time" value={entry.teleopBallCapacity} />}
+                      {entry.endgameParking && <DataCell label="Park" value={entry.endgameParking} />}
+                      {entry.penaltyPointsGiven != null && <DataCell label="Penalty Pts" value={String(entry.penaltyPointsGiven)} />}
+                    </div>
+                    {(entry.penalties || []).filter(p => p !== "None observed").length > 0 && (
+                      <div>
+                        <span className="text-xs text-muted-foreground font-body">Penalties: </span>
+                        {entry.penalties.map((p, i) => (
+                          <span key={i} className="inline-block text-xs px-2 py-0.5 rounded mr-1 mt-1 bg-destructive/20 text-destructive">{p}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Silver Drive Data Entries */}
+          <div className="glass rounded-xl overflow-hidden border border-slate-400/20">
+            <div className="px-5 py-4 border-b border-slate-400/20 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(148,163,184,0.08), rgba(100,116,139,0.04))" }}>
+              <span className="text-lg">⚪</span>
+              <h3 className="font-display text-sm tracking-wider text-slate-300">SILVER DRIVE DATA SUBMISSIONS</h3>
+              <span className="ml-auto text-xs font-display text-slate-400/70">
+                {driveEntries.filter(e => e.scouterName === "Naila Nauman").length} ENTRIES
+              </span>
+            </div>
+            <div className="px-5 py-3 border-b border-slate-400/10 bg-slate-400/5">
+              <p className="text-xs text-slate-400 font-body">👤 Naila Nauman — Silver Drive Data Collector</p>
+            </div>
+            {driveEntries.filter(e => e.scouterName === "Naila Nauman").length === 0 ? (
+              <div className="px-5 py-10 text-center text-sm text-muted-foreground font-body">No Silver Drive Data submitted yet.</div>
+            ) : (
+              <div className="divide-y divide-border/30">
+                {driveEntries.filter(e => e.scouterName === "Naila Nauman").map((entry) => (
+                  <div key={entry.id} className="px-5 py-4 space-y-3">
+                    <div className="flex items-start justify-between gap-3 flex-wrap">
+                      <div>
+                        <p className="font-display text-sm text-foreground tracking-wide">
+                          Team {entry.teamNumber} — Match {entry.matchNumber || "N/A"}
+                          {entry.allianceWon && (
+                            <span className={`ml-2 text-xs ${entry.allianceWon === "Yes – Won" ? "text-green-400" : entry.allianceWon === "No – Lost" ? "text-destructive" : "text-muted-foreground"}`}>
+                              {entry.allianceWon === "Yes – Won" ? "🏆 Won" : entry.allianceWon === "No – Lost" ? "❌ Lost" : "🤝 Tie"}
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-body mt-0.5">
+                          ⚪ <span className="text-slate-300">{entry.scouterName}</span> · {new Date(entry.timestamp).toLocaleDateString()}
                           {entry.matchScore != null && <span className="ml-2">· Score: {entry.matchScore}</span>}
                         </p>
                       </div>
