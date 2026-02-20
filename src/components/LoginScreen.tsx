@@ -235,7 +235,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                   type="text"
                   value={signupUsername}
                   onChange={e => { setSignupUsername(e.target.value); setSignupError(""); }}
-                  placeholder="e.g. BMH28"
+                  placeholder="e.g. ScoutName1"
                   className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all duration-300"
                   autoCapitalize="none"
                 />
