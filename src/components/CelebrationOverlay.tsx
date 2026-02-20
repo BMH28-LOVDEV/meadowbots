@@ -6,17 +6,25 @@ const CelebrationOverlay = ({ visible }: CelebrationOverlayProps) => {
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 z-[9998] flex items-center justify-center pointer-events-none">
-      <div className="animate-[scale-in_0.4s_ease-out] text-center px-8 py-10 rounded-3xl bg-black/70 backdrop-blur-md border border-green-400/40 shadow-2xl shadow-green-500/30">
-        <div className="text-7xl mb-4 animate-bounce">🏆</div>
-        <h1 className="text-4xl md:text-5xl font-display font-bold text-green-400 tracking-wider mb-3"
-          style={{ textShadow: "0 0 30px rgba(74,222,128,0.8)" }}>
+    <div
+      className="fixed inset-0 z-[9998] flex items-center justify-center"
+      style={{ background: "rgba(0,0,0,0.80)", backdropFilter: "blur(8px)" }}
+    >
+      <div
+        className="text-center px-10 py-12 rounded-3xl border border-green-400/50 shadow-2xl shadow-green-500/40"
+        style={{ background: "rgba(0,20,0,0.90)", animation: "scale-in 0.4s ease-out" }}
+      >
+        <div className="text-8xl mb-5 animate-bounce">🏆</div>
+        <h1
+          className="text-5xl md:text-6xl font-display font-bold text-green-400 tracking-wider mb-4"
+          style={{ textShadow: "0 0 50px rgba(74,222,128,1)" }}
+        >
           GOOD JOB, TEAM.
         </h1>
-        <p className="text-2xl md:text-3xl font-display text-white tracking-widest">
+        <p className="text-3xl md:text-4xl font-display text-white tracking-widest mb-6">
           WE WON!! 🎉
         </p>
-        <div className="flex justify-center gap-3 mt-5 text-3xl">
+        <div className="flex justify-center gap-4 text-4xl">
           {["🎊", "⭐", "🎊", "⭐", "🎊"].map((e, i) => (
             <span key={i} className="animate-bounce" style={{ animationDelay: `${i * 0.15}s` }}>{e}</span>
           ))}
