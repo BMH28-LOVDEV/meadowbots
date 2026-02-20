@@ -69,7 +69,10 @@ export function findTeamMember(input: string): string | null {
     normalizedInput === "lets go" ||
     normalizedInput === "letsgo" ||
     normalizedInput === "lets go" ||
-    normalizedInput === "celebration"
+    normalizedInput === "go" ||
+    normalizedInput === "celebrate" ||
+    normalizedInput === "celebration" ||
+    normalizedInput === "party"
   ) return "Lets Go";
 
   // Check explicit aliases
