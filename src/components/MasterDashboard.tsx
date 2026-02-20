@@ -536,7 +536,7 @@ const MasterDashboard = ({ onLogout, username }: MasterDashboardProps) => {
                 : "text-muted-foreground hover:text-foreground border border-transparent"
             }`}
           >
-            🔷 BLUE #14841
+            🔷 BLUE DATA
           </button>
           <button
             onClick={() => setActiveTab("silverdrivedata")}
@@ -546,7 +546,7 @@ const MasterDashboard = ({ onLogout, username }: MasterDashboardProps) => {
                 : "text-muted-foreground hover:text-foreground border border-transparent"
             }`}
           >
-            ⚪ SILVER #19792
+            ⚪ SILVER DATA
           </button>
           <button
             onClick={() => setActiveTab("livestream")}
@@ -1230,8 +1230,8 @@ const MasterDashboard = ({ onLogout, username }: MasterDashboardProps) => {
             <div className="flex items-center gap-4">
               <span className="text-4xl">🔷</span>
               <div>
-                <h2 className="font-display text-xl tracking-wider text-blue-400">BLUE DRIVE TEAM DATA</h2>
-                <p className="text-xs text-muted-foreground font-body mt-1">Team #14841 · Chantelle Wong</p>
+                <h2 className="font-display text-xl tracking-wider text-blue-400">BLUE DATA</h2>
+                <p className="text-xs text-muted-foreground font-body mt-1">Chantelle Wong</p>
               </div>
             </div>
           </div>
@@ -1362,8 +1362,8 @@ const MasterDashboard = ({ onLogout, username }: MasterDashboardProps) => {
             <div className="flex items-center gap-4">
               <span className="text-4xl">⚪</span>
               <div>
-                <h2 className="font-display text-xl tracking-wider text-slate-300">SILVER DRIVE TEAM DATA</h2>
-                <p className="text-xs text-muted-foreground font-body mt-1">Team #19792 · Naila Nauman</p>
+                <h2 className="font-display text-xl tracking-wider text-slate-300">SILVER DATA</h2>
+                <p className="text-xs text-muted-foreground font-body mt-1">Naila Nauman</p>
               </div>
             </div>
           </div>
