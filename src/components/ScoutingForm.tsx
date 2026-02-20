@@ -335,7 +335,18 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="font-display text-xl text-primary text-glow tracking-wider">SCOUT PORTAL</h1>
-            <p className="text-xs text-muted-foreground font-body">{scouterName} — DECODE 2025–2026</p>
+            <p className="text-xs text-muted-foreground font-body">
+              Logged In As: <span className="text-foreground">{scouterName}</span>
+            </p>
+            <p className="text-xs font-body" style={{ color:
+              userRole === "bluedriver" ? "hsl(220 100% 70%)" :
+              userRole === "driveteam" ? "hsl(220 80% 65%)" :
+              "hsl(var(--muted-foreground))"
+            }}>
+              {userRole === "bluedriver" ? "Drive Team Data Collector" :
+               userRole === "driveteam" ? "Drive Team" :
+               "Scouter"}
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <button
