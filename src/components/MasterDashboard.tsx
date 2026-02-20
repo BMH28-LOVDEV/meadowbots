@@ -482,7 +482,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                 🔷 BLUE FORM
               </button>
             )}
-            {isJude && onViewAsScouter && (
+            {(isJude || isBen) && onViewAsScouter && (
               <button
                 onClick={onViewAsScouter}
                 className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-primary/40 text-primary hover:border-primary hover:text-primary transition-all duration-200 whitespace-nowrap"
