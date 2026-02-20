@@ -487,7 +487,7 @@ const MasterDashboard = ({ onLogout, username }: MasterDashboardProps) => {
         </div>
 
         {/* Tabs */}
-        <div className="max-w-4xl mx-auto px-4 flex gap-1 pb-2">
+        <div className="max-w-4xl mx-auto px-4 flex gap-1 pb-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab("dashboard")}
             className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 ${
