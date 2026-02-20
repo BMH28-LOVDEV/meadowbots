@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { TEAM_MEMBERS, DRIVE_TEAM } from "@/lib/teamAuth";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
+import LockdownDashboard from "@/components/LockdownDashboard";
 
 interface MasterDashboardProps {
   onLogout: () => void;
@@ -87,6 +88,7 @@ interface TeamSummary {
 
 const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   const { celebrating, triggerCelebration } = useCelebration();
+  const [showLockdown, setShowLockdown] = useState(false);
   const [entries, setEntries] = useState<ScoutingEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
@@ -388,6 +390,10 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
     return `#${rank}`;
   };
 
+  if (showLockdown) {
+    return <LockdownDashboard onLogout={onLogout} />;
+  }
+
   return (
     <div className="min-h-screen bg-background relative">
       <CelebrationOverlay visible={celebrating} />
@@ -420,6 +426,12 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/40 text-destructive/70 hover:border-destructive hover:text-destructive transition-all duration-200"
             >
               🗑 CLEAR ALL
+            </button>
+            <button
+              onClick={() => setShowLockdown(true)}
+              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/60 text-destructive hover:bg-destructive/10 transition-all duration-200"
+            >
+              🔴 LOCKDOWN
             </button>
             <button
               onClick={onLogout}
