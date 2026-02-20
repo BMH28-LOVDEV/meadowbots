@@ -19,11 +19,18 @@ export function useCelebration() {
 
   const fireCelebration = () => {
     setCelebrating(true);
-    // Big confetti burst
-    const duration = 5000;
-    const end = Date.now() + duration;
     const colors = ["#3b82f6", "#22c55e", "#f59e0b", "#ec4899", "#8b5cf6", "#ffffff"];
 
+    // Center burst
+    confetti({
+      particleCount: 150,
+      spread: 100,
+      origin: { y: 0.6 },
+      colors,
+      zIndex: 9999,
+    });
+
+    // Infinite side streams
     const frame = () => {
       confetti({
         particleCount: 6,
@@ -41,20 +48,9 @@ export function useCelebration() {
         colors,
         zIndex: 9999,
       });
-      if (Date.now() < end) requestAnimationFrame(frame);
+      requestAnimationFrame(frame);
     };
     frame();
-
-    // Center burst
-    confetti({
-      particleCount: 150,
-      spread: 100,
-      origin: { y: 0.6 },
-      colors,
-      zIndex: 9999,
-    });
-
-    setTimeout(() => setCelebrating(false), 6000);
   };
 
   useEffect(() => {
