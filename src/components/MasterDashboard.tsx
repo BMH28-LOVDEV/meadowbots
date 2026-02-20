@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { TEAM_MEMBERS, DRIVE_TEAM } from "@/lib/teamAuth";
+import { useCelebration } from "@/hooks/useCelebration";
+import CelebrationOverlay from "@/components/CelebrationOverlay";
 
 interface MasterDashboardProps {
   onLogout: () => void;
@@ -84,6 +86,7 @@ interface TeamSummary {
 }
 
 const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
+  const { celebrating } = useCelebration();
   const [entries, setEntries] = useState<ScoutingEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
@@ -310,6 +313,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
 
   return (
     <div className="min-h-screen bg-background relative">
+      <CelebrationOverlay visible={celebrating} />
       <div className="fixed top-0 left-0 w-full h-64 bg-gradient-to-b from-accent/5 to-transparent pointer-events-none" />
 
       {/* Header */}

@@ -65,6 +65,13 @@ export function findTeamMember(input: string): string | null {
     normalizedInput === "emergency"
   ) return "Lockdown";
 
+  if (
+    normalizedInput === "lets go" ||
+    normalizedInput === "letsgo" ||
+    normalizedInput === "lets go" ||
+    normalizedInput === "celebration"
+  ) return "Lets Go";
+
   // Check explicit aliases
   if (ALIASES[normalizedInput]) return ALIASES[normalizedInput];
 

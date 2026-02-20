@@ -4,6 +4,7 @@ import ScoutingForm from "@/components/ScoutingForm";
 import MasterDashboard from "@/components/MasterDashboard";
 import ScoutDashboard from "@/components/ScoutDashboard";
 import LockdownDashboard from "@/components/LockdownDashboard";
+import LetsGoDashboard from "@/components/LetsGoDashboard";
 
 const Index = () => {
   const [user, setUser] = useState<string | null>(() => {
@@ -34,6 +35,10 @@ const Index = () => {
 
   if (user === "Lockdown") {
     return <LockdownDashboard onLogout={handleLogout} />;
+  }
+
+  if (user === "Lets Go") {
+    return <LetsGoDashboard onLogout={handleLogout} />;
   }
 
   return <ScoutingForm scouterName={user} onLogout={handleLogout} />;

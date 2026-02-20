@@ -12,6 +12,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [pendingMaster, setPendingMaster] = useState(false);
   const [pendingScout, setPendingScout] = useState<string | null>(null);
   const [pendingLockdown, setPendingLockdown] = useState(false);
+  const [pendingLetsGo, setPendingLetsGo] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [masterPassword, setMasterPassword] = useState("");
@@ -36,9 +37,9 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       return;
     }
 
-    // Step 2b: Lockdown password
+    // Step 2b: Lockdown password (14841)
     if (pendingLockdown) {
-      if (masterPassword === "MeadowBots") {
+      if (masterPassword === "14841") {
         onLogin("Lockdown");
       } else {
         setMasterError("Incorrect password.");
@@ -47,7 +48,18 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       return;
     }
 
-    // Step 2c: Scout password
+    // Step 2c: Let's Go password (14841)
+    if (pendingLetsGo) {
+      if (masterPassword === "14841") {
+        onLogin("Lets Go");
+      } else {
+        setMasterError("Incorrect password.");
+        shake();
+      }
+      return;
+    }
+
+    // Step 2d: Scout password
     if (pendingScout) {
       if (password.toLowerCase() === "meadowbots") {
         onLogin(pendingScout);
@@ -66,6 +78,10 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       setMasterError("");
     } else if (match === "Lockdown") {
       setPendingLockdown(true);
+      setMasterPassword("");
+      setMasterError("");
+    } else if (match === "Lets Go") {
+      setPendingLetsGo(true);
       setMasterPassword("");
       setMasterError("");
     } else if (match) {
@@ -103,10 +119,10 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         {/* Login card */}
         <div className="glass rounded-xl p-8 glow-primary">
           <h2 className="text-xl font-display text-foreground mb-6 text-center tracking-wide">
-            {pendingMaster ? "MASTER ACCESS" : pendingLockdown ? "🔒 LOCKDOWN ACCESS" : pendingScout ? "TEAM PASSWORD" : "AUTHENTICATION"}
+            {pendingMaster ? "MASTER ACCESS" : pendingLockdown ? "🔒 LOCKDOWN ACCESS" : pendingLetsGo ? "🎉 LET'S GO! ACCESS" : pendingScout ? "TEAM PASSWORD" : "AUTHENTICATION"}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {!pendingMaster && !pendingLockdown && !pendingScout ? (
+            {!pendingMaster && !pendingLockdown && !pendingLetsGo && !pendingScout ? (
               <div>
                 <label htmlFor="name" className="block text-sm font-body text-muted-foreground mb-2">
                   Enter your full name
@@ -170,6 +186,31 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                   ← Back
                 </button>
               </div>
+            ) : pendingLetsGo ? (
+              <div>
+                <p className="text-sm font-body mb-3" style={{ color: "#4ade80" }}>🎉 Let's celebrate — enter the password!</p>
+                <label htmlFor="letsgo-pw" className="block text-sm font-body text-muted-foreground mb-2">
+                  Enter the password
+                </label>
+                <input
+                  id="letsgo-pw"
+                  type="password"
+                  value={masterPassword}
+                  onChange={(e) => { setMasterPassword(e.target.value); setMasterError(""); }}
+                  placeholder="Password"
+                  autoFocus
+                  className="w-full px-4 py-3 rounded-lg bg-muted border focus:ring-1 text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all duration-300"
+                  style={{ borderColor: "rgba(74,222,128,0.4)" }}
+                />
+                {masterError && <p className="mt-2 text-sm text-destructive">{masterError}</p>}
+                <button
+                  type="button"
+                  onClick={() => { setPendingLetsGo(false); setName(""); setMasterPassword(""); setMasterError(""); }}
+                  className="mt-2 text-xs text-muted-foreground hover:text-foreground font-body transition-colors"
+                >
+                  ← Back
+                </button>
+              </div>
             ) : (
               <div>
                 <label htmlFor="master-pw" className="block text-sm font-body text-muted-foreground mb-2">
@@ -198,7 +239,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               type="submit"
               className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-display font-semibold tracking-wider hover:glow-primary-strong transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
             >
-              {pendingMaster || pendingScout ? "UNLOCK" : "ENTER"}
+              {pendingMaster || pendingScout || pendingLockdown || pendingLetsGo ? "UNLOCK" : "ENTER"}
             </button>
           </form>
         </div>
