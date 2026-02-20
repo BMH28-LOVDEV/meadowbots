@@ -142,7 +142,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               onClick={() => { setMode("login"); setLoginError(""); }}
               className={`flex-1 py-2 rounded-md font-display text-sm tracking-wider transition-all ${mode === "login" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
             >
-              SIGN IN
+              LOG IN
             </button>
             <button
               onClick={() => { setMode("signup"); setSignupError(""); }}
@@ -197,7 +197,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 disabled={loginLoading}
                 className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-display font-semibold tracking-wider hover:glow-primary-strong transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
               >
-                {loginLoading ? "SIGNING IN..." : "SIGN IN"}
+                {loginLoading ? "LOGGING IN..." : "LOG IN"}
               </button>
             </form>
           ) : (
