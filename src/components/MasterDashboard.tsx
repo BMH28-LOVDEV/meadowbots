@@ -9,6 +9,7 @@ import LockdownDashboard from "@/components/LockdownDashboard";
 interface MasterDashboardProps {
   onLogout: () => void;
   username: string;
+  onViewAsBlueDriver?: () => void;
 }
 
 interface ScoutingEntry {
@@ -87,7 +88,7 @@ interface TeamSummary {
   goodMatchResponses: { scouter: string; response: string }[];
 }
 
-const MasterDashboard = ({ onLogout, username }: MasterDashboardProps) => {
+const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver }: MasterDashboardProps) => {
   const isBen = username === "Benjamin Hale";
   const { celebrating, triggerCelebration } = useCelebration();
   const [showLockdown, setShowLockdown] = useState(false);
@@ -469,6 +470,14 @@ const MasterDashboard = ({ onLogout, username }: MasterDashboardProps) => {
                 className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/40 text-destructive/70 hover:border-destructive hover:text-destructive transition-all duration-200"
               >
                 🗑 CLEAR ALL
+              </button>
+            )}
+            {isBen && onViewAsBlueDriver && (
+              <button
+                onClick={onViewAsBlueDriver}
+                className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-blue-500/40 text-blue-400 hover:border-blue-400 hover:text-blue-300 transition-all duration-200 whitespace-nowrap"
+              >
+                🔷 BLUE FORM
               </button>
             )}
             <button

@@ -16,6 +16,7 @@ const Index = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [viewAsBlueDriver, setViewAsBlueDriver] = useState(false);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -95,7 +96,25 @@ const Index = () => {
   }
 
   if (profile.role === "master" || profile.role === "coach") {
-    return <MasterDashboard onLogout={handleLogout} username={profile.display_name} />;
+    if (viewAsBlueDriver) {
+      return (
+        <div>
+          <div className="fixed top-0 left-0 right-0 z-50 bg-blue-900/90 backdrop-blur border-b border-blue-500/40 px-4 py-2 flex items-center justify-between">
+            <span className="text-blue-300 text-xs font-display tracking-wider">👁 VIEWING AS BLUE DRIVER</span>
+            <button
+              onClick={() => setViewAsBlueDriver(false)}
+              className="text-xs text-blue-300 border border-blue-500/40 rounded px-3 py-1 hover:bg-blue-500/20 transition-colors"
+            >
+              ← Back to Master
+            </button>
+          </div>
+          <div className="pt-10">
+            <ScoutingForm scouterName={profile.display_name} onLogout={handleLogout} userRole="bluedriver" />
+          </div>
+        </div>
+      );
+    }
+    return <MasterDashboard onLogout={handleLogout} username={profile.display_name} onViewAsBlueDriver={() => setViewAsBlueDriver(true)} />;
   }
 
   if (profile.role === "letsgo") {
