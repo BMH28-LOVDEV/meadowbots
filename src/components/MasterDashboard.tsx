@@ -10,6 +10,7 @@ interface MasterDashboardProps {
   onLogout: () => void;
   username: string;
   onViewAsBlueDriver?: () => void;
+  onViewAsScouter?: () => void;
 }
 
 interface ScoutingEntry {
@@ -88,8 +89,9 @@ interface TeamSummary {
   goodMatchResponses: { scouter: string; response: string }[];
 }
 
-const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver }: MasterDashboardProps) => {
+const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScouter }: MasterDashboardProps) => {
   const isBen = username === "Benjamin Hale";
+  const isJude = username === "Jude Trujillo";
   const { celebrating, triggerCelebration } = useCelebration();
   const [showLockdown, setShowLockdown] = useState(false);
   const [entries, setEntries] = useState<ScoutingEntry[]>([]);
@@ -478,6 +480,14 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver }: MasterDashb
                 className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-blue-500/40 text-blue-400 hover:border-blue-400 hover:text-blue-300 transition-all duration-200 whitespace-nowrap"
               >
                 🔷 BLUE FORM
+              </button>
+            )}
+            {isJude && onViewAsScouter && (
+              <button
+                onClick={onViewAsScouter}
+                className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-primary/40 text-primary hover:border-primary hover:text-primary transition-all duration-200 whitespace-nowrap"
+              >
+                📋 SCOUT FORM
               </button>
             )}
             <button
