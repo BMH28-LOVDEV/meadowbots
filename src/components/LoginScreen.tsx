@@ -7,7 +7,7 @@ interface LoginScreenProps {
 
 const EMAIL_DOMAIN = "@themeadowsschool.org";
 
-type Mode = "login" | "signup";
+type Mode = "login" | "signup" | "forgot";
 
 const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [mode, setMode] = useState<Mode>("login");
@@ -27,11 +27,39 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [signupError, setSignupError] = useState("");
   const [signupLoading, setSignupLoading] = useState(false);
 
+  // Forgot password fields
+  const [forgotPrefix, setForgotPrefix] = useState("");
+  const [forgotError, setForgotError] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
+
   const [isShaking, setIsShaking] = useState(false);
 
   const shake = () => {
     setIsShaking(true);
     setTimeout(() => setIsShaking(false), 500);
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError("");
+    if (!forgotPrefix.trim()) {
+      setForgotError("Please enter your school email prefix.");
+      shake();
+      return;
+    }
+    const email = forgotPrefix.trim().toLowerCase() + EMAIL_DOMAIN;
+    setForgotLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setForgotLoading(false);
+    if (error) {
+      setForgotError(error.message);
+      shake();
+    } else {
+      setForgotSent(true);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -139,20 +167,22 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
         {/* Card */}
         <div className="glass rounded-xl p-8 glow-primary">
-          <div className="flex mb-6 rounded-lg bg-muted p-1 gap-1">
-            <button
-              onClick={() => { setMode("login"); }}
-              className={`flex-1 py-2 rounded-md font-display text-sm tracking-wider transition-all ${mode === "login" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              LOG IN
-            </button>
-            <button
-              onClick={() => { setMode("signup"); setSignupError(""); setAccountCreated(false); }}
-              className={`flex-1 py-2 rounded-md font-display text-sm tracking-wider transition-all ${mode === "signup" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              CREATE ACCOUNT
-            </button>
-          </div>
+          {mode !== "forgot" && (
+            <div className="flex mb-6 rounded-lg bg-muted p-1 gap-1">
+              <button
+                onClick={() => { setMode("login"); }}
+                className={`flex-1 py-2 rounded-md font-display text-sm tracking-wider transition-all ${mode === "login" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                LOG IN
+              </button>
+              <button
+                onClick={() => { setMode("signup"); setSignupError(""); setAccountCreated(false); }}
+                className={`flex-1 py-2 rounded-md font-display text-sm tracking-wider transition-all ${mode === "signup" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                CREATE ACCOUNT
+              </button>
+            </div>
+          )}
 
           {accountCreated && mode === "login" && (
             <div className="mb-5 px-4 py-3 rounded-lg border border-blue-500/50 bg-blue-500/10 text-blue-400 text-sm font-body text-center">
@@ -207,7 +237,75 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
               >
                 {loginLoading ? "LOGGING IN..." : "LOG IN"}
               </button>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => { setMode("forgot"); setForgotError(""); setForgotSent(false); }}
+                  className="text-xs text-muted-foreground/60 hover:text-primary font-body transition-colors duration-200 underline underline-offset-2"
+                >
+                  Forgot your password?
+                </button>
+              </div>
             </form>
+          ) : mode === "forgot" ? (
+            <div className="space-y-5">
+              <div className="text-center mb-2">
+                <h2 className="text-foreground font-display tracking-wider">FORGOT PASSWORD</h2>
+                <p className="text-muted-foreground text-xs font-body mt-1">
+                  Enter your school email and we'll send a reset link.
+                </p>
+              </div>
+
+              {forgotSent ? (
+                <div className="px-4 py-4 rounded-lg border border-green-500/40 bg-green-500/10 text-green-400 text-sm font-body text-center space-y-1">
+                  <p className="font-semibold">✅ Reset link sent!</p>
+                  <p className="text-xs text-muted-foreground">Check your school email inbox for the reset link.</p>
+                </div>
+              ) : (
+                <form onSubmit={handleForgotPassword} className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-body text-muted-foreground mb-2">
+                      School Email
+                    </label>
+                    <div className="flex items-stretch rounded-lg overflow-hidden border border-border focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all duration-300 bg-muted">
+                      <input
+                        type="text"
+                        value={forgotPrefix}
+                        onChange={e => { setForgotPrefix(e.target.value); setForgotError(""); }}
+                        placeholder="first_last"
+                        className="flex-1 px-4 py-3 bg-transparent text-foreground placeholder:text-muted-foreground/50 font-body outline-none"
+                        autoComplete="username"
+                        autoCapitalize="none"
+                      />
+                      <span className="flex items-center px-3 text-muted-foreground/60 font-body text-sm bg-muted/50 border-l border-border select-none whitespace-nowrap">
+                        {EMAIL_DOMAIN}
+                      </span>
+                    </div>
+                  </div>
+
+                  {forgotError && <p className="text-sm text-destructive">{forgotError}</p>}
+
+                  <button
+                    type="submit"
+                    disabled={forgotLoading}
+                    className="w-full py-3 rounded-lg bg-primary text-primary-foreground font-display font-semibold tracking-wider hover:glow-primary-strong transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+                  >
+                    {forgotLoading ? "SENDING..." : "SEND RESET LINK"}
+                  </button>
+                </form>
+              )}
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => { setMode("login"); setForgotSent(false); setForgotError(""); }}
+                  className="text-xs text-muted-foreground/60 hover:text-primary font-body transition-colors duration-200 underline underline-offset-2"
+                >
+                  ← Back to Log In
+                </button>
+              </div>
+            </div>
           ) : (
             <form onSubmit={handleSignup} className="space-y-5">
               {/* Email prefix */}
