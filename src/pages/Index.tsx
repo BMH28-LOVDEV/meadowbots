@@ -76,7 +76,7 @@ const Index = () => {
   }
 
   if (profile.role === "viewer") {
-    return <ScoutDashboard onLogout={handleLogout} />;
+    return <ScoutDashboard scouterName={profile.display_name} onLogout={handleLogout} />;
   }
 
 
@@ -86,7 +86,7 @@ const Index = () => {
   }
 
   // Default: scout
-  return <ScoutingForm scouterName={profile.display_name} onLogout={handleLogout} />;
+  return <ScoutDashboard scouterName={profile.display_name} onLogout={handleLogout} />;
 };
 
 export default Index;
