@@ -457,7 +457,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               {/* Silver Drive Team */}
               <div className="glass rounded-xl overflow-hidden border border-zinc-400/40">
                 <div className="px-5 py-3.5 border-b border-zinc-400/30 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(180,180,180,0.12), rgba(120,120,120,0.06))" }}>
-                  <span className="text-lg">🥈</span>
+                  <span className="text-lg" style={{ color: "#C0C0C0" }}>●</span>
                   <h3 className="font-display text-sm tracking-wider" style={{ color: "#C0C0C0", textShadow: "0 0 8px rgba(192,192,192,0.5)" }}>SILVER DRIVE TEAM</h3>
                 </div>
                 <div className="divide-y divide-zinc-400/20">
@@ -491,7 +491,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                     { name: "Mason Howard", role: "Build / Drive Coach" },
                   ].map(({ name, role }) => (
                     <div key={role} className="px-5 py-2.5 flex items-center justify-between">
-                      <span className="font-body text-sm text-blue-100">{name}</span>
+                      <span className="font-body text-sm" style={{ color: "#60a5fa" }}>{name}</span>
                       <span className="text-xs font-display tracking-wider text-blue-400">{role}</span>
                     </div>
                   ))}
