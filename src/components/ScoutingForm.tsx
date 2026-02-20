@@ -232,7 +232,7 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
       setCompletedMatches((prev) => [...prev, form.matchNumber.toUpperCase()]);
     }
 
-    toast.success(`Scouting data for Team ${form.teamNumber} saved!`);
+    toast.success(`Solo: ~${form.matchScore || "N/A"}`);
     setForm((prev) => ({
       ...INITIAL_FORM,
       teamNumber: assignment?.team_number || "",
