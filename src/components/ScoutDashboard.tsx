@@ -7,6 +7,7 @@ import CelebrationOverlay from "@/components/CelebrationOverlay";
 interface ScoutDashboardProps {
   onLogout: () => void;
   scouterName: string;
+  userRole?: string;
 }
 
 // ─── Scouting Entry types ───────────────────────────────────────────────────
@@ -154,12 +155,14 @@ const SectionHeader = ({ title, icon }: { title: string; icon: string }) => (
 );
 
 // ─── Main Component ──────────────────────────────────────────────────────────
-const ScoutDashboard = ({ onLogout, scouterName }: ScoutDashboardProps) => {
+const ScoutDashboard = ({ onLogout, scouterName, userRole }: ScoutDashboardProps) => {
   const { celebrating } = useCelebration();
   const [entries, setEntries] = useState<ScoutingEntry[]>([]);
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata">("dashboard");
+
+  const isBlueDriver = userRole === "bluedriver";
 
   // Scouting form state
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
@@ -406,6 +409,16 @@ const ScoutDashboard = ({ onLogout, scouterName }: ScoutDashboardProps) => {
             }`}
           >
             🔴 LIVE STREAM
+          </button>
+          <button
+            onClick={() => setActiveTab("drivedata")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 ${
+              activeTab === "drivedata"
+                ? "bg-blue-500/20 text-blue-400 border border-blue-500/40"
+                : "text-muted-foreground hover:text-foreground border border-transparent"
+            }`}
+          >
+            🔵 DRIVE DATA
           </button>
         </div>
       </header>
@@ -781,6 +794,75 @@ const ScoutDashboard = ({ onLogout, scouterName }: ScoutDashboardProps) => {
               title="FirstNevada Live Stream"
             />
           </div>
+        </div>
+      )}
+
+      {/* ══ DRIVE DATA TAB ══ */}
+      {activeTab === "drivedata" && (
+        <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+          {isBlueDriver ? (
+            <>
+              {/* Header */}
+              <div className="glass rounded-xl p-6 border border-blue-500/40" style={{ boxShadow: "0 0 20px hsl(220 100% 60% / 0.15)" }}>
+                <div className="flex items-center gap-4">
+                  <span className="text-4xl">🔵</span>
+                  <div>
+                    <h2 className="font-display text-xl tracking-wider" style={{ color: "hsl(220 100% 70%)" }}>BLUE DRIVE DATA</h2>
+                    <p className="text-xs text-muted-foreground font-body mt-1">Restricted — Drive Team Access Only</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Team Rankings for Drive Team */}
+              <div className="glass rounded-xl p-6 border border-border/50">
+                <h3 className="font-display text-sm tracking-wider text-foreground mb-4">📊 FULL TEAM RANKINGS</h3>
+                {loading ? (
+                  <p className="text-muted-foreground text-sm font-body">Loading...</p>
+                ) : teamSummaries.length === 0 ? (
+                  <p className="text-muted-foreground text-sm font-body text-center py-4">No scouting data yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {teamSummaries.map((team, i) => (
+                      <div key={team.teamNumber} className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 border border-border/30">
+                        <span className="font-display text-sm w-8 text-center" style={{ color: i < 3 ? "hsl(220 100% 70%)" : undefined }}>
+                          {getRankIcon(i + 1)}
+                        </span>
+                        <div className="flex-1">
+                          <p className="font-display text-sm text-foreground">Team {team.teamNumber}</p>
+                          <p className="text-xs text-muted-foreground font-body">{team.entries.length} match{team.entries.length !== 1 ? "es" : ""} scouted</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-display text-sm" style={{ color: "hsl(220 100% 70%)" }}>{Math.round(team.avgScore)}</p>
+                          <p className="text-xs text-muted-foreground font-body">avg score</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Quick strategy notes area */}
+              <div className="glass rounded-xl p-6 border border-border/50">
+                <h3 className="font-display text-sm tracking-wider text-foreground mb-3">📝 DRIVE TEAM NOTES</h3>
+                <p className="text-xs text-muted-foreground font-body mb-3">Private notes for drive team planning. (Not saved — refresh to clear.)</p>
+                <textarea
+                  className="w-full h-40 px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/40 font-body text-sm outline-none transition-all duration-300 resize-none"
+                  placeholder="Alliance selection targets, strategy notes, robot observations..."
+                />
+              </div>
+            </>
+          ) : (
+            /* Access Denied */
+            <div className="flex flex-col items-center justify-center py-20 space-y-5 text-center">
+              <span className="text-6xl">🔒</span>
+              <div>
+                <h2 className="font-display text-xl tracking-wider text-foreground">RESTRICTED ACCESS</h2>
+                <p className="text-muted-foreground font-body text-sm mt-2 max-w-xs mx-auto">
+                  Blue Drive Data is only accessible to authorized drive team members.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -124,11 +124,17 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         .map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
         .join(" ");
 
+      // Certain prefixes get special roles automatically
+      const BLUE_DRIVER_PREFIXES = ["zoe_khansevahn", "chantelle_wong"];
+      const assignedRole = BLUE_DRIVER_PREFIXES.includes(signupPrefix.trim().toLowerCase())
+        ? "bluedriver"
+        : "scout";
+
       const { error: profileError } = await supabase.from("profiles").insert({
         user_id: data.user.id,
         username: signupUsername.trim(),
         display_name: displayName,
-        role: "scout",
+        role: assignedRole,
       });
 
       if (profileError) {
