@@ -499,6 +499,22 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               </div>
             </div>
 
+            {/* Coaches */}
+            <div className="glass rounded-xl overflow-hidden border border-amber-400/30">
+              <div className="px-5 py-3.5 border-b border-amber-400/20 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(251,191,36,0.08), rgba(245,158,11,0.04))" }}>
+                <span className="text-lg">🎓</span>
+                <h3 className="font-display text-sm tracking-wider text-amber-400" style={{ textShadow: "0 0 8px rgba(251,191,36,0.4)" }}>COACHES</h3>
+              </div>
+              <div className="flex flex-wrap gap-0 divide-y divide-amber-400/10">
+                {["Mrs. Trujillo", "Mr. Trujillo", "Aiden Rubbo", "Devin Allen"].map((name) => (
+                  <div key={name} className="px-5 py-2.5 w-full sm:w-1/2 flex items-center gap-3">
+                    <span className="text-amber-400/60 text-xs">★</span>
+                    <span className="font-body text-sm text-amber-100">{name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Quick nav */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button onClick={() => setActiveTab("rankings")} className="glass rounded-xl p-5 text-left border border-border/50 hover:border-primary/40 transition-all group">
