@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 
+const LETSGO_PASSWORD = "BennyGF28!";
+
 interface LetsGoDashboardProps {
   onLogout: () => void;
 }
@@ -9,8 +11,22 @@ interface LetsGoDashboardProps {
 const LetsGoDashboard = ({ onLogout }: LetsGoDashboardProps) => {
   const { celebrating, triggerCelebration } = useCelebration();
   const [pressed, setPressed] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
-  const handlePress = async () => {
+  const handlePressAttempt = () => {
+    setPasswordInput("");
+    setPasswordError("");
+    setShowPasswordModal(true);
+  };
+
+  const handlePasswordConfirm = async () => {
+    if (passwordInput !== LETSGO_PASSWORD) {
+      setPasswordError("Incorrect password.");
+      return;
+    }
+    setShowPasswordModal(false);
     setPressed(true);
     await triggerCelebration();
     setTimeout(() => setPressed(false), 6000);
@@ -51,7 +67,7 @@ const LetsGoDashboard = ({ onLogout }: LetsGoDashboardProps) => {
           </p>
 
           <button
-            onClick={handlePress}
+            onClick={handlePressAttempt}
             disabled={pressed}
             className="w-full py-8 rounded-xl font-display text-2xl font-bold tracking-widest transition-all duration-200 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
             style={{
@@ -76,6 +92,41 @@ const LetsGoDashboard = ({ onLogout }: LetsGoDashboardProps) => {
           Let's Go Console · MeadowBots #14841
         </p>
       </div>
+
+      {/* Password Confirmation Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="bg-background border border-green-500/30 rounded-xl p-8 w-full max-w-sm space-y-5 shadow-2xl">
+            <h3 className="font-display text-lg text-foreground tracking-wide text-center">🔒 CONFIRM LET'S GO</h3>
+            <p className="text-muted-foreground text-sm font-body text-center">Enter the password to trigger the celebration.</p>
+            <input
+              type="password"
+              value={passwordInput}
+              onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(""); }}
+              onKeyDown={(e) => e.key === "Enter" && handlePasswordConfirm()}
+              placeholder="Password"
+              className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground font-body text-sm focus:outline-none focus:border-green-500/60"
+              autoFocus
+            />
+            {passwordError && <p className="text-red-400 text-xs text-center font-body">{passwordError}</p>}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowPasswordModal(false)}
+                className="flex-1 py-2 rounded-lg border border-border text-muted-foreground text-sm font-body hover:text-foreground transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePasswordConfirm}
+                className="flex-1 py-2 rounded-lg text-sm font-body font-bold text-white transition-all"
+                style={{ background: "linear-gradient(135deg, #22c55e, #16a34a)" }}
+              >
+                CONFIRM
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
