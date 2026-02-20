@@ -17,6 +17,7 @@ const Index = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [viewAsBlueDriver, setViewAsBlueDriver] = useState(false);
+  const [viewAsScouter, setViewAsScouter] = useState(false);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -114,7 +115,32 @@ const Index = () => {
         </div>
       );
     }
-    return <MasterDashboard onLogout={handleLogout} username={profile.display_name} onViewAsBlueDriver={() => setViewAsBlueDriver(true)} />;
+    if (viewAsScouter) {
+      return (
+        <div>
+          <div className="fixed top-0 left-0 right-0 z-50 bg-primary/10 backdrop-blur border-b border-primary/40 px-4 py-2 flex items-center justify-between">
+            <span className="text-primary text-xs font-display tracking-wider">📋 SCOUTING FORM</span>
+            <button
+              onClick={() => setViewAsScouter(false)}
+              className="text-xs text-primary border border-primary/40 rounded px-3 py-1 hover:bg-primary/20 transition-colors"
+            >
+              ← Back to Master
+            </button>
+          </div>
+          <div className="pt-10">
+            <ScoutingForm scouterName={profile.display_name} onLogout={handleLogout} userRole="scout" />
+          </div>
+        </div>
+      );
+    }
+    return (
+      <MasterDashboard
+        onLogout={handleLogout}
+        username={profile.display_name}
+        onViewAsBlueDriver={() => setViewAsBlueDriver(true)}
+        onViewAsScouter={() => setViewAsScouter(true)}
+      />
+    );
   }
 
   if (profile.role === "letsgo") {
