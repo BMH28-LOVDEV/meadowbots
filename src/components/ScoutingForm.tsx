@@ -944,7 +944,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           </button>
 
           <p className="text-center text-muted-foreground/30 text-xs font-body pb-8">
-            Data synced to Lovable Cloud • FTC DECODE™ 2025–2026
+            Data synced to TMS Scouting • FTC DECODE™ 2025–2026
           </p>
         </form>
       )}
