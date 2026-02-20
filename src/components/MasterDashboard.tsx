@@ -311,7 +311,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="font-display text-xl text-accent text-glow tracking-wider" style={{ textShadow: "0 0 10px hsl(260 80% 60% / 0.5)" }}>
-              MEADOWBOT MASTER
+              MASTER MEADOWBOT
             </h1>
             <p className="text-xs text-muted-foreground font-body">Team Rankings Dashboard</p>
           </div>
@@ -457,7 +457,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               {/* Silver Drive Team */}
               <div className="glass rounded-xl overflow-hidden border border-zinc-400/40">
                 <div className="px-5 py-3.5 border-b border-zinc-400/30 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(180,180,180,0.12), rgba(120,120,120,0.06))" }}>
-                  <span className="text-lg" style={{ color: "#C0C0C0" }}>●</span>
+                  <span style={{ color: "#C0C0C0", fontSize: "1.25rem", lineHeight: 1 }}>⬤</span>
                   <h3 className="font-display text-sm tracking-wider" style={{ color: "#C0C0C0", textShadow: "0 0 8px rgba(192,192,192,0.5)" }}>SILVER DRIVE TEAM</h3>
                 </div>
                 <div className="divide-y divide-zinc-400/20">
