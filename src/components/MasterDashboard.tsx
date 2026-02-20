@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { TEAM_MEMBERS } from "@/lib/teamAuth";
+import { TEAM_MEMBERS, DRIVE_TEAM } from "@/lib/teamAuth";
 
 interface MasterDashboardProps {
   onLogout: () => void;
@@ -718,7 +718,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
               </div>
             ) : (
               <div className="space-y-3">
-                {[...TEAM_MEMBERS].sort((a, b) => a.localeCompare(b)).map((scoutName) => {
+                {[...TEAM_MEMBERS].filter((m) => !DRIVE_TEAM.includes(m)).sort((a, b) => a.localeCompare(b)).map((scoutName) => {
                   const current = editedAssignments[scoutName] || { team_number: "", team_name: "", qual_matches: [] };
                   const saved = assignments.find((a) => a.scout_name === scoutName);
                   const isDirty =

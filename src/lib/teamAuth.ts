@@ -75,4 +75,14 @@ export function findTeamMember(input: string): string | null {
   return null;
 }
 
+// Drive team members — not eligible for scouting assignments
+export const DRIVE_TEAM = [
+  "William Hu",
+  "Rock Kuperman",
+  "Isabelle Liang",
+  "Benjamin Hale",
+  "Max Tran",
+  "Cole Schubert",
+];
+
 export { TEAM_MEMBERS };
