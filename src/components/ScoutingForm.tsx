@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCelebration } from "@/hooks/useCelebration";
@@ -7,19 +7,18 @@ import CelebrationOverlay from "@/components/CelebrationOverlay";
 interface ScoutingFormProps {
   scouterName: string;
   onLogout: () => void;
+  userRole?: string;
 }
 
 interface FormData {
   teamNumber: string;
   teamName: string;
   matchNumber: string;
-  // Autonomous
   autoArtifactsScored: string;
   autoPatternAlignment: string;
   autoLaunchLine: string;
   autoLeave: string;
   autoConsistency: string;
-  // Teleop
   teleopIntakeMethod: string;
   teleopBallCapacity: string;
   teleopShootingAccuracy: string;
@@ -27,17 +26,37 @@ interface FormData {
   teleopOverflowManagement: string;
   teleopCycleSpeed: string;
   teleopArtifactClassification: string;
-  // Endgame
   endgameParking: string;
   endgameAllianceAssist: string;
-  // Penalties
   penalties: string[];
   cards: string[];
   penaltyPointsGiven: string;
-  // Match result
   matchScore: string;
   allianceWon: string;
-  // Notes
+  specialFeatures: string;
+  goodMatch: string;
+}
+
+interface ScoutingEntry {
+  id: string;
+  teamNumber: string;
+  matchNumber: string;
+  scouterName: string;
+  autoArtifactsScored: string;
+  autoPatternAlignment: string;
+  autoLaunchLine: string;
+  autoLeave: string;
+  autoConsistency: string;
+  teleopIntakeMethod: string;
+  teleopBallCapacity: string;
+  teleopShootingAccuracy: string;
+  teleopGateInteraction: string;
+  teleopOverflowManagement: string;
+  teleopCycleSpeed: string;
+  teleopArtifactClassification: string;
+  endgameParking: string;
+  endgameAllianceAssist: string;
+  penalties: string[];
   specialFeatures: string;
   goodMatch: string;
 }
@@ -56,57 +75,62 @@ const PENALTY_OPTIONS = [
 const CARD_OPTIONS = ["Yellow Card", "Red Card"];
 
 const INITIAL_FORM: FormData = {
-  teamNumber: "",
-  teamName: "",
-  matchNumber: "",
-  autoArtifactsScored: "",
-  autoPatternAlignment: "",
-  autoLaunchLine: "",
-  autoLeave: "",
-  autoConsistency: "",
-  teleopIntakeMethod: "",
-  teleopBallCapacity: "",
-  teleopShootingAccuracy: "",
-  teleopGateInteraction: "",
-  teleopOverflowManagement: "",
-  teleopCycleSpeed: "",
-  teleopArtifactClassification: "",
-  endgameParking: "",
-  endgameAllianceAssist: "",
-  penalties: [],
-  cards: [],
-  penaltyPointsGiven: "",
-  matchScore: "",
-  allianceWon: "",
-  specialFeatures: "",
-  goodMatch: "",
+  teamNumber: "", teamName: "", matchNumber: "",
+  autoArtifactsScored: "", autoPatternAlignment: "", autoLaunchLine: "", autoLeave: "", autoConsistency: "",
+  teleopIntakeMethod: "", teleopBallCapacity: "", teleopShootingAccuracy: "", teleopGateInteraction: "",
+  teleopOverflowManagement: "", teleopCycleSpeed: "", teleopArtifactClassification: "",
+  endgameParking: "", endgameAllianceAssist: "",
+  penalties: [], cards: [], penaltyPointsGiven: "",
+  matchScore: "", allianceWon: "", specialFeatures: "", goodMatch: "",
 };
 
-interface MCQuestionProps {
-  label: string;
-  name: keyof FormData;
-  options: string[];
-  value: string;
-  onChange: (name: keyof FormData, value: string) => void;
-}
+const scoreEntry = (entry: ScoutingEntry): number => {
+  let score = 0;
+  const autoArtifacts: Record<string, number> = { "0": 0, "1-2": 5, "3-4": 10, "5+": 15 };
+  score += autoArtifacts[entry.autoArtifactsScored] || 0;
+  const autoPattern: Record<string, number> = { "None": 0, "1 Pattern": 5, "2 Patterns": 10, "3+ Patterns": 15 };
+  score += autoPattern[entry.autoPatternAlignment] || 0;
+  if (entry.autoLaunchLine === "Yes") score += 5;
+  if (entry.autoLeave === "Yes") score += 3;
+  const autoConsistency: Record<string, number> = { "Very Consistent": 10, "Mostly Consistent": 6, "Inconsistent": 2, "No Auto": 0 };
+  score += autoConsistency[entry.autoConsistency] || 0;
+  const shootingAcc: Record<string, number> = { "Very Accurate": 10, "Somewhat Accurate": 6, "Inaccurate": 2, "No Shooting": 0 };
+  score += shootingAcc[entry.teleopShootingAccuracy] || 0;
+  const gateInteraction: Record<string, number> = { "Opened Reliably": 10, "Sometimes": 5, "Tried But Failed": 1, "Did Not Attempt": 0 };
+  score += gateInteraction[entry.teleopGateInteraction] || 0;
+  const overflow: Record<string, number> = { "Excellent": 8, "Good": 5, "Poor": 2, "Did Not Collect": 0 };
+  score += overflow[entry.teleopOverflowManagement] || 0;
+  const cycleSpeed: Record<string, number> = { "Very Fast": 10, "Average": 6, "Slow": 3, "Minimal Cycling": 0 };
+  score += cycleSpeed[entry.teleopCycleSpeed] || 0;
+  const classification: Record<string, number> = { "Always": 8, "Mostly": 5, "Rarely": 2, "No Classification": 0 };
+  score += classification[entry.teleopArtifactClassification] || 0;
+  const ballCap: Record<string, number> = { "1": 2, "2": 5, "3": 8 };
+  score += ballCap[entry.teleopBallCapacity] || 0;
+  const parking: Record<string, number> = { "Yes – Full Park": 10, "Partial": 5, "No": 0 };
+  score += parking[entry.endgameParking] || 0;
+  const assist: Record<string, number> = { "Yes": 8, "Attempted": 4, "No": 0 };
+  score += assist[entry.endgameAllianceAssist] || 0;
+  const penalties = entry.penalties || [];
+  const penaltyCount = penalties.filter((p) => p !== "None observed").length;
+  score -= penaltyCount * 5;
+  return score;
+};
 
-const MCQuestion = ({ label, name, options, value, onChange }: MCQuestionProps) => (
+const MCQuestion = ({ label, name, options, value, onChange }: {
+  label: string; name: keyof FormData; options: string[]; value: string;
+  onChange: (name: keyof FormData, value: string) => void;
+}) => (
   <div className="space-y-3">
     <p className="text-sm font-body text-foreground font-medium">{label}</p>
     <div className="flex flex-wrap gap-2">
       {options.map((option) => (
-        <button
-          key={option}
-          type="button"
-          onClick={() => onChange(name, option)}
+        <button key={option} type="button" onClick={() => onChange(name, option)}
           className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
             value === option
               ? "bg-primary/20 border-primary text-primary glow-primary"
               : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
           }`}
-        >
-          {option}
-        </button>
+        >{option}</button>
       ))}
     </div>
   </div>
@@ -120,14 +144,26 @@ const SectionHeader = ({ title, icon }: { title: string; icon: string }) => (
   </div>
 );
 
-const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
+const getRankIcon = (rank: number) => {
+  if (rank === 1) return "🥇";
+  if (rank === 2) return "🥈";
+  if (rank === 3) return "🥉";
+  return `#${rank}`;
+};
+
+const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) => {
   const { celebrating } = useCelebration();
+  const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata">("dashboard");
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [assignment, setAssignment] = useState<{ team_number: string; team_name: string; qual_matches: string[] } | null>(null);
   const [completedMatches, setCompletedMatches] = useState<string[]>([]);
+  const [entries, setEntries] = useState<ScoutingEntry[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
 
-  // Broadcast presence so Master can see who is actively scouting
+  const isBlueDriver = userRole === "bluedriver";
+
+  // Presence tracking
   useEffect(() => {
     const channel = supabase.channel("active_scouts", {
       config: { presence: { key: scouterName } },
@@ -142,23 +178,41 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
     return () => { supabase.removeChannel(channel); };
   }, [scouterName]);
 
-  const fetchAssignmentAndProgress = async () => {
-    const [{ data: assignmentData }, { data: entriesData }] = await Promise.all([
-      supabase
-        .from("team_assignments")
-        .select("team_number, team_name, qual_matches")
-        .eq("scout_name", scouterName)
-        .maybeSingle(),
-      supabase
-        .from("scouting_entries")
-        .select("match_number, team_number")
-        .eq("scouter_name", scouterName),
+  const fetchData = async () => {
+    setLoadingData(true);
+    const [{ data: rawEntries }, { data: assignmentData }, { data: entriesData }] = await Promise.all([
+      supabase.from("scouting_entries").select("*").order("timestamp", { ascending: true }),
+      supabase.from("team_assignments").select("team_number, team_name, qual_matches").eq("scout_name", scouterName).maybeSingle(),
+      supabase.from("scouting_entries").select("match_number, team_number").eq("scouter_name", scouterName),
     ]);
+
+    if (rawEntries) {
+      setEntries(rawEntries.map((row) => ({
+        id: row.id, teamNumber: row.team_number, matchNumber: row.match_number || "",
+        scouterName: row.scouter_name,
+        autoArtifactsScored: row.auto_artifacts_scored || "",
+        autoPatternAlignment: row.auto_pattern_alignment || "",
+        autoLaunchLine: row.auto_launch_line || "",
+        autoLeave: row.auto_leave || "",
+        autoConsistency: row.auto_consistency || "",
+        teleopIntakeMethod: row.teleop_intake_method || "",
+        teleopBallCapacity: row.teleop_ball_capacity || "",
+        teleopShootingAccuracy: row.teleop_shooting_accuracy || "",
+        teleopGateInteraction: row.teleop_gate_interaction || "",
+        teleopOverflowManagement: row.teleop_overflow_management || "",
+        teleopCycleSpeed: row.teleop_cycle_speed || "",
+        teleopArtifactClassification: row.teleop_artifact_classification || "",
+        endgameParking: row.endgame_parking || "",
+        endgameAllianceAssist: row.endgame_alliance_assist || "",
+        penalties: row.penalties || [],
+        specialFeatures: row.special_features || "",
+        goodMatch: row.good_match || "",
+      })));
+    }
 
     if (assignmentData) {
       setAssignment({ team_number: assignmentData.team_number, team_name: assignmentData.team_name, qual_matches: assignmentData.qual_matches || [] });
       setForm((prev) => ({ ...prev, teamNumber: assignmentData.team_number, teamName: assignmentData.team_name }));
-
       if (entriesData) {
         const done = entriesData
           .filter((e) => e.team_number === assignmentData.team_number && e.match_number)
@@ -166,11 +220,28 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
         setCompletedMatches(done);
       }
     }
+
+    setLoadingData(false);
   };
 
   useEffect(() => {
-    fetchAssignmentAndProgress();
+    fetchData();
   }, [scouterName]);
+
+  const teamSummaries = useMemo(() => {
+    const byTeam: Record<string, ScoutingEntry[]> = {};
+    entries.forEach((entry) => {
+      if (!byTeam[entry.teamNumber]) byTeam[entry.teamNumber] = [];
+      byTeam[entry.teamNumber].push(entry);
+    });
+    return Object.entries(byTeam)
+      .map(([teamNumber, teamEntries]) => ({
+        teamNumber,
+        avgScore: teamEntries.reduce((sum, e) => sum + scoreEntry(e), 0) / teamEntries.length,
+        entries: teamEntries,
+      }))
+      .sort((a, b) => b.avgScore - a.avgScore);
+  }, [entries]);
 
   const handleChange = (name: keyof FormData, value: string) => {
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -178,7 +249,6 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const missingFields: string[] = [];
     if (!form.teamNumber) missingFields.push("Team Number");
     if (!form.matchNumber) missingFields.push("Match Number");
@@ -202,8 +272,7 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
 
     if (missingFields.length > 0) {
       toast.error("Please answer all of the questions.", {
-        duration: 5000,
-        position: "top-center",
+        duration: 5000, position: "top-center",
         style: { background: "hsl(0 72% 28%)", border: "1px solid hsl(0 72% 50%)", color: "white" },
       });
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -237,7 +306,6 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
       special_features: form.specialFeatures || null,
       good_match: form.goodMatch || null,
     });
-
     setSubmitting(false);
 
     if (error) {
@@ -246,18 +314,15 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
       return;
     }
 
-    // Add the submitted match to completed list immediately
     if (form.matchNumber) {
       setCompletedMatches((prev) => [...prev, form.matchNumber.toUpperCase()]);
     }
 
-    toast.success(`Solo: ~${form.matchScore || "N/A"}`);
-    setForm((prev) => ({
-      ...INITIAL_FORM,
-      teamNumber: assignment?.team_number || "",
-      teamName: assignment?.team_name || "",
-    }));
+    toast.success(`Submitted! Score: ~${form.matchScore || "N/A"}`);
+    setForm((prev) => ({ ...INITIAL_FORM, teamNumber: assignment?.team_number || "", teamName: assignment?.team_name || "" }));
     window.scrollTo({ top: 0, behavior: "smooth" });
+    setActiveTab("dashboard");
+    fetchData();
   };
 
   return (
@@ -265,19 +330,20 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
       <CelebrationOverlay visible={celebrating} />
       <div className="fixed top-0 left-0 w-full h-64 bg-gradient-to-b from-primary/3 to-transparent pointer-events-none" />
 
-      {/* Header */}
+      {/* ── Header ── */}
       <header className="sticky top-0 z-50 glass border-b border-border">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
-            <h1 className="font-display text-xl text-primary text-glow tracking-wider">
-              MEADOWBOTS <span className="text-primary">#14841</span>
-            </h1>
-            <p className="text-xs text-muted-foreground font-body">DECODE Scouting Form</p>
+            <h1 className="font-display text-xl text-primary text-glow tracking-wider">SCOUT PORTAL</h1>
+            <p className="text-xs text-muted-foreground font-body">{scouterName} — DECODE 2025–2026</p>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground font-body hidden sm:block">
-              Scout: <span className="text-foreground">{scouterName}</span>
-            </span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={fetchData}
+              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200"
+            >
+              ↻ REFRESH
+            </button>
             <button
               onClick={onLogout}
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-destructive hover:text-destructive transition-all duration-200"
@@ -286,305 +352,407 @@ const ScoutingForm = ({ scouterName, onLogout }: ScoutingFormProps) => {
             </button>
           </div>
         </div>
+
+        {/* Tabs */}
+        <div className="max-w-4xl mx-auto px-4 flex gap-1 pb-2 overflow-x-auto">
+          <button
+            onClick={() => setActiveTab("dashboard")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap ${
+              activeTab === "dashboard" ? "bg-primary/20 text-primary border border-primary/40" : "text-muted-foreground hover:text-foreground border border-transparent"
+            }`}
+          >
+            🏠 DASHBOARD
+          </button>
+          <button
+            onClick={() => setActiveTab("scouting")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap ${
+              activeTab === "scouting" ? "bg-accent/20 text-accent border border-accent/40" : "text-muted-foreground hover:text-foreground border border-transparent"
+            }`}
+          >
+            📋 SCOUTING FORM
+          </button>
+          <button
+            onClick={() => setActiveTab("livestream")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap ${
+              activeTab === "livestream" ? "bg-red-500/20 text-red-400 border border-red-500/40" : "text-muted-foreground hover:text-foreground border border-transparent"
+            }`}
+          >
+            🔴 LIVE STREAM
+          </button>
+          <button
+            onClick={() => setActiveTab("drivedata")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap ${
+              activeTab === "drivedata" ? "bg-blue-500/20 text-blue-400 border border-blue-500/40" : "text-muted-foreground hover:text-foreground border border-transparent"
+            }`}
+          >
+            🔵 DRIVE DATA
+          </button>
+        </div>
       </header>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+      {/* ══ DASHBOARD TAB ══ */}
+      {activeTab === "dashboard" && (
+        <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+          <div className="glass rounded-xl p-6 border border-accent/30 glow-primary">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-4">
+                <span className="text-4xl">🛰️</span>
+                <div>
+                  <h2 className="font-display text-xl text-primary tracking-wider text-glow">MEADOWBOTS SCOUTING HQ</h2>
+                  <p className="text-sm text-muted-foreground font-body mt-1">Scout View — DECODE 2025–2026</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveTab("scouting")}
+                className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-display font-bold tracking-widest text-sm hover:glow-primary-strong transition-all duration-300 hover:scale-[1.03] active:scale-[0.98]"
+              >
+                🚀 START SCOUTING
+              </button>
+            </div>
+          </div>
 
-        {/* Assignment Banner */}
-        {assignment && (
-          <div className="glass rounded-xl p-4 border border-primary/40 glow-primary">
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">🎯</span>
-              <div>
-                <p className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-0.5">Your Assigned Team</p>
-                <p className="font-display text-lg text-primary tracking-wider">
-                  {assignment.team_name ? (
-                    <>
-                      {assignment.team_name}{" "}
-                      <span className="text-foreground/60 text-base">#{assignment.team_number}</span>
-                    </>
-                  ) : (
-                    <>Team #{assignment.team_number}</>
+          {loadingData ? (
+            <div className="text-center py-10 text-muted-foreground font-body text-sm">Loading...</div>
+          ) : (
+            <>
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="glass rounded-xl p-4 text-center border border-border/50">
+                  <p className="font-display text-3xl text-primary text-glow">{entries.length}</p>
+                  <p className="text-xs text-muted-foreground font-body mt-1">Total Entries</p>
+                </div>
+                <div className="glass rounded-xl p-4 text-center border border-border/50">
+                  <p className="font-display text-3xl text-primary text-glow">{teamSummaries.length}</p>
+                  <p className="text-xs text-muted-foreground font-body mt-1">Teams Scouted</p>
+                </div>
+              </div>
+
+              {/* Assignment */}
+              {assignment && (
+                <div className="glass rounded-xl p-5 border border-primary/30">
+                  <p className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-2">Your Assigned Team</p>
+                  <p className="font-display text-xl text-primary tracking-wider">
+                    {assignment.team_name || `Team #${assignment.team_number}`}
+                    {assignment.team_name && <span className="text-foreground/50 text-base ml-2">#{assignment.team_number}</span>}
+                  </p>
+                  {assignment.qual_matches.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {assignment.qual_matches.map((m) => (
+                        <span key={m} className={`px-3 py-1 rounded-md text-xs font-display ${completedMatches.includes(m.toUpperCase()) ? "bg-green-500/20 text-green-400 border border-green-500/40" : "bg-muted text-muted-foreground border border-border"}`}>
+                          {completedMatches.includes(m.toUpperCase()) ? "✓ " : ""}{m}
+                        </span>
+                      ))}
+                    </div>
                   )}
-                </p>
+                </div>
+              )}
+
+              {/* Top Rankings */}
+              {teamSummaries.length > 0 && (
+                <div className="glass rounded-xl p-5 border border-border/50">
+                  <h3 className="font-display text-sm tracking-wider text-foreground mb-4">🏆 TOP RANKINGS</h3>
+                  <div className="space-y-3">
+                    {teamSummaries.slice(0, 5).map((team, i) => (
+                      <div key={team.teamNumber} className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 border border-border/30">
+                        <span className="font-display text-sm w-8 text-center text-primary">{getRankIcon(i + 1)}</span>
+                        <div className="flex-1">
+                          <p className="font-display text-sm text-foreground">Team {team.teamNumber}</p>
+                          <p className="text-xs text-muted-foreground font-body">{team.entries.length} match{team.entries.length !== 1 ? "es" : ""}</p>
+                        </div>
+                        <p className="font-display text-sm text-primary">{Math.round(team.avgScore)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ══ SCOUTING FORM TAB ══ */}
+      {activeTab === "scouting" && (
+        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+
+          {assignment && (
+            <div className="glass rounded-xl p-4 border border-primary/40 glow-primary">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🎯</span>
+                <div>
+                  <p className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-0.5">Your Assigned Team</p>
+                  <p className="font-display text-lg text-primary tracking-wider">
+                    {assignment.team_name ? <>{assignment.team_name} <span className="text-foreground/60 text-base">#{assignment.team_number}</span></> : <>Team #{assignment.team_number}</>}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Team Info */}
+          <div className="glass rounded-xl p-6 glow-primary space-y-4">
+            <SectionHeader title="TEAM INFO" icon="🤖" />
+            <div>
+              <label className="block text-sm text-muted-foreground font-body mb-1">Official Team Name</label>
+              <input type="text" value={form.teamName} onChange={(e) => handleChange("teamName", e.target.value)}
+                placeholder="e.g. The Cheesy Poofs"
+                className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm text-muted-foreground font-body mb-1">Team Number *</label>
+                <input type="text" value={form.teamNumber} onChange={(e) => handleChange("teamNumber", e.target.value)}
+                  placeholder="e.g. 14841"
+                  className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all" />
+              </div>
+              <div>
+                <label className="block text-sm text-muted-foreground font-body mb-1">Match Number</label>
+                {assignment && assignment.qual_matches.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {assignment.qual_matches.map((match) => {
+                      const isDone = completedMatches.includes(match.toUpperCase());
+                      const isSelected = form.matchNumber === match;
+                      return (
+                        <button key={match} type="button" disabled={isDone}
+                          onClick={() => !isDone && handleChange("matchNumber", isSelected ? "" : match)}
+                          className={`px-4 py-2 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
+                            isDone ? "bg-green-500/20 border-green-500/60 text-green-400 cursor-not-allowed opacity-80"
+                              : isSelected ? "bg-primary/20 border-primary text-primary glow-primary"
+                              : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                          }`}>
+                          {isDone ? "✓ " : ""}{match}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <input type="text" value={form.matchNumber} onChange={(e) => handleChange("matchNumber", e.target.value)}
+                    placeholder="e.g. Q5"
+                    className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all" />
+                )}
               </div>
             </div>
           </div>
-        )}
 
-        {/* Team Info */}
-        <div className="glass rounded-xl p-6 glow-primary space-y-4">
-          <SectionHeader title="TEAM INFO" icon="🤖" />
-
-          <div>
-            <label className="block text-sm text-muted-foreground font-body mb-1">Official Team Name</label>
-            <input
-              type="text"
-              value={form.teamName}
-              onChange={(e) => handleChange("teamName", e.target.value)}
-              placeholder="e.g. The Cheesy Poofs"
-              className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
-            />
+          {/* Autonomous */}
+          <div className="glass rounded-xl p-6 border-glow space-y-5">
+            <SectionHeader title="AUTONOMOUS" icon="⚡" />
+            <MCQuestion label="How many artifacts did they score in Autonomous?" name="autoArtifactsScored" options={["0", "1-2", "3-4", "5+"]} value={form.autoArtifactsScored} onChange={handleChange} />
+            <MCQuestion label="Did they achieve pattern alignment in Autonomous?" name="autoPatternAlignment" options={["None", "1 Pattern", "2 Patterns", "3+ Patterns"]} value={form.autoPatternAlignment} onChange={handleChange} />
+            <MCQuestion label="Did their robot cross the Launch Line?" name="autoLaunchLine" options={["No", "Yes"]} value={form.autoLaunchLine} onChange={handleChange} />
+            <MCQuestion label="Did they leave at the end of Autonomous?" name="autoLeave" options={["No", "Yes"]} value={form.autoLeave} onChange={handleChange} />
+            <MCQuestion label="How consistent was their Autonomous routine?" name="autoConsistency" options={["No Auto", "Inconsistent", "Mostly Consistent", "Very Consistent"]} value={form.autoConsistency} onChange={handleChange} />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm text-muted-foreground font-body mb-1">Team Number *</label>
-              <input
-                type="text"
-                value={form.teamNumber}
-                onChange={(e) => handleChange("teamNumber", e.target.value)}
-                placeholder="e.g. 14841"
-                className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-muted-foreground font-body mb-1">Match Number</label>
-              {assignment && assignment.qual_matches.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {assignment.qual_matches.map((match) => {
-                    const isDone = completedMatches.includes(match.toUpperCase());
-                    const isSelected = form.matchNumber === match;
-                    return (
-                      <button
-                        key={match}
-                        type="button"
-                        disabled={isDone}
-                        onClick={() => !isDone && handleChange("matchNumber", isSelected ? "" : match)}
-                        className={`px-4 py-2 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
-                          isDone
-                            ? "bg-green-500/20 border-green-500/60 text-green-400 cursor-not-allowed opacity-80"
-                            : isSelected
-                            ? "bg-primary/20 border-primary text-primary glow-primary"
-                            : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                        }`}
-                      >
-                        {isDone ? "✓ " : ""}{match}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <input
-                  type="text"
-                  value={form.matchNumber}
-                  onChange={(e) => handleChange("matchNumber", e.target.value)}
-                  placeholder="e.g. Q5"
-                  className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
-                />
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Autonomous */}
-        <div className="glass rounded-xl p-6 border-glow space-y-5">
-          <SectionHeader title="AUTONOMOUS" icon="⚡" />
-          <MCQuestion label="How many artifacts did they score in Autonomous?" name="autoArtifactsScored" options={["0", "1-2", "3-4", "5+"]} value={form.autoArtifactsScored} onChange={handleChange} />
-          <MCQuestion label="Did they achieve pattern alignment in Autonomous?" name="autoPatternAlignment" options={["None", "1 Pattern", "2 Patterns", "3+ Patterns"]} value={form.autoPatternAlignment} onChange={handleChange} />
-          <MCQuestion label="Did their robot cross the Launch Line?" name="autoLaunchLine" options={["No", "Yes"]} value={form.autoLaunchLine} onChange={handleChange} />
-          <MCQuestion label="Did they leave (move from the depot line) at the end of Autonomous?" name="autoLeave" options={["No", "Yes"]} value={form.autoLeave} onChange={handleChange} />
-          <MCQuestion label="How consistent was their Autonomous routine?" name="autoConsistency" options={["No Auto", "Inconsistent", "Mostly Consistent", "Very Consistent"]} value={form.autoConsistency} onChange={handleChange} />
-        </div>
-
-        {/* Teleop */}
-        <div className="glass rounded-xl p-6 border-glow space-y-5">
-          <SectionHeader title="TELE-OP" icon="🎮" />
-          <MCQuestion label="What intake method did they use?" name="teleopIntakeMethod" options={["No Intake", "Pushing", "Floor Intake", "Both"]} value={form.teleopIntakeMethod} onChange={handleChange} />
-          <MCQuestion label="How many balls can their robot hold at once?" name="teleopBallCapacity" options={["1", "2", "3"]} value={form.teleopBallCapacity} onChange={handleChange} />
-          <MCQuestion label="How accurate was their shooting?" name="teleopShootingAccuracy" options={["No Shooting", "Inaccurate", "Somewhat Accurate", "Very Accurate"]} value={form.teleopShootingAccuracy} onChange={handleChange} />
-          <MCQuestion label="Did they interact with the Gate?" name="teleopGateInteraction" options={["Did Not Attempt", "Tried But Failed", "Sometimes", "Opened Reliably"]} value={form.teleopGateInteraction} onChange={handleChange} />
-          <MCQuestion label="How well did they manage Overflow artifacts?" name="teleopOverflowManagement" options={["Did Not Collect", "Poor", "Good", "Excellent"]} value={form.teleopOverflowManagement} onChange={handleChange} />
-          <MCQuestion label="How fast were their scoring cycles?" name="teleopCycleSpeed" options={["Minimal Cycling", "Slow", "Average", "Very Fast"]} value={form.teleopCycleSpeed} onChange={handleChange} />
-          <MCQuestion label="Did they classify artifacts (purple vs green) correctly?" name="teleopArtifactClassification" options={["No Classification", "Rarely", "Mostly", "Always"]} value={form.teleopArtifactClassification} onChange={handleChange} />
-        </div>
-
-        {/* Endgame */}
-        <div className="glass rounded-xl p-6 border-glow space-y-5">
-          <SectionHeader title="ENDGAME" icon="🏁" />
-          <MCQuestion label="Did they park in the Base Zone?" name="endgameParking" options={["No", "Partial", "Yes – Full Park"]} value={form.endgameParking} onChange={handleChange} />
-          <MCQuestion label="Did they assist their alliance partner in Endgame?" name="endgameAllianceAssist" options={["No", "Attempted", "Yes"]} value={form.endgameAllianceAssist} onChange={handleChange} />
-        </div>
-
-        {/* Penalties */}
-        <div className="glass rounded-xl p-6 border-glow space-y-5">
-          <SectionHeader title="PENALTIES" icon="🚨" />
-          <p className="text-sm font-body text-foreground font-medium">Which penalties did this team receive? (Select all that apply)</p>
-          <div className="flex flex-wrap gap-2">
-            {PENALTY_OPTIONS.map((penalty) => (
-              <button
-                key={penalty}
-                type="button"
-                onClick={() => {
-                  setForm((prev) => {
-                    const has = prev.penalties.includes(penalty);
-                    if (penalty === "None observed") {
-                      return { ...prev, penalties: has ? [] : ["None observed"] };
-                    }
-                    const withoutNone = prev.penalties.filter((p) => p !== "None observed");
-                    return {
-                      ...prev,
-                      penalties: has ? withoutNone.filter((p) => p !== penalty) : [...withoutNone, penalty],
-                    };
-                  });
-                }}
-                className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
-                  (form.penalties || []).includes(penalty)
-                    ? penalty === "None observed"
-                      ? "bg-glow-success/20 border-glow-success text-glow-success"
-                      : "bg-destructive/20 border-destructive text-destructive"
-                    : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                }`}
-              >
-                {penalty}
-              </button>
-            ))}
+          {/* Teleop */}
+          <div className="glass rounded-xl p-6 border-glow space-y-5">
+            <SectionHeader title="TELE-OP" icon="🎮" />
+            <MCQuestion label="What intake method did they use?" name="teleopIntakeMethod" options={["No Intake", "Pushing", "Floor Intake", "Both"]} value={form.teleopIntakeMethod} onChange={handleChange} />
+            <MCQuestion label="How many balls can their robot hold at once?" name="teleopBallCapacity" options={["1", "2", "3"]} value={form.teleopBallCapacity} onChange={handleChange} />
+            <MCQuestion label="How accurate was their shooting?" name="teleopShootingAccuracy" options={["No Shooting", "Inaccurate", "Somewhat Accurate", "Very Accurate"]} value={form.teleopShootingAccuracy} onChange={handleChange} />
+            <MCQuestion label="Did they interact with the Gate?" name="teleopGateInteraction" options={["Did Not Attempt", "Tried But Failed", "Sometimes", "Opened Reliably"]} value={form.teleopGateInteraction} onChange={handleChange} />
+            <MCQuestion label="How well did they manage Overflow artifacts?" name="teleopOverflowManagement" options={["Did Not Collect", "Poor", "Good", "Excellent"]} value={form.teleopOverflowManagement} onChange={handleChange} />
+            <MCQuestion label="How fast were their scoring cycles?" name="teleopCycleSpeed" options={["Minimal Cycling", "Slow", "Average", "Very Fast"]} value={form.teleopCycleSpeed} onChange={handleChange} />
+            <MCQuestion label="Did they classify artifacts correctly?" name="teleopArtifactClassification" options={["No Classification", "Rarely", "Mostly", "Always"]} value={form.teleopArtifactClassification} onChange={handleChange} />
           </div>
 
-          {/* Divider */}
-          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-
-          {/* Major Cards */}
-          <div className="space-y-3">
-            <p className="text-sm font-body text-foreground font-medium">Major Cards Issued</p>
-            <div className="flex flex-wrap gap-3">
-              {CARD_OPTIONS.map((card) => {
-                const isSelected = (form.cards || []).includes(card);
-                const isYellow = card === "Yellow Card";
-                return (
-                  <button
-                    key={card}
-                    type="button"
-                    onClick={() => {
-                      setForm((prev) => {
-                        const has = prev.cards.includes(card);
-                        return { ...prev, cards: has ? prev.cards.filter((c) => c !== card) : [...prev.cards, card] };
-                      });
-                    }}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
-                      isSelected
-                        ? isYellow
-                          ? "bg-yellow-400/20 border-yellow-400 text-yellow-400 shadow-[0_0_12px_2px_rgba(250,204,21,0.4)]"
-                          : "bg-red-500/20 border-red-500 text-red-400 shadow-[0_0_12px_2px_rgba(239,68,68,0.45)]"
-                        : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                    }`}
-                  >
-                    {isYellow ? "🟨" : "🟥"} {card}
-                  </button>
-                );
-              })}
-            </div>
+          {/* Endgame */}
+          <div className="glass rounded-xl p-6 border-glow space-y-5">
+            <SectionHeader title="ENDGAME" icon="🏁" />
+            <MCQuestion label="Did they park in the Base Zone?" name="endgameParking" options={["No", "Partial", "Yes – Full Park"]} value={form.endgameParking} onChange={handleChange} />
+            <MCQuestion label="Did they assist their alliance partner in Endgame?" name="endgameAllianceAssist" options={["No", "Attempted", "Yes"]} value={form.endgameAllianceAssist} onChange={handleChange} />
           </div>
 
-          {/* Divider */}
-          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-
-          {/* Penalty Points Given */}
-          <div className="space-y-2">
-            <label className="block text-sm font-body text-foreground font-medium">
-              How many penalty points did this team give to the opposing alliance?
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={form.penaltyPointsGiven}
-              onChange={(e) => handleChange("penaltyPointsGiven", e.target.value)}
-              placeholder="e.g. 10"
-              className="w-full sm:w-48 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
-            />
-          </div>
-        </div>
-
-        {/* Match Result */}
-        <div className="glass rounded-xl p-6 border-glow space-y-5">
-          <SectionHeader title="MATCH RESULT" icon="🏆" />
-
-          {/* Match Score */}
-          <div className="space-y-2">
-            <label className="block text-sm font-body text-foreground font-medium">
-              What was the final score of the Alliance that the Team you were Scouting was on?
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={form.matchScore}
-              onChange={(e) => handleChange("matchScore", e.target.value)}
-              placeholder="e.g. 85"
-              className="w-full sm:w-48 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
-            />
-          </div>
-
-          {/* Alliance Won */}
-          <div className="space-y-3">
-            <p className="text-sm font-body text-foreground font-medium">
-              Did the alliance / team you are scouting win the match?
-            </p>
-            <div className="flex flex-wrap gap-3">
-              {["Yes – Won", "No – Lost", "Tie"].map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => handleChange("allianceWon", option)}
-                  className={`px-5 py-2.5 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
-                    form.allianceWon === option
-                      ? option === "Yes – Won"
-                        ? "bg-green-500/20 border-green-500 text-green-400 shadow-[0_0_12px_2px_rgba(34,197,94,0.3)]"
-                        : option === "No – Lost"
-                        ? "bg-destructive/20 border-destructive text-destructive"
-                        : "bg-primary/20 border-primary text-primary"
+          {/* Penalties */}
+          <div className="glass rounded-xl p-6 border-glow space-y-5">
+            <SectionHeader title="PENALTIES" icon="🚨" />
+            <p className="text-sm font-body text-foreground font-medium">Which penalties did this team receive? (Select all that apply)</p>
+            <div className="flex flex-wrap gap-2">
+              {PENALTY_OPTIONS.map((penalty) => (
+                <button key={penalty} type="button"
+                  onClick={() => {
+                    setForm((prev) => {
+                      const has = prev.penalties.includes(penalty);
+                      if (penalty === "None observed") return { ...prev, penalties: has ? [] : ["None observed"] };
+                      const withoutNone = prev.penalties.filter((p) => p !== "None observed");
+                      return { ...prev, penalties: has ? withoutNone.filter((p) => p !== penalty) : [...withoutNone, penalty] };
+                    });
+                  }}
+                  className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                    (form.penalties || []).includes(penalty)
+                      ? penalty === "None observed" ? "bg-glow-success/20 border-glow-success text-glow-success" : "bg-destructive/20 border-destructive text-destructive"
                       : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
-                  }`}
-                >
-                  {option === "Yes – Won" ? "🏆 " : option === "No – Lost" ? "❌ " : "🤝 "}{option}
-                </button>
+                  }`}>{penalty}</button>
               ))}
             </div>
+            <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+            <div className="space-y-3">
+              <p className="text-sm font-body text-foreground font-medium">Major Cards Issued</p>
+              <div className="flex flex-wrap gap-3">
+                {CARD_OPTIONS.map((card) => {
+                  const isSelected = (form.cards || []).includes(card);
+                  const isYellow = card === "Yellow Card";
+                  return (
+                    <button key={card} type="button"
+                      onClick={() => { setForm((prev) => { const has = prev.cards.includes(card); return { ...prev, cards: has ? prev.cards.filter((c) => c !== card) : [...prev.cards, card] }; }); }}
+                      className={`px-5 py-2.5 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
+                        isSelected ? isYellow ? "bg-yellow-400/20 border-yellow-400 text-yellow-400 shadow-[0_0_12px_2px_rgba(250,204,21,0.4)]" : "bg-red-500/20 border-red-500 text-red-400 shadow-[0_0_12px_2px_rgba(239,68,68,0.45)]"
+                        : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                      }`}>
+                      {isYellow ? "🟨" : "🟥"} {card}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+            <div className="space-y-2">
+              <label className="block text-sm font-body text-foreground font-medium">How many penalty points did this team give to the opposing alliance?</label>
+              <input type="number" min="0" value={form.penaltyPointsGiven} onChange={(e) => handleChange("penaltyPointsGiven", e.target.value)}
+                placeholder="e.g. 10"
+                className="w-full sm:w-48 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all" />
+            </div>
           </div>
-        </div>
 
-        {/* Short Answers / Notes */}
-        <div className="glass rounded-xl p-6 glow-primary space-y-6">
-          <SectionHeader title="NOTES" icon="📝" />
-          <div className="space-y-2">
-            <label className="block text-sm font-body text-foreground font-medium">
-              What special features or strategies did you notice about this team?
-            </label>
-            <textarea
-              value={form.specialFeatures}
-              onChange={(e) => handleChange("specialFeatures", e.target.value)}
-              rows={3}
-              placeholder="e.g. They had a unique dual-flywheel launcher, very fast cycles..."
-              className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all resize-none"
+          {/* Match Result */}
+          <div className="glass rounded-xl p-6 border-glow space-y-5">
+            <SectionHeader title="MATCH RESULT" icon="🏆" />
+            <div className="space-y-2">
+              <label className="block text-sm font-body text-foreground font-medium">What was the final score of the Alliance that the Team you were Scouting was on?</label>
+              <input type="number" min="0" value={form.matchScore} onChange={(e) => handleChange("matchScore", e.target.value)}
+                placeholder="e.g. 85"
+                className="w-full sm:w-48 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all" />
+            </div>
+            <div className="space-y-3">
+              <p className="text-sm font-body text-foreground font-medium">Did the alliance / team you are scouting win the match?</p>
+              <div className="flex flex-wrap gap-3">
+                {["Yes – Won", "No – Lost", "Tie"].map((option) => (
+                  <button key={option} type="button" onClick={() => handleChange("allianceWon", option)}
+                    className={`px-5 py-2.5 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
+                      form.allianceWon === option
+                        ? option === "Yes – Won" ? "bg-green-500/20 border-green-500 text-green-400 shadow-[0_0_12px_2px_rgba(34,197,94,0.3)]"
+                          : option === "No – Lost" ? "bg-destructive/20 border-destructive text-destructive"
+                          : "bg-primary/20 border-primary text-primary"
+                        : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                    }`}>
+                    {option === "Yes – Won" ? "🏆 " : option === "No – Lost" ? "❌ " : "🤝 "}{option}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div className="glass rounded-xl p-6 glow-primary space-y-6">
+            <SectionHeader title="NOTES" icon="📝" />
+            <div className="space-y-2">
+              <label className="block text-sm font-body text-foreground font-medium">What special features or strategies did you notice about this team?</label>
+              <textarea value={form.specialFeatures} onChange={(e) => handleChange("specialFeatures", e.target.value)} rows={3}
+                placeholder="e.g. They had a unique dual-flywheel launcher, very fast cycles..."
+                className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all resize-none" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-body text-foreground font-bold text-lg">Do you think this team will be a good match for us?</label>
+              <textarea value={form.goodMatch} onChange={(e) => handleChange("goodMatch", e.target.value)} rows={3}
+                placeholder="Yes / No and why..."
+                className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all resize-none" />
+            </div>
+          </div>
+
+          {/* Submit */}
+          <button type="submit" disabled={submitting}
+            className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-display font-bold text-lg tracking-widest hover:glow-primary-strong transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed">
+            {submitting ? "SAVING..." : "SUBMIT SCOUTING DATA"}
+          </button>
+
+          <p className="text-center text-muted-foreground/30 text-xs font-body pb-8">
+            Data synced to Lovable Cloud • FTC DECODE™ 2025–2026
+          </p>
+        </form>
+      )}
+
+      {/* ══ LIVE STREAM TAB ══ */}
+      {activeTab === "livestream" && (
+        <div className="max-w-4xl mx-auto px-4 py-8 space-y-4">
+          <div className="glass rounded-xl p-4 border border-red-500/30">
+            <div className="flex items-center gap-3 mb-1">
+              <span className="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <h2 className="font-display text-sm tracking-wider text-red-400">LIVE — FirstNevada</h2>
+            </div>
+            <p className="text-xs text-muted-foreground font-body">Official FIRST Nevada Twitch stream</p>
+          </div>
+          <div className="glass rounded-xl overflow-hidden border border-border/50" style={{ aspectRatio: "16/9" }}>
+            <iframe
+              src="https://player.twitch.tv/?channel=FirstNevada&parent=meadowbots.lovable.app&parent=id-preview--507347b5-b304-47c7-a618-7ba9a3c5c371.lovable.app"
+              allowFullScreen className="w-full h-full" title="FirstNevada Live Stream"
             />
           </div>
-          <div className="space-y-2">
-            <label className="block text-sm font-body text-foreground font-bold text-lg">
-              Do you think this team will be a good match for us?
-            </label>
-            <textarea
-              value={form.goodMatch}
-              onChange={(e) => handleChange("goodMatch", e.target.value)}
-              rows={3}
-              placeholder="Yes / No and why..."
-              className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all resize-none"
-            />
-          </div>
         </div>
+      )}
 
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-display font-bold text-lg tracking-widest hover:glow-primary-strong transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {submitting ? "SAVING..." : "SUBMIT SCOUTING DATA"}
-        </button>
+      {/* ══ DRIVE DATA TAB ══ */}
+      {activeTab === "drivedata" && (
+        <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+          {isBlueDriver ? (
+            <>
+              <div className="glass rounded-xl p-6 border border-blue-500/40" style={{ boxShadow: "0 0 20px hsl(220 100% 60% / 0.15)" }}>
+                <div className="flex items-center gap-4">
+                  <span className="text-4xl">🔵</span>
+                  <div>
+                    <h2 className="font-display text-xl tracking-wider" style={{ color: "hsl(220 100% 70%)" }}>BLUE DRIVE DATA</h2>
+                    <p className="text-xs text-muted-foreground font-body mt-1">Restricted — Drive Team Access Only</p>
+                  </div>
+                </div>
+              </div>
 
-        <p className="text-center text-muted-foreground/30 text-xs font-body pb-8">
-          Data synced to Lovable Cloud • FTC DECODE™ 2025–2026
-        </p>
-      </form>
+              <div className="glass rounded-xl p-6 border border-border/50">
+                <h3 className="font-display text-sm tracking-wider text-foreground mb-4">📊 FULL TEAM RANKINGS</h3>
+                {loadingData ? (
+                  <p className="text-muted-foreground text-sm font-body">Loading...</p>
+                ) : teamSummaries.length === 0 ? (
+                  <p className="text-muted-foreground text-sm font-body text-center py-4">No scouting data yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {teamSummaries.map((team, i) => (
+                      <div key={team.teamNumber} className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 border border-border/30">
+                        <span className="font-display text-sm w-8 text-center" style={{ color: i < 3 ? "hsl(220 100% 70%)" : undefined }}>
+                          {getRankIcon(i + 1)}
+                        </span>
+                        <div className="flex-1">
+                          <p className="font-display text-sm text-foreground">Team {team.teamNumber}</p>
+                          <p className="text-xs text-muted-foreground font-body">{team.entries.length} match{team.entries.length !== 1 ? "es" : ""} scouted</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-display text-sm" style={{ color: "hsl(220 100% 70%)" }}>{Math.round(team.avgScore)}</p>
+                          <p className="text-xs text-muted-foreground font-body">avg score</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="glass rounded-xl p-6 border border-border/50">
+                <h3 className="font-display text-sm tracking-wider text-foreground mb-3">📝 DRIVE TEAM NOTES</h3>
+                <p className="text-xs text-muted-foreground font-body mb-3">Private notes for drive team planning. (Not saved — refresh to clear.)</p>
+                <textarea
+                  className="w-full h-40 px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/40 font-body text-sm outline-none transition-all duration-300 resize-none"
+                  placeholder="Alliance selection targets, strategy notes, robot observations..."
+                />
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 space-y-5 text-center">
+              <span className="text-6xl">🔒</span>
+              <div>
+                <h2 className="font-display text-xl tracking-wider text-foreground">RESTRICTED ACCESS</h2>
+                <p className="text-muted-foreground font-body text-sm mt-2 max-w-xs mx-auto">
+                  Only allowed for Authorized Drive Team Data.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

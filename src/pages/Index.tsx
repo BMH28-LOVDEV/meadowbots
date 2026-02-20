@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import LoginScreen from "@/components/LoginScreen";
 import ScoutingForm from "@/components/ScoutingForm";
 import MasterDashboard from "@/components/MasterDashboard";
-import ScoutDashboard from "@/components/ScoutDashboard";
 import LetsGoDashboard from "@/components/LetsGoDashboard";
 import type { User } from "@supabase/supabase-js";
 
@@ -79,8 +78,8 @@ const Index = () => {
     return <LetsGoDashboard onLogout={handleLogout} />;
   }
 
-  // scout, viewer, bluedriver — all get ScoutDashboard (with role passed for Drive Data access)
-  return <ScoutDashboard scouterName={profile.display_name} onLogout={handleLogout} userRole={profile.role} />;
+  // scout, viewer, bluedriver — all get ScoutingForm (with role passed for Drive Data access)
+  return <ScoutingForm scouterName={profile.display_name} onLogout={handleLogout} userRole={profile.role} />;
 };
 
 export default Index;
