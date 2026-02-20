@@ -106,7 +106,10 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
   const [pendingPassword, setPendingPassword] = useState("");
   const [pendingError, setPendingError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments" | "livestream">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments" | "drivedata" | "livestream">("dashboard");
+  const [driveEntries, setDriveEntries] = useState<ScoutingEntry[]>([]);
+  const [driveProfiles, setDriveProfiles] = useState<{ display_name: string; username: string; role: string; user_id: string }[]>([]);
+  const [updatingRole, setUpdatingRole] = useState<string | null>(null);
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
   const [savingAssignment, setSavingAssignment] = useState<string | null>(null);
@@ -175,9 +178,52 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
     setAssignmentsLoading(false);
   };
 
+  const fetchDriveData = async () => {
+    const [{ data: entriesData }, { data: profilesData }] = await Promise.all([
+      supabase.from("scouting_entries").select("*").in("scouter_name", ["Zoë Khansevahn", "Zoe GK", "Chantelle Wong"]).order("timestamp", { ascending: false }),
+      supabase.from("profiles").select("display_name, username, role, user_id").order("display_name"),
+    ]);
+    if (entriesData) {
+      setDriveEntries(entriesData.map((row) => ({
+        id: row.id, teamNumber: row.team_number, matchNumber: row.match_number || "",
+        scouterName: row.scouter_name, timestamp: row.timestamp,
+        autoArtifactsScored: row.auto_artifacts_scored || "",
+        autoPatternAlignment: row.auto_pattern_alignment || "",
+        autoLaunchLine: row.auto_launch_line || "",
+        autoLeave: row.auto_leave || "",
+        autoConsistency: row.auto_consistency || "",
+        teleopIntakeMethod: row.teleop_intake_method || "",
+        teleopBallCapacity: row.teleop_ball_capacity || "",
+        teleopShootingAccuracy: row.teleop_shooting_accuracy || "",
+        teleopGateInteraction: row.teleop_gate_interaction || "",
+        teleopOverflowManagement: row.teleop_overflow_management || "",
+        teleopCycleSpeed: row.teleop_cycle_speed || "",
+        teleopArtifactClassification: row.teleop_artifact_classification || "",
+        endgameParking: row.endgame_parking || "",
+        endgameAllianceAssist: row.endgame_alliance_assist || "",
+        penalties: row.penalties || [],
+        specialFeatures: row.special_features || "",
+        goodMatch: row.good_match || "",
+        matchScore: (row as any).match_score ?? null,
+        allianceWon: (row as any).alliance_won || "",
+        penaltyPointsGiven: (row as any).penalty_points_given ?? null,
+      })));
+    }
+    if (profilesData) setDriveProfiles(profilesData as any);
+  };
+
+  const handleRoleUpdate = async (userId: string, newRole: string) => {
+    setUpdatingRole(userId);
+    const { error } = await supabase.from("profiles").update({ role: newRole }).eq("user_id", userId);
+    if (error) { toast.error("Failed to update role."); }
+    else { toast.success(`Role updated to ${newRole}!`); await fetchDriveData(); }
+    setUpdatingRole(null);
+  };
+
   useEffect(() => {
     fetchEntries();
     fetchAssignments();
+    fetchDriveData();
   }, []);
 
   // Subscribe to active scouts presence channel
@@ -346,7 +392,7 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={() => { fetchEntries(); fetchAssignments(); }}
+              onClick={() => { fetchEntries(); fetchAssignments(); fetchDriveData(); }}
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200"
             >
               ↻ REFRESH
@@ -407,6 +453,16 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
             }`}
           >
             📋 SCOUT ASSIGNMENTS
+          </button>
+          <button
+            onClick={() => setActiveTab("drivedata")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap ${
+              activeTab === "drivedata"
+                ? "bg-blue-500/20 text-blue-400 border border-blue-500/40"
+                : "text-muted-foreground hover:text-foreground border border-transparent"
+            }`}
+          >
+            🔵 DRIVE DATA
           </button>
           <button
             onClick={() => setActiveTab("livestream")}
@@ -1077,6 +1133,132 @@ const MasterDashboard = ({ onLogout }: MasterDashboardProps) => {
                 {clearingAll ? "CLEARING..." : "CLEAR ALL"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── DRIVE DATA TAB ── */}
+      {activeTab === "drivedata" && (
+        <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+          {/* Header */}
+          <div className="glass rounded-xl p-6 border border-blue-500/40" style={{ boxShadow: "0 0 20px hsl(220 100% 60% / 0.15)" }}>
+            <div className="flex items-center gap-4">
+              <span className="text-4xl">🔵</span>
+              <div>
+                <h2 className="font-display text-xl tracking-wider text-blue-400">DRIVE DATA HQ</h2>
+                <p className="text-xs text-muted-foreground font-body mt-1">Drive Team Data Collector submissions & role management</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Role Manager */}
+          <div className="glass rounded-xl overflow-hidden border border-blue-500/20">
+            <div className="px-5 py-4 border-b border-blue-500/20 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.08), rgba(37,99,235,0.04))" }}>
+              <span className="text-lg">👥</span>
+              <h3 className="font-display text-sm tracking-wider text-blue-400">TEAM ROLE MANAGER</h3>
+            </div>
+            <div className="divide-y divide-border/30">
+              {driveProfiles.filter(p => p.role !== "master").map((profile) => {
+                const roleLabels: Record<string, string> = {
+                  scout: "Scouter",
+                  bluedriver: "Drive Team Data Collector",
+                  driveteam: "Drive Team",
+                  viewer: "Viewer",
+                  letsgo: "Let's Go",
+                };
+                const roleColors: Record<string, string> = {
+                  scout: "text-muted-foreground",
+                  bluedriver: "text-blue-400",
+                  driveteam: "text-blue-300",
+                  viewer: "text-muted-foreground",
+                  letsgo: "text-primary",
+                };
+                return (
+                  <div key={profile.user_id} className="px-5 py-3.5 flex items-center gap-4 flex-wrap">
+                    <div className="flex-1 min-w-[160px]">
+                      <p className="font-display text-sm text-foreground tracking-wide">{profile.display_name}</p>
+                      <p className={`text-xs font-body mt-0.5 ${roleColors[profile.role] || "text-muted-foreground"}`}>
+                        {roleLabels[profile.role] || profile.role}
+                      </p>
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      {["scout", "driveteam", "bluedriver"].map((role) => (
+                        <button key={role} type="button"
+                          disabled={profile.role === role || updatingRole === profile.user_id}
+                          onClick={() => handleRoleUpdate(profile.user_id, role)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 border ${
+                            profile.role === role
+                              ? role === "bluedriver" ? "bg-blue-500/20 border-blue-500 text-blue-400"
+                                : role === "driveteam" ? "bg-blue-400/20 border-blue-400 text-blue-300"
+                                : "bg-primary/20 border-primary text-primary"
+                              : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground disabled:opacity-40"
+                          }`}>
+                          {role === "bluedriver" ? "Data Collector" : role === "driveteam" ? "Drive Team" : "Scout"}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+              {driveProfiles.filter(p => p.role !== "master").length === 0 && (
+                <div className="px-5 py-6 text-sm text-muted-foreground font-body text-center">No user accounts created yet.</div>
+              )}
+            </div>
+          </div>
+
+          {/* Drive Data Entries */}
+          <div className="glass rounded-xl overflow-hidden border border-blue-500/20">
+            <div className="px-5 py-4 border-b border-blue-500/20 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.08), rgba(37,99,235,0.04))" }}>
+              <span className="text-lg">📊</span>
+              <h3 className="font-display text-sm tracking-wider text-blue-400">DRIVE DATA SUBMISSIONS</h3>
+              <span className="ml-auto text-xs font-display text-blue-400/70">{driveEntries.length} ENTRIES</span>
+            </div>
+            {driveEntries.length === 0 ? (
+              <div className="px-5 py-10 text-center text-sm text-muted-foreground font-body">No Drive Data submitted yet.</div>
+            ) : (
+              <div className="divide-y divide-border/30">
+                {driveEntries.map((entry) => (
+                  <div key={entry.id} className="px-5 py-4 space-y-3">
+                    <div className="flex items-start justify-between gap-3 flex-wrap">
+                      <div>
+                        <p className="font-display text-sm text-foreground tracking-wide">
+                          Team {entry.teamNumber} — Match {entry.matchNumber || "N/A"}
+                          {entry.allianceWon && (
+                            <span className={`ml-2 text-xs ${entry.allianceWon === "Yes – Won" ? "text-green-400" : entry.allianceWon === "No – Lost" ? "text-destructive" : "text-muted-foreground"}`}>
+                              {entry.allianceWon === "Yes – Won" ? "🏆 Won" : entry.allianceWon === "No – Lost" ? "❌ Lost" : "🤝 Tie"}
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-muted-foreground font-body mt-0.5">
+                          🔵 <span className="text-blue-400">{entry.scouterName}</span> · {new Date(entry.timestamp).toLocaleDateString()}
+                          {entry.matchScore != null && <span className="ml-2">· Score: {entry.matchScore}</span>}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => { setDeleteTarget({ id: entry.id }); setDeletePassword(""); setDeleteError(""); }}
+                        className="px-3 py-1 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all shrink-0"
+                      >DELETE</button>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-body">
+                      {entry.autoArtifactsScored && <DataCell label="Auto Artifacts" value={entry.autoArtifactsScored} />}
+                      {entry.teleopArtifactClassification && <DataCell label="Teleop Artifacts" value={entry.teleopArtifactClassification} />}
+                      {entry.teleopCycleSpeed && <DataCell label="Cycles" value={entry.teleopCycleSpeed} />}
+                      {entry.teleopBallCapacity && <DataCell label="Cycle Time" value={entry.teleopBallCapacity} />}
+                      {entry.endgameParking && <DataCell label="Park" value={entry.endgameParking} />}
+                      {entry.penaltyPointsGiven != null && <DataCell label="Penalty Pts" value={String(entry.penaltyPointsGiven)} />}
+                    </div>
+                    {(entry.penalties || []).filter(p => p !== "None observed").length > 0 && (
+                      <div>
+                        <span className="text-xs text-muted-foreground font-body">Penalties: </span>
+                        {entry.penalties.map((p, i) => (
+                          <span key={i} className="inline-block text-xs px-2 py-0.5 rounded mr-1 mt-1 bg-destructive/20 text-destructive">{p}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
