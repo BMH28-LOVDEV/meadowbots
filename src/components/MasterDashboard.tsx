@@ -713,7 +713,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                     { name: "Max Tran", role: "Driver 1 / Human Player" },
                     { name: "Cole Schubert", role: "Driver 1 / Human Player" },
                     { name: "Benjamin Hale", role: "Driver 2" },
-                    { name: "Travis Quinn", role: "Human Player" },
+                    { name: "Travis Quinn", role: "Human Player (Sub)" },
                     { name: "Aiden Rubbo", role: "Drive Coach" },
                     { name: "Mason Howard", role: "Build / Drive Coach" },
                   ].map(({ name, role }, idx) => (
