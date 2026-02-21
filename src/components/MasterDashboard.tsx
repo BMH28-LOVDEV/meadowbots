@@ -1065,12 +1065,10 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="glass rounded-xl p-6 w-full max-w-sm mx-4 border border-destructive/40 space-y-4">
             <h3 className="font-display text-lg text-destructive tracking-wider">
-              {pendingAction.type === "clearAssignment" ? "🗑 CLEAR ASSIGNMENT" : `✕ REMOVE ${pendingAction.match}`}
+              🗑 CLEAR ASSIGNMENT
             </h3>
             <p className="text-sm text-muted-foreground font-body">
-              {pendingAction.type === "clearAssignment"
-                ? `This will clear the full assignment for ${pendingAction.scoutName}. Enter the password to confirm.`
-                : `This will remove match ${pendingAction.match} from ${pendingAction.scoutName}'s schedule. Enter the password to confirm.`}
+              {`This will clear the full assignment for ${pendingAction.scoutName}. Enter the password to confirm.`}
             </p>
             <input
               type="password"
