@@ -416,10 +416,12 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
   const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata">("dashboard");
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
-  const [assignment, setAssignment] = useState<{ team_number: string; team_name: string; qual_matches: string[] } | null>(null);
-  const [completedMatches, setCompletedMatches] = useState<string[]>([]);
+  const [assignments, setAssignments] = useState<{ team_number: string; team_name: string; qual_matches: string[] }[]>([]);
+  const [selectedTeamIdx, setSelectedTeamIdx] = useState(0);
   const [entries, setEntries] = useState<ScoutingEntry[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+
+  const assignment = assignments[selectedTeamIdx] || null;
 
   const isBlueDriver = userRole === "bluedriver";
   const isSilverDriver = userRole === "silverdriver";
@@ -441,10 +443,9 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
 
   const fetchData = async () => {
     setLoadingData(true);
-    const [{ data: rawEntries }, { data: assignmentData }, { data: entriesData }] = await Promise.all([
+    const [{ data: rawEntries }, { data: assignmentData }] = await Promise.all([
       supabase.from("scouting_entries").select("*").order("timestamp", { ascending: true }),
-      supabase.from("team_assignments").select("team_number, team_name, qual_matches").eq("scout_name", scouterName).maybeSingle(),
-      supabase.from("scouting_entries").select("match_number, team_number").eq("scouter_name", scouterName),
+      supabase.from("team_assignments").select("team_number, team_name, qual_matches").eq("scout_name", scouterName),
     ]);
 
     if (rawEntries) {
@@ -471,15 +472,9 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
       })));
     }
 
-    if (assignmentData) {
-      setAssignment({ team_number: assignmentData.team_number, team_name: assignmentData.team_name, qual_matches: assignmentData.qual_matches || [] });
-      setForm((prev) => ({ ...prev, teamNumber: assignmentData.team_number, teamName: assignmentData.team_name }));
-      if (entriesData) {
-        const done = entriesData
-          .filter((e) => e.team_number === assignmentData.team_number && e.match_number)
-          .map((e) => e.match_number!.toUpperCase());
-        setCompletedMatches(done);
-      }
+    if (assignmentData && assignmentData.length > 0) {
+      setAssignments(assignmentData.map(a => ({ team_number: a.team_number, team_name: a.team_name, qual_matches: a.qual_matches || [] })));
+      setForm((prev) => ({ ...prev, teamNumber: assignmentData[0].team_number, teamName: assignmentData[0].team_name }));
     }
 
     setLoadingData(false);
@@ -488,6 +483,14 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
   useEffect(() => {
     fetchData();
   }, [scouterName]);
+
+  const completedMatches = useMemo(() => {
+    const a = assignments[selectedTeamIdx];
+    if (!a) return [];
+    return entries
+      .filter(e => e.scouterName === scouterName && e.teamNumber === a.team_number && e.matchNumber)
+      .map(e => e.matchNumber.toUpperCase());
+  }, [entries, assignments, selectedTeamIdx, scouterName]);
 
   const teamSummaries = useMemo(() => {
     const byTeam: Record<string, ScoutingEntry[]> = {};
@@ -573,10 +576,6 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
       toast.error("Failed to save. Please try again.");
       console.error(error);
       return;
-    }
-
-    if (form.matchNumber) {
-      setCompletedMatches((prev) => [...prev, form.matchNumber.toUpperCase()]);
     }
 
     toast.success(`Submitted! Score: ~${form.matchScore || "N/A"}`);
@@ -701,23 +700,45 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
                 </div>
               </div>
 
-              {/* Assignment */}
-              {assignment && (
-                <div className="glass rounded-xl p-5 border border-primary/30">
-                  <p className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-2">Your Assigned Team</p>
-                  <p className="font-display text-xl text-primary tracking-wider">
-                    {assignment.team_name || `Team #${assignment.team_number}`}
-                    {assignment.team_name && <span className="text-foreground/50 text-base ml-2">#{assignment.team_number}</span>}
-                  </p>
-                  {assignment.qual_matches.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {assignment.qual_matches.map((m) => (
-                        <span key={m} className={`px-3 py-1 rounded-md text-xs font-display ${completedMatches.includes(m.toUpperCase()) ? "bg-green-500/20 text-green-400 border border-green-500/40" : "bg-muted text-muted-foreground border border-border"}`}>
-                          {completedMatches.includes(m.toUpperCase()) ? "✓ " : ""}{m}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+              {/* Assignments */}
+              {assignments.length > 0 && (
+                <div className="glass rounded-xl p-5 border border-primary/30 space-y-3">
+                  <p className="text-xs text-muted-foreground font-body uppercase tracking-wider">Your Assigned Teams (3)</p>
+                  {assignments.map((a, idx) => {
+                    const teamCompleted = a.qual_matches.every(m =>
+                      entries.some(e => e.scouterName === scouterName && e.teamNumber === a.team_number && e.matchNumber.toUpperCase() === m.toUpperCase())
+                    );
+                    return (
+                      <button
+                        key={a.team_number}
+                        type="button"
+                        onClick={() => {
+                          setSelectedTeamIdx(idx);
+                          setForm(prev => ({ ...prev, teamNumber: a.team_number, teamName: a.team_name, matchNumber: "" }));
+                        }}
+                        className={`w-full text-left p-3 rounded-lg border transition-all ${
+                          selectedTeamIdx === idx ? "border-primary/60 bg-primary/10" : "border-border/30 bg-muted/30"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1.5">
+                          <p className="font-display text-sm text-primary tracking-wider">
+                            Team #{a.team_number}
+                          </p>
+                          {teamCompleted && <span className="text-xs text-green-400 font-display">✓ DONE</span>}
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {a.qual_matches.map((m) => {
+                            const done = entries.some(e => e.scouterName === scouterName && e.teamNumber === a.team_number && e.matchNumber.toUpperCase() === m.toUpperCase());
+                            return (
+                              <span key={m} className={`px-2.5 py-0.5 rounded-md text-xs font-display ${done ? "bg-green-500/20 text-green-400 border border-green-500/40" : "bg-muted text-muted-foreground border border-border"}`}>
+                                {done ? "✓ " : ""}{m}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
 
@@ -748,16 +769,37 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
       {activeTab === "scouting" && (
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto px-4 py-8 space-y-8">
 
-          {assignment && (
-            <div className="glass rounded-xl p-4 border border-primary/40 glow-primary">
+          {assignments.length > 0 && (
+            <div className="glass rounded-xl p-4 border border-primary/40 glow-primary space-y-3">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">🎯</span>
-                <div>
-                  <p className="text-xs text-muted-foreground font-body uppercase tracking-wider mb-0.5">Your Assigned Team</p>
-                  <p className="font-display text-lg text-primary tracking-wider">
-                    {assignment.team_name ? <>{assignment.team_name} <span className="text-foreground/60 text-base">#{assignment.team_number}</span></> : <>Team #{assignment.team_number}</>}
-                  </p>
-                </div>
+                <p className="text-xs text-muted-foreground font-body uppercase tracking-wider">Select Team to Scout</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {assignments.map((a, idx) => {
+                  const allDone = a.qual_matches.every(m =>
+                    entries.some(e => e.scouterName === scouterName && e.teamNumber === a.team_number && e.matchNumber.toUpperCase() === m.toUpperCase())
+                  );
+                  return (
+                    <button
+                      key={a.team_number}
+                      type="button"
+                      onClick={() => {
+                        setSelectedTeamIdx(idx);
+                        setForm(prev => ({ ...prev, teamNumber: a.team_number, teamName: a.team_name, matchNumber: "" }));
+                      }}
+                      className={`px-4 py-2.5 rounded-lg text-sm font-display tracking-wider transition-all border ${
+                        selectedTeamIdx === idx
+                          ? "bg-primary/20 border-primary text-primary glow-primary"
+                          : allDone
+                            ? "bg-green-500/10 border-green-500/40 text-green-400"
+                            : "bg-muted border-border text-muted-foreground hover:border-primary/40"
+                      }`}
+                    >
+                      {allDone ? "✓ " : ""}#{a.team_number}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}

@@ -109,7 +109,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
   const [activeScouts, setActiveScouts] = useState<string[]>([]);
 
   // Shared password modal for assignment CLEAR and qual match removal
-  const [pendingAction, setPendingAction] = useState<null | { type: "clearAssignment"; scoutName: string } | { type: "removeMatch"; scoutName: string; match: string }>(null);
+  const [pendingAction, setPendingAction] = useState<null | { type: "clearAssignment"; scoutName: string }>(null);
   const [pendingPassword, setPendingPassword] = useState("");
   const [pendingError, setPendingError] = useState("");
 
@@ -119,9 +119,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
-  const [savingAssignment, setSavingAssignment] = useState<string | null>(null);
-  const [editedAssignments, setEditedAssignments] = useState<Record<string, { team_number: string; team_name: string; qual_matches: string[] }>>({});
-  const [matchInputs, setMatchInputs] = useState<Record<string, string>>({});
 
   // Drive team match schedules (from DB)
   const [blueMatches, setBlueMatches] = useState<{ id: string; match_label: string; sort_order: number }[]>([]);
@@ -176,17 +173,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
     setAssignmentsLoading(true);
     const { data, error } = await supabase.from("team_assignments").select("*");
     if (!error && data) {
-      const typed = data as TeamAssignment[];
-      setAssignments(typed);
-      const edited: Record<string, { team_number: string; team_name: string; qual_matches: string[] }> = {};
-      typed.forEach((a) => {
-        edited[a.scout_name] = {
-          team_number: a.team_number,
-          team_name: a.team_name,
-          qual_matches: a.qual_matches || [],
-        };
-      });
-      setEditedAssignments(edited);
+      setAssignments(data as TeamAssignment[]);
     }
     setAssignmentsLoading(false);
   };
@@ -308,65 +295,19 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
     );
   };
 
-  const handleSaveAssignment = async (scoutName: string) => {
-    const edited = editedAssignments[scoutName];
-    if (!edited) return;
-    setSavingAssignment(scoutName);
-
-    const existing = assignments.find((a) => a.scout_name === scoutName);
-    if (existing) {
-      const { error } = await supabase
-        .from("team_assignments")
-        .update({ team_number: edited.team_number, team_name: edited.team_name, qual_matches: edited.qual_matches })
-        .eq("scout_name", scoutName);
-      if (error) { toast.error("Failed to save."); console.error(error); }
-      else { toast.success(`Saved for ${scoutName}!`); await fetchAssignments(); }
-    } else {
-      const { error } = await supabase
-        .from("team_assignments")
-        .insert({ scout_name: scoutName, team_number: edited.team_number, team_name: edited.team_name, qual_matches: edited.qual_matches });
-      if (error) { toast.error("Failed to save."); console.error(error); }
-      else { toast.success(`Saved for ${scoutName}!`); await fetchAssignments(); }
-    }
-    setSavingAssignment(null);
-  };
-
   const executeClearAssignment = async (scoutName: string) => {
-    const existing = assignments.find((a) => a.scout_name === scoutName);
-    if (existing) {
-      await supabase.from("team_assignments").delete().eq("scout_name", scoutName);
-      await fetchAssignments();
-      toast.success(`Assignment cleared for ${scoutName}.`);
-    }
-    setEditedAssignments((prev) => ({ ...prev, [scoutName]: { team_number: "", team_name: "", qual_matches: [] } }));
-    setMatchInputs((prev) => ({ ...prev, [scoutName]: "" }));
-  };
-
-  const executeRemoveMatch = (scoutName: string, match: string) => {
-    const current = editedAssignments[scoutName] || { team_number: "", team_name: "", qual_matches: [] };
-    setEditedAssignments((prev) => ({ ...prev, [scoutName]: { ...current, qual_matches: current.qual_matches.filter((m) => m !== match) } }));
+    await supabase.from("team_assignments").delete().eq("scout_name", scoutName);
+    await fetchAssignments();
+    toast.success(`All assignments cleared for ${scoutName}.`);
   };
 
   const handlePendingAction = async () => {
     if (pendingPassword !== "BennyGF28!") { setPendingError("Incorrect password."); return; }
     if (!pendingAction) return;
-    if (pendingAction.type === "clearAssignment") {
-      await executeClearAssignment(pendingAction.scoutName);
-    } else if (pendingAction.type === "removeMatch") {
-      executeRemoveMatch(pendingAction.scoutName, pendingAction.match);
-    }
+    await executeClearAssignment(pendingAction.scoutName);
     setPendingAction(null);
     setPendingPassword("");
     setPendingError("");
-  };
-
-  const addMatch = (scoutName: string) => {
-    const raw = (matchInputs[scoutName] || "").trim().toUpperCase();
-    if (!raw) return;
-    const current = editedAssignments[scoutName] || { team_number: "", team_name: "", qual_matches: [] };
-    if (current.qual_matches.includes(raw)) { setMatchInputs((prev) => ({ ...prev, [scoutName]: "" })); return; }
-    setEditedAssignments((prev) => ({ ...prev, [scoutName]: { ...current, qual_matches: [...current.qual_matches, raw] } }));
-    setMatchInputs((prev) => ({ ...prev, [scoutName]: "" }));
   };
 
   const handleClearAll = async () => {
@@ -416,6 +357,14 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
 
   // Only show scouts that have an assignment
   const assignedScouts = assignments.filter((a) => a.team_number);
+  const uniqueAssignedScoutNames = [...new Set(assignedScouts.map(a => a.scout_name))];
+  const completedScoutsCount = uniqueAssignedScoutNames.filter(s => {
+    const sa = assignments.filter(a => a.scout_name === s && a.team_number);
+    return sa.length > 0 && sa.every(a => {
+      const m = a.qual_matches || [];
+      return m.length > 0 && m.every(q => isMatchDone(a, q));
+    });
+  }).length;
 
   const getRankColor = (rank: number) => {
     if (rank === 1) return "text-yellow-400";
@@ -608,16 +557,13 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
               </div>
               <div className="glass rounded-xl p-4 text-center border border-border/50">
                 <p className="font-display text-3xl text-primary text-glow">
-                  {assignments.filter((a) => a.team_number).length}
+                  {uniqueAssignedScoutNames.length}
                 </p>
                 <p className="text-xs text-muted-foreground font-body mt-1">Scouts Assigned</p>
               </div>
               <div className="glass rounded-xl p-4 text-center border border-border/50">
                 <p className="font-display text-3xl text-primary text-glow">
-                  {assignments.filter((a) => {
-                    const m = a.qual_matches || [];
-                    return m.length > 0 && m.every((q) => entries.some((e) => e.scouterName === a.scout_name && e.teamNumber === a.team_number && e.matchNumber.toUpperCase() === q.toUpperCase()));
-                  }).length}
+                  {completedScoutsCount}
                 </p>
                 <p className="text-xs text-muted-foreground font-body mt-1">Scouts Complete</p>
               </div>
@@ -766,7 +712,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
         {/* ── SCOUT PROGRESS TAB ── */}
         {activeTab === "progress" && (
           <>
-            {assignedScouts.length === 0 ? (
+            {uniqueAssignedScoutNames.length === 0 ? (
               <div className="glass rounded-xl p-12 text-center">
                 <p className="text-4xl mb-4">📋</p>
                 <p className="text-muted-foreground font-body">No scouts assigned yet. Set up assignments in the Scout Assignments tab.</p>
@@ -778,60 +724,57 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                   <div>
                     <h2 className="font-display text-base text-foreground tracking-wider">SCOUT PROGRESS</h2>
                     <p className="text-xs text-muted-foreground font-body mt-0.5">
-                      Live status — green = submitted, red = not yet scouted
+                      Live status — green = submitted, red = not yet scouted • 3 teams per scout
                     </p>
                   </div>
                 </div>
 
                 <div className="divide-y divide-border/30">
-                  {assignedScouts.map((assignment) => {
-                    const matches = assignment.qual_matches || [];
-                    const doneCount = matches.filter((m) => isMatchDone(assignment, m)).length;
-                    const allDone = matches.length > 0 && doneCount === matches.length;
+                  {uniqueAssignedScoutNames.sort().map((scoutName) => {
+                    const scoutAssignments = assignedScouts.filter(a => a.scout_name === scoutName);
+                    const totalMatches = scoutAssignments.reduce((sum, a) => sum + (a.qual_matches || []).length, 0);
+                    const doneMatches = scoutAssignments.reduce((sum, a) => (a.qual_matches || []).filter(m => isMatchDone(a, m)).length + sum, 0);
+                    const allDone = totalMatches > 0 && doneMatches === totalMatches;
 
                     return (
                       <div
-                        key={assignment.scout_name}
-                        className={`px-5 py-3.5 flex items-center gap-4 flex-wrap transition-colors ${allDone ? "bg-green-500/5" : ""}`}
+                        key={scoutName}
+                        className={`px-5 py-3.5 space-y-2 transition-colors ${allDone ? "bg-green-500/5" : ""}`}
                       >
-                        <div className="min-w-[130px]">
-                          <p className="font-display text-sm text-foreground tracking-wide leading-tight">{assignment.scout_name}</p>
-                          <p className="text-xs text-muted-foreground font-body mt-0.5">
-                            {assignment.team_name ? `${assignment.team_name} #${assignment.team_number}` : `Team #${assignment.team_number}`}
+                        <div className="flex items-center justify-between">
+                          <p className="font-display text-sm text-foreground tracking-wide leading-tight">{scoutName}</p>
+                          <p className={`font-display text-sm font-bold ${allDone ? "text-green-400" : "text-muted-foreground"}`}>
+                            {doneMatches}/{totalMatches}
                           </p>
                         </div>
 
-                        <div className="flex flex-wrap gap-1.5 flex-1">
-                          {matches.length === 0 ? (
-                            <span className="text-xs text-muted-foreground/50 font-body italic">No matches assigned</span>
-                          ) : (
-                            matches.map((match) => {
-                              const done = isMatchDone(assignment, match);
-                              return (
-                                <span
-                                  key={match}
-                                  className={`px-4 py-2 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
-                                    done
-                                      ? "bg-glow-success/20 border-glow-success text-glow-success"
-                                      : "bg-destructive/20 border-destructive text-destructive"
-                                  }`}
-                                >
-                                  {match}
-                                </span>
-                              );
-                            })
-                          )}
-                        </div>
-
-                        {/* Progress count */}
-                        {matches.length > 0 && (
-                          <div className="text-right shrink-0">
-                            <p className={`font-display text-sm font-bold ${allDone ? "text-green-400" : "text-muted-foreground"}`}>
-                              {doneCount}/{matches.length}
-                            </p>
-                            <p className="text-xs text-muted-foreground font-body">done</p>
-                          </div>
-                        )}
+                        {scoutAssignments.map((assignment) => {
+                          const matches = assignment.qual_matches || [];
+                          return (
+                            <div key={assignment.team_number} className="flex items-center gap-3 flex-wrap">
+                              <p className="text-xs text-muted-foreground font-body min-w-[80px]">
+                                Team #{assignment.team_number}
+                              </p>
+                              <div className="flex flex-wrap gap-1.5 flex-1">
+                                {matches.map((match) => {
+                                  const done = isMatchDone(assignment, match);
+                                  return (
+                                    <span
+                                      key={match}
+                                      className={`px-3 py-1 rounded-lg text-xs font-body font-semibold transition-all duration-200 border ${
+                                        done
+                                          ? "bg-glow-success/20 border-glow-success text-glow-success"
+                                          : "bg-destructive/20 border-destructive text-destructive"
+                                      }`}
+                                    >
+                                      {match}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     );
                   })}
@@ -839,10 +782,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
 
                 <div className="px-5 py-3 border-t border-border/50 bg-muted/20 flex items-center justify-between">
                   <p className="text-xs text-muted-foreground font-body">
-                    {assignedScouts.filter((a) => {
-                      const m = a.qual_matches || [];
-                      return m.length > 0 && m.every((q) => isMatchDone(a, q));
-                    }).length} / {assignedScouts.length} scouts complete
+                    {completedScoutsCount} / {uniqueAssignedScoutNames.length} scouts complete
                   </p>
                   <p className="text-xs text-muted-foreground font-body">
                     {entries.length} total entries submitted
@@ -1005,7 +945,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
           <div className="space-y-4">
             <div className="glass rounded-xl p-4 border border-primary/20">
               <p className="text-sm text-muted-foreground font-body">
-                📋 Assign each scout their team and qualification matches (e.g. <span className="text-foreground font-mono">Q5, Q7, Q12</span>). The progress chart will update live as scouts submit.
+                📋 Each scout is assigned <span className="text-foreground font-bold">3 teams</span> with <span className="text-foreground font-bold">3 qual matches</span> each. Progress updates live as scouts submit.
               </p>
             </div>
 
@@ -1016,110 +956,67 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
               </div>
             ) : (
               <div className="space-y-3">
-                {[...TEAM_MEMBERS].filter((m) => !DRIVE_TEAM.includes(m)).sort((a, b) => a.localeCompare(b)).map((scoutName) => {
-                  const current = editedAssignments[scoutName] || { team_number: "", team_name: "", qual_matches: [] };
-                  const saved = assignments.find((a) => a.scout_name === scoutName);
-                  const isDirty =
-                    current.team_number !== (saved?.team_number || "") ||
-                    current.team_name !== (saved?.team_name || "") ||
-                    JSON.stringify(current.qual_matches) !== JSON.stringify(saved?.qual_matches || []);
-                  const hasAssignment = !!(saved?.team_number);
-                  const matchInput = matchInputs[scoutName] || "";
+                {[...TEAM_MEMBERS].filter((m) => !DRIVE_TEAM.includes(m)).sort().map((scoutName) => {
+                  const scoutAssignments = assignments.filter(a => a.scout_name === scoutName);
+                  const hasAssignment = scoutAssignments.length > 0;
+                  const totalMatches = scoutAssignments.reduce((sum, a) => sum + (a.qual_matches || []).length, 0);
+                  const doneMatches = scoutAssignments.reduce((sum, a) => (a.qual_matches || []).filter(m => isMatchDone(a, m)).length + sum, 0);
+                  const allDone = totalMatches > 0 && doneMatches === totalMatches;
 
                   return (
-                    <div key={scoutName} className={`glass rounded-xl p-4 transition-all duration-200 ${hasAssignment ? "border border-primary/30" : "border border-border/30"}`}>
-                      <div className="flex items-start gap-3 flex-wrap">
-                        {/* Scout name */}
-                        <div className="min-w-[140px] pt-1">
+                    <div key={scoutName} className={`glass rounded-xl p-4 transition-all duration-200 ${allDone ? "border border-green-500/30 bg-green-500/5" : hasAssignment ? "border border-primary/30" : "border border-border/30"}`}>
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div>
                           <p className="font-display text-sm text-foreground tracking-wide">{scoutName}</p>
                           {hasAssignment && (
-                            <p className="text-xs text-primary font-body mt-0.5">✓ Assigned</p>
+                            <p className={`text-xs font-body mt-0.5 ${allDone ? "text-green-400" : "text-primary"}`}>
+                              {allDone ? "✓ All complete" : `${doneMatches}/${totalMatches} matches done`}
+                            </p>
                           )}
                         </div>
-
-                        {/* Fields */}
-                        <div className="flex-1 space-y-2 min-w-[260px]">
-                          <div className="grid grid-cols-2 gap-2">
-                            <div>
-                              <label className="block text-xs text-muted-foreground font-body mb-1">Team #</label>
-                              <input
-                                type="text"
-                                value={current.team_number}
-                                onChange={(e) => setEditedAssignments((prev) => ({ ...prev, [scoutName]: { ...current, team_number: e.target.value } }))}
-                                placeholder="e.g. 254"
-                                className="w-full px-3 py-1.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body text-sm outline-none transition-all"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-xs text-muted-foreground font-body mb-1">Official Team Name</label>
-                              <input
-                                type="text"
-                                value={current.team_name}
-                                onChange={(e) => setEditedAssignments((prev) => ({ ...prev, [scoutName]: { ...current, team_name: e.target.value } }))}
-                                placeholder="e.g. The Cheesy Poofs"
-                                className="w-full px-3 py-1.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body text-sm outline-none transition-all"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Tag-style match input */}
-                          <div>
-                            <label className="block text-xs text-muted-foreground font-body mb-1">Qual Matches to Scout</label>
-                            <div className="min-h-[44px] w-full px-3 py-2 rounded-lg bg-muted border border-border focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all flex flex-wrap gap-1.5 items-center">
-                              {current.qual_matches.map((match) => {
-                                const done = saved ? isMatchDone(saved, match) : false;
-                                return (
-                                  <button
-                                    key={match}
-                                    type="button"
-                                    onClick={() => { setPendingAction({ type: "removeMatch", scoutName, match }); setPendingPassword(""); setPendingError(""); }}
-                                    title="Click to remove"
-                                    className={`px-3 py-1 rounded-lg text-sm font-body font-semibold border transition-all duration-200 hover:opacity-70 ${
-                                      done
-                                        ? "bg-glow-success/20 border-glow-success text-glow-success"
-                                        : "bg-destructive/20 border-destructive text-destructive"
-                                    }`}
-                                  >
-                                    {match} ×
-                                  </button>
-                                );
-                              })}
-                              <input
-                                type="text"
-                                value={matchInput}
-                                onChange={(e) => setMatchInputs((prev) => ({ ...prev, [scoutName]: e.target.value }))}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter" || e.key === "," || e.key === " ") {
-                                    e.preventDefault();
-                                    addMatch(scoutName);
-                                  }
-                                }}
-                                placeholder={current.qual_matches.length === 0 ? "Type Q5 then Enter…" : "Add more…"}
-                                className="flex-1 min-w-[100px] bg-transparent outline-none text-foreground placeholder:text-muted-foreground/40 font-body text-sm"
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Buttons */}
-                        <div className="flex gap-2 items-start pt-5 shrink-0">
+                        {hasAssignment && (
                           <button
-                            onClick={() => handleSaveAssignment(scoutName)}
-                            disabled={!isDirty || savingAssignment === scoutName || !current.team_number}
-                            className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider bg-primary text-primary-foreground hover:bg-primary/80 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                            onClick={() => { setPendingAction({ type: "clearAssignment", scoutName }); setPendingPassword(""); setPendingError(""); }}
+                            className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/50 text-destructive hover:bg-destructive/10 transition-all shrink-0"
                           >
-                            {savingAssignment === scoutName ? "SAVING..." : "SAVE"}
+                            CLEAR
                           </button>
-                          {hasAssignment && (
-                            <button
-                              onClick={() => { setPendingAction({ type: "clearAssignment", scoutName }); setPendingPassword(""); setPendingError(""); }}
-                              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/50 text-destructive hover:bg-destructive/10 transition-all"
-                            >
-                              CLEAR
-                            </button>
-                          )}
-                        </div>
+                        )}
                       </div>
+
+                      {!hasAssignment ? (
+                        <p className="text-xs text-muted-foreground/50 font-body italic">No teams assigned</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {scoutAssignments.map((a) => {
+                            const matches = a.qual_matches || [];
+                            return (
+                              <div key={a.team_number} className="flex items-center gap-3 flex-wrap p-2 rounded-lg bg-muted/30">
+                                <p className="font-display text-xs text-primary tracking-wide min-w-[90px]">
+                                  #{a.team_number}
+                                </p>
+                                <div className="flex flex-wrap gap-1.5 flex-1">
+                                  {matches.map((match) => {
+                                    const done = isMatchDone(a, match);
+                                    return (
+                                      <span
+                                        key={match}
+                                        className={`px-3 py-1 rounded-lg text-xs font-body font-semibold border transition-all duration-200 ${
+                                          done
+                                            ? "bg-glow-success/20 border-glow-success text-glow-success"
+                                            : "bg-destructive/20 border-destructive text-destructive"
+                                        }`}
+                                      >
+                                        {match}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
