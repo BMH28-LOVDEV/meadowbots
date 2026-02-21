@@ -998,7 +998,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           </div>
           <div className="glass rounded-xl overflow-hidden border border-border/50" style={{ aspectRatio: "16/9" }}>
             <iframe
-              src="https://player.twitch.tv/?channel=FirstNevada&parent=meadowbots.lovable.app&parent=id-preview--507347b5-b304-47c7-a618-7ba9a3c5c371.lovable.app"
+              src="https://player.twitch.tv/?channel=FIRSTNevada&parent=meadowbots.lovable.app&parent=id-preview--507347b5-b304-47c7-a618-7ba9a3c5c371.lovable.app&parent=507347b5-b304-47c7-a618-7ba9a3c5c371.lovableproject.com&parent=localhost"
               allowFullScreen className="w-full h-full" title="FirstNevada Live Stream"
             />
           </div>
