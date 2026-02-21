@@ -31,6 +31,8 @@ const ALIASES: Record<string, string> = {
   "ben hale": "Benjamin Hale",
   "will": "William Hu",
   "will hu": "William Hu",
+  "alexander": "Alex Gianelloni",
+  "alexander gianelloni": "Alex Gianelloni",
 };
 
 function normalize(str: string): string {
@@ -106,7 +108,7 @@ export const DRIVE_TEAM = [
   "Benjamin Hale",
   "Max Tran",
   "Cole Schubert",
-  "Travis Quinn",
+  "Heath Wells",
   "Mason Howard",
   "Naila Nauman",
 ];
