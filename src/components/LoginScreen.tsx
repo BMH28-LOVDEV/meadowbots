@@ -22,8 +22,8 @@ function detectEmailType(prefix: string): EmailType {
 }
 
 // Special role assignments by email prefix (case-insensitive)
-const BLUE_DRIVER_PREFIXES = ["zoe_khansevahn", "chantelle_wong"];
-const SILVER_DRIVER_PREFIXES = ["naila_nauman"];
+const BLUE_DRIVER_PREFIXES: string[] = [];
+const SILVER_DRIVER_PREFIXES: string[] = [];
 const COACH_PREFIXES = ["devin_allen"];
 const MASTER_PREFIXES = ["maxwell_tran", "benjamin_hale"];
 
