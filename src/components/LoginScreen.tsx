@@ -76,6 +76,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [forgotSent, setForgotSent] = useState(false);
 
   const [isShaking, setIsShaking] = useState(false);
+  const [accessDenied, setAccessDenied] = useState(false);
   
 
   const shake = () => {
@@ -135,8 +136,14 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     setLoginLoading(false);
 
     if (error) {
-      setLoginError("Incorrect email or password.");
-      shake();
+      // Check if the account doesn't exist at all — show Access Denied for the laughs
+      const errorMsg = error.message?.toLowerCase() || "";
+      if (errorMsg.includes("invalid login credentials")) {
+        setAccessDenied(true);
+      } else {
+        setLoginError(error.message);
+        shake();
+      }
     } else {
       onLogin();
     }
@@ -196,6 +203,29 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
+      {/* ACCESS DENIED OVERLAY */}
+      {accessDenied && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-destructive/95 backdrop-blur-sm">
+          <div className="text-center px-8 py-12 max-w-lg mx-4">
+            <div className="text-7xl md:text-9xl mb-6 animate-pulse">🚫</div>
+            <h1 className="text-4xl md:text-5xl font-display font-black text-white mb-4 tracking-wider">
+              ACCESS DENIED
+            </h1>
+            <p className="text-white/80 font-body text-lg mb-2">
+              You are not authorized to access this system.
+            </p>
+            <p className="text-white/60 font-body text-sm mb-8">
+              Nice try though 😏
+            </p>
+            <button
+              onClick={() => { setAccessDenied(false); setLoginError(""); setLoginPassword(""); }}
+              className="px-6 py-3 rounded-lg bg-white/20 text-white font-display font-semibold tracking-wider hover:bg-white/30 transition-all duration-300 border border-white/30"
+            >
+              ← TRY AGAIN
+            </button>
+          </div>
+        </div>
+      )}
 
 
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px] animate-pulse-glow" />
