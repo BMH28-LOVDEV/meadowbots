@@ -76,7 +76,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [forgotSent, setForgotSent] = useState(false);
 
   const [isShaking, setIsShaking] = useState(false);
-  const [accessDenied, setAccessDenied] = useState(false);
+  
 
   const shake = () => {
     setIsShaking(true);
@@ -167,19 +167,6 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
     setSignupLoading(true);
 
-    // Check whitelist before attempting signup
-    const { data: whitelistMatch, error: whitelistError } = await supabase
-      .from("allowed_emails")
-      .select("id")
-      .eq("email", email.toLowerCase())
-      .maybeSingle();
-
-    if (!whitelistMatch) {
-      setSignupLoading(false);
-      setAccessDenied(true);
-      return;
-    }
-
     const { data, error } = await supabase.auth.signUp({ email, password: signupPassword });
 
     if (error) {
@@ -209,31 +196,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
-      {/* ACCESS DENIED OVERLAY */}
-      {accessDenied && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-destructive/95 backdrop-blur-sm">
-          <div className="text-center px-8 py-12 max-w-lg mx-4">
-            <div className="text-7xl md:text-9xl font-display font-black text-white mb-6 tracking-wider animate-pulse">
-              🚫
-            </div>
-            <h1 className="text-4xl md:text-5xl font-display font-black text-white mb-4 tracking-wider">
-              ACCESS DENIED
-            </h1>
-            <p className="text-white/80 font-body text-lg mb-2">
-              Your email is not on the approved whitelist.
-            </p>
-            <p className="text-white/60 font-body text-sm mb-8">
-              Contact a team lead to get whitelisted before creating an account.
-            </p>
-            <button
-              onClick={() => { setAccessDenied(false); setMode("login"); }}
-              className="px-6 py-3 rounded-lg bg-white/20 text-white font-display font-semibold tracking-wider hover:bg-white/30 transition-all duration-300 border border-white/30"
-            >
-              ← BACK TO LOGIN
-            </button>
-          </div>
-        </div>
-      )}
+
 
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px] animate-pulse-glow" />
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/5 rounded-full blur-[100px] animate-pulse-glow" style={{ animationDelay: "1.5s" }} />

@@ -10,6 +10,7 @@ interface Profile {
   display_name: string;
   username: string;
   role: string;
+  approval_status: string;
 }
 
 const Index = () => {
@@ -23,7 +24,7 @@ const Index = () => {
     try {
       const { data } = await supabase
         .from("profiles")
-        .select("display_name, username, role")
+        .select("display_name, username, role, approval_status")
         .eq("user_id", userId)
         .single();
       setProfile(data ?? null);
@@ -94,6 +95,61 @@ const Index = () => {
 
   if (!user || !profile) {
     return <LoginScreen onLogin={() => {}} />;
+  }
+
+  // Pending approval screen
+  if (profile.approval_status === "pending") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px] animate-pulse-glow" />
+        <div className="text-center px-8 py-12 max-w-lg mx-4">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center animate-pulse">
+            <span className="text-4xl">⏳</span>
+          </div>
+          <h1 className="text-3xl font-display font-bold text-primary tracking-wider mb-4">
+            WAITING FOR APPROVAL
+          </h1>
+          <p className="text-muted-foreground font-body mb-2">
+            Your account has been created successfully.
+          </p>
+          <p className="text-muted-foreground/70 font-body text-sm mb-8">
+            A team administrator needs to approve your account before you can access the scouting portal.
+          </p>
+          <button
+            onClick={handleLogout}
+            className="px-6 py-3 rounded-lg bg-muted text-foreground font-display font-semibold tracking-wider hover:bg-muted/80 transition-all duration-300 border border-border"
+          >
+            LOG OUT
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Denied screen
+  if (profile.approval_status === "denied") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-destructive/95 relative overflow-hidden">
+        <div className="text-center px-8 py-12 max-w-lg mx-4">
+          <div className="text-7xl md:text-9xl mb-6 animate-pulse">🚫</div>
+          <h1 className="text-4xl md:text-5xl font-display font-black text-white mb-4 tracking-wider">
+            ACCESS DENIED
+          </h1>
+          <p className="text-white/80 font-body text-lg mb-2">
+            Your account has been denied access.
+          </p>
+          <p className="text-white/60 font-body text-sm mb-8">
+            Contact a team lead if you believe this is a mistake.
+          </p>
+          <button
+            onClick={handleLogout}
+            className="px-6 py-3 rounded-lg bg-white/20 text-white font-display font-semibold tracking-wider hover:bg-white/30 transition-all duration-300 border border-white/30"
+          >
+            LOG OUT
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (profile.role === "master" || profile.role === "coach") {
