@@ -61,6 +61,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          approval_status: string
           created_at: string
           display_name: string
           id: string
@@ -70,6 +71,7 @@ export type Database = {
           username: string
         }
         Insert: {
+          approval_status?: string
           created_at?: string
           display_name: string
           id?: string
@@ -79,6 +81,7 @@ export type Database = {
           username: string
         }
         Update: {
+          approval_status?: string
           created_at?: string
           display_name?: string
           id?: string
@@ -208,7 +211,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_master: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

@@ -113,9 +113,10 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
   const [pendingPassword, setPendingPassword] = useState("");
   const [pendingError, setPendingError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments" | "bluedrivedata" | "silverdrivedata" | "livestream">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments" | "bluedrivedata" | "silverdrivedata" | "livestream" | "approvals">("dashboard");
   const [driveEntries, setDriveEntries] = useState<ScoutingEntry[]>([]);
   const [driveProfiles, setDriveProfiles] = useState<{ display_name: string; username: string; role: string; user_id: string }[]>([]);
+  const [pendingUsers, setPendingUsers] = useState<{ id: string; display_name: string; username: string; role: string; approval_status: string; created_at: string }[]>([]);
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
@@ -261,11 +262,34 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
     setUpdatingRole(null);
   };
 
+  const fetchPendingUsers = async () => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, display_name, username, role, approval_status, created_at")
+      .in("approval_status", ["pending", "denied"])
+      .order("created_at", { ascending: false });
+    setPendingUsers(data ?? []);
+  };
+
+  const handleApproval = async (profileId: string, status: "approved" | "denied") => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ approval_status: status } as any)
+      .eq("id", profileId);
+    if (error) {
+      toast.error("Failed to update approval status");
+    } else {
+      toast.success(status === "approved" ? "User approved!" : "User denied.");
+      fetchPendingUsers();
+    }
+  };
+
   useEffect(() => {
     fetchEntries();
     fetchAssignments();
     fetchDriveData();
     fetchDriveTeamMatches();
+    fetchPendingUsers();
   }, []);
 
   // Subscribe to active scouts presence channel
@@ -525,6 +549,21 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             }`}
           >
             🔴 LIVE STREAM
+          </button>
+          <button
+            onClick={() => { setActiveTab("approvals"); fetchPendingUsers(); }}
+            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 relative ${
+              activeTab === "approvals"
+                ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
+                : "text-muted-foreground hover:text-foreground border border-transparent"
+            }`}
+          >
+            👤 APPROVALS
+            {pendingUsers.filter(u => u.approval_status === "pending").length > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full text-[10px] font-bold text-black flex items-center justify-center">
+                {pendingUsers.filter(u => u.approval_status === "pending").length}
+              </span>
+            )}
           </button>
         </div>
       </header>
@@ -1418,6 +1457,73 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
               title="FIRSTNevadaSouth Live Stream"
             />
           </div>
+        </div>
+      )}
+
+      {/* ── APPROVALS TAB ── */}
+      {activeTab === "approvals" && (
+        <div className="space-y-4">
+          <div className="glass rounded-xl p-4 border border-amber-500/30">
+            <h2 className="font-display text-sm tracking-wider text-amber-400 mb-1">ACCOUNT APPROVALS</h2>
+            <p className="text-xs text-muted-foreground font-body">Approve or deny new account requests</p>
+          </div>
+
+          {pendingUsers.length === 0 ? (
+            <div className="glass rounded-xl p-8 border border-border/50 text-center">
+              <span className="text-4xl mb-3 block">✅</span>
+              <p className="text-muted-foreground font-body">No pending accounts to review</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {pendingUsers.filter(u => u.approval_status === "pending").length > 0 && (
+                <div>
+                  <h3 className="text-xs font-display tracking-wider text-amber-400 mb-2 px-1">PENDING ({pendingUsers.filter(u => u.approval_status === "pending").length})</h3>
+                  {pendingUsers.filter(u => u.approval_status === "pending").map(user => (
+                    <div key={user.id} className="glass rounded-xl p-4 border border-amber-500/30 flex items-center justify-between mb-2">
+                      <div>
+                        <p className="font-display text-sm text-foreground tracking-wider">{user.display_name}</p>
+                        <p className="text-xs text-muted-foreground font-body">{user.username} · {user.role}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleApproval(user.id, "approved")}
+                          className="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-display tracking-wider hover:bg-emerald-500/30 transition-all"
+                        >
+                          ✓ APPROVE
+                        </button>
+                        <button
+                          onClick={() => handleApproval(user.id, "denied")}
+                          className="px-3 py-1.5 rounded-lg bg-destructive/20 text-destructive border border-destructive/40 text-xs font-display tracking-wider hover:bg-destructive/30 transition-all"
+                        >
+                          ✗ DENY
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {pendingUsers.filter(u => u.approval_status === "denied").length > 0 && (
+                <div>
+                  <h3 className="text-xs font-display tracking-wider text-destructive mb-2 px-1">DENIED ({pendingUsers.filter(u => u.approval_status === "denied").length})</h3>
+                  {pendingUsers.filter(u => u.approval_status === "denied").map(user => (
+                    <div key={user.id} className="glass rounded-xl p-4 border border-destructive/30 flex items-center justify-between mb-2 opacity-70">
+                      <div>
+                        <p className="font-display text-sm text-foreground tracking-wider">{user.display_name}</p>
+                        <p className="text-xs text-muted-foreground font-body">{user.username} · {user.role}</p>
+                      </div>
+                      <button
+                        onClick={() => handleApproval(user.id, "approved")}
+                        className="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-display tracking-wider hover:bg-emerald-500/30 transition-all"
+                      >
+                        ✓ APPROVE
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
