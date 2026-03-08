@@ -4,6 +4,7 @@ import LoginScreen from "@/components/LoginScreen";
 import ScoutingForm from "@/components/ScoutingForm";
 import MasterDashboard from "@/components/MasterDashboard";
 import LetsGoDashboard from "@/components/LetsGoDashboard";
+import AIChatBot from "@/components/AIChatBot";
 import type { User } from "@supabase/supabase-js";
 
 interface Profile {
