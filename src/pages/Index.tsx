@@ -197,21 +197,34 @@ const Index = () => {
       );
     }
     return (
-      <MasterDashboard
-        onLogout={handleLogout}
-        username={profile.display_name}
-        onViewAsBlueDriver={() => setViewAsBlueDriver(true)}
-        onViewAsScouter={() => setViewAsScouter(true)}
-      />
+      <>
+        <MasterDashboard
+          onLogout={handleLogout}
+          username={profile.display_name}
+          onViewAsBlueDriver={() => setViewAsBlueDriver(true)}
+          onViewAsScouter={() => setViewAsScouter(true)}
+        />
+        <FloatingChatButton onClick={() => setShowChat(true)} />
+      </>
     );
   }
 
   if (profile.role === "letsgo") {
-    return <LetsGoDashboard onLogout={handleLogout} />;
+    return (
+      <>
+        <LetsGoDashboard onLogout={handleLogout} />
+        <FloatingChatButton onClick={() => setShowChat(true)} />
+      </>
+    );
   }
 
   // scout, viewer, bluedriver — all get ScoutingForm (with role passed for Drive Data access)
-  return <ScoutingForm scouterName={profile.display_name} onLogout={handleLogout} userRole={profile.role} />;
+  return (
+    <>
+      <ScoutingForm scouterName={profile.display_name} onLogout={handleLogout} userRole={profile.role} />
+      <FloatingChatButton onClick={() => setShowChat(true)} />
+    </>
+  );
 };
 
 export default Index;
