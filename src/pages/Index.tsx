@@ -4,7 +4,18 @@ import LoginScreen from "@/components/LoginScreen";
 import ScoutingForm from "@/components/ScoutingForm";
 import MasterDashboard from "@/components/MasterDashboard";
 import LetsGoDashboard from "@/components/LetsGoDashboard";
+import AIChatBot from "@/components/AIChatBot";
 import type { User } from "@supabase/supabase-js";
+
+const FloatingChatButton = ({ onClick }: { onClick: () => void }) => (
+  <button
+    onClick={onClick}
+    className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-110 transition-transform flex items-center justify-center text-2xl"
+    title="Ask MeadowBot AI"
+  >
+    🤖
+  </button>
+);
 
 interface Profile {
   display_name: string;
@@ -19,6 +30,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [viewAsBlueDriver, setViewAsBlueDriver] = useState(false);
   const [viewAsScouter, setViewAsScouter] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -152,6 +164,11 @@ const Index = () => {
     );
   }
 
+  // AI ChatBot view
+  if (showChat) {
+    return <AIChatBot onBack={() => setShowChat(false)} userName={profile.display_name} />;
+  }
+
   if (profile.role === "master" || profile.role === "coach") {
     if (viewAsBlueDriver) {
       return (
@@ -190,21 +207,34 @@ const Index = () => {
       );
     }
     return (
-      <MasterDashboard
-        onLogout={handleLogout}
-        username={profile.display_name}
-        onViewAsBlueDriver={() => setViewAsBlueDriver(true)}
-        onViewAsScouter={() => setViewAsScouter(true)}
-      />
+      <>
+        <MasterDashboard
+          onLogout={handleLogout}
+          username={profile.display_name}
+          onViewAsBlueDriver={() => setViewAsBlueDriver(true)}
+          onViewAsScouter={() => setViewAsScouter(true)}
+        />
+        <FloatingChatButton onClick={() => setShowChat(true)} />
+      </>
     );
   }
 
   if (profile.role === "letsgo") {
-    return <LetsGoDashboard onLogout={handleLogout} />;
+    return (
+      <>
+        <LetsGoDashboard onLogout={handleLogout} />
+        <FloatingChatButton onClick={() => setShowChat(true)} />
+      </>
+    );
   }
 
   // scout, viewer, bluedriver — all get ScoutingForm (with role passed for Drive Data access)
-  return <ScoutingForm scouterName={profile.display_name} onLogout={handleLogout} userRole={profile.role} />;
+  return (
+    <>
+      <ScoutingForm scouterName={profile.display_name} onLogout={handleLogout} userRole={profile.role} />
+      <FloatingChatButton onClick={() => setShowChat(true)} />
+    </>
+  );
 };
 
 export default Index;
