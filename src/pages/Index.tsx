@@ -20,6 +20,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [viewAsBlueDriver, setViewAsBlueDriver] = useState(false);
   const [viewAsScouter, setViewAsScouter] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   const fetchProfile = async (userId: string) => {
     try {
