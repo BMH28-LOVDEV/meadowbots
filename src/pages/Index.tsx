@@ -154,6 +154,11 @@ const Index = () => {
     );
   }
 
+  // AI ChatBot view
+  if (showChat) {
+    return <AIChatBot onBack={() => setShowChat(false)} userName={profile.display_name} />;
+  }
+
   if (profile.role === "master" || profile.role === "coach") {
     if (viewAsBlueDriver) {
       return (
