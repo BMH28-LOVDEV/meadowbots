@@ -7,6 +7,16 @@ import LetsGoDashboard from "@/components/LetsGoDashboard";
 import AIChatBot from "@/components/AIChatBot";
 import type { User } from "@supabase/supabase-js";
 
+const FloatingChatButton = ({ onClick }: { onClick: () => void }) => (
+  <button
+    onClick={onClick}
+    className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-110 transition-transform flex items-center justify-center text-2xl"
+    title="Ask MeadowBot AI"
+  >
+    🤖
+  </button>
+);
+
 interface Profile {
   display_name: string;
   username: string;
