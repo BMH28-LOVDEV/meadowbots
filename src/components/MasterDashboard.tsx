@@ -217,7 +217,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
     const { data } = await (supabase as any).from("drive_team_matches").select("id, team_number, match_label, sort_order").order("sort_order", { ascending: true });
     if (data) {
       setBlueMatches(data.filter((r: any) => r.team_number === "14841").map((r: any) => ({ id: r.id, match_label: r.match_label, sort_order: r.sort_order })));
-      setSilverMatches(data.filter((r: any) => r.team_number === "19792").map((r: any) => ({ id: r.id, match_label: r.match_label, sort_order: r.sort_order })));
     }
   };
 
