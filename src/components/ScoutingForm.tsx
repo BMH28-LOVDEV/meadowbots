@@ -1028,6 +1028,17 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           )}
         </div>
       )}
+      {isMobile && <div className="h-20" />}
+      <MobileTabBar
+        tabs={[
+          { id: "dashboard", label: "HOME", icon: "🏠" },
+          { id: "scouting", label: "SCOUT", icon: "📋", activeClass: "text-accent bg-accent/10" },
+          { id: "livestream", label: "LIVE", icon: "🔴", activeClass: "text-red-400 bg-red-500/10" },
+          { id: "drivedata", label: "DRIVE", icon: "🔵", activeClass: "text-blue-400 bg-blue-500/10" },
+        ] as TabItem[]}
+        activeTab={activeTab}
+        onTabChange={(id) => setActiveTab(id as typeof activeTab)}
+      />
     </div>
   );
 };
