@@ -27,7 +27,10 @@ const ChampionshipCountdown = () => {
     );
   }
 
+  const weeks = Math.round(days / 7);
+
   const blocks = [
+    { value: `~${weeks}`, label: "WKS" },
     { value: days, label: "DAYS" },
     { value: hours, label: "HRS" },
     { value: mins, label: "MIN" },
