@@ -80,7 +80,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [viewAsBlueDriver, setViewAsBlueDriver] = useState(false);
   const [viewAsScouter, setViewAsScouter] = useState(false);
-  const [showChat, setShowChat] = useState(false);
+  
 
   const fetchProfile = async (userId: string, retries = 3) => {
     for (let i = 0; i < retries; i++) {
@@ -221,10 +221,6 @@ const Index = () => {
     );
   }
 
-  // AI ChatBot view
-  if (showChat) {
-    return <AIChatBot onBack={() => setShowChat(false)} userName={profile.display_name} />;
-  }
 
   if (profile.role === "master" || profile.role === "coach") {
     if (viewAsBlueDriver) {
@@ -272,7 +268,7 @@ const Index = () => {
           onViewAsBlueDriver={() => setViewAsBlueDriver(true)}
           onViewAsScouter={() => setViewAsScouter(true)}
         />
-        <FloatingChatButton onClick={() => setShowChat(true)} />
+        <FloatingChat userName={profile.display_name} />
       </>
     );
   }
@@ -282,7 +278,7 @@ const Index = () => {
       <>
         <ChampionshipCountdown />
         <LetsGoDashboard onLogout={handleLogout} />
-        <FloatingChatButton onClick={() => setShowChat(true)} />
+        <FloatingChat userName={profile.display_name} />
       </>
     );
   }
@@ -292,7 +288,7 @@ const Index = () => {
     <>
       <ChampionshipCountdown />
       <ScoutingForm scouterName={profile.display_name} onLogout={handleLogout} userRole={profile.role} />
-      <FloatingChatButton onClick={() => setShowChat(true)} />
+      <FloatingChat userName={profile.display_name} />
     </>
   );
 };
