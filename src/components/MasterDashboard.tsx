@@ -5,7 +5,7 @@ import { TEAM_MEMBERS, DRIVE_TEAM } from "@/lib/teamAuth";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import LockdownDashboard from "@/components/LockdownDashboard";
-import { HamburgerTabs, type TabItem } from "@/components/HamburgerTabs";
+import { HamburgerTabs, type TabItem, type ActionItem } from "@/components/HamburgerTabs";
 
 interface MasterDashboardProps {
   onLogout: () => void;
@@ -421,52 +421,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             <p className="text-xs text-muted-foreground font-body">Team Rankings Dashboard</p>
           </div>
           <div className="flex items-center gap-3">
-            {isBen && (
-              <button
-                onClick={() => triggerCelebration()}
-                className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-green-500/50 text-green-400 hover:border-green-400 hover:bg-green-500/10 transition-all duration-200"
-              >
-                🎉 LET'S GO!
-              </button>
-            )}
-            {isBen && (
-              <button
-                onClick={() => setShowLockdown(true)}
-                className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/60 text-destructive hover:bg-destructive/10 transition-all duration-200"
-              >
-                🔴 LOCKDOWN
-              </button>
-            )}
-            {isBen && (
-              <button
-                onClick={() => { setShowClearAll(true); setClearAllPassword(""); setClearAllError(""); }}
-                className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/40 text-destructive/70 hover:border-destructive hover:text-destructive transition-all duration-200"
-              >
-                🗑 CLEAR ALL
-              </button>
-            )}
-            {isBen && onViewAsBlueDriver && (
-              <button
-                onClick={onViewAsBlueDriver}
-                className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-blue-500/40 text-blue-400 hover:border-blue-400 hover:text-blue-300 transition-all duration-200 whitespace-nowrap"
-              >
-                🔷 BLUE FORM
-              </button>
-            )}
-            {(isJude || isBen) && onViewAsScouter && (
-              <button
-                onClick={onViewAsScouter}
-                className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-primary/40 text-primary hover:border-primary hover:text-primary transition-all duration-200 whitespace-nowrap"
-              >
-                📋 SCOUT FORM
-              </button>
-            )}
-            <button
-              onClick={() => { fetchEntries(); fetchAssignments(); fetchDriveData(); fetchDriveTeamMatches(); }}
-              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200"
-            >
-              ↻ REFRESH
-            </button>
             <button
               onClick={onLogout}
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-destructive hover:text-destructive transition-all duration-200"
@@ -488,6 +442,14 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
           ]}
           activeTab={activeTab}
           onTabChange={(id) => setActiveTab(id as typeof activeTab)}
+          actions={[
+            ...(isBen ? [{ id: "letsgo", label: "LET'S GO!", icon: "🎉", className: "text-green-400 hover:text-green-300", onClick: () => triggerCelebration() }] : []),
+            ...(isBen ? [{ id: "lockdown", label: "LOCKDOWN", icon: "🔴", className: "text-destructive hover:text-destructive", onClick: () => setShowLockdown(true) }] : []),
+            ...(isBen ? [{ id: "clearall", label: "CLEAR ALL", icon: "🗑", className: "text-destructive/70 hover:text-destructive", onClick: () => { setShowClearAll(true); setClearAllPassword(""); setClearAllError(""); } }] : []),
+            ...(isBen && onViewAsBlueDriver ? [{ id: "blueform", label: "BLUE FORM", icon: "🔷", className: "text-blue-400 hover:text-blue-300", onClick: onViewAsBlueDriver }] : []),
+            ...((isJude || isBen) && onViewAsScouter ? [{ id: "scoutform", label: "SCOUT FORM", icon: "📋", className: "text-primary hover:text-primary", onClick: onViewAsScouter }] : []),
+            { id: "refresh", label: "REFRESH", icon: "↻", onClick: () => { fetchEntries(); fetchAssignments(); fetchDriveData(); fetchDriveTeamMatches(); } },
+          ]}
         />
       </header>
 
