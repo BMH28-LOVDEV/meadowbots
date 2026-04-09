@@ -3,8 +3,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
-import { MobileTabBar, type TabItem } from "@/components/MobileTabBar";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { HamburgerTabs, type TabItem } from "@/components/HamburgerTabs";
 
 interface ScoutingFormProps {
   scouterName: string;
@@ -415,7 +414,6 @@ const DriveDataForm = ({ scouterName, teamSummaries, loadingData }: {
 
 const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) => {
   const { celebrating } = useCelebration();
-  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata">("dashboard");
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
@@ -629,43 +627,16 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           </div>
         </div>
 
-        {/* Tabs - Desktop only */}
-        {!isMobile && (
-        <div className="max-w-4xl mx-auto px-4 flex gap-1 pb-2 overflow-x-auto">
-          <button
-            onClick={() => setActiveTab("dashboard")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap ${
-              activeTab === "dashboard" ? "bg-primary/20 text-primary border border-primary/40" : "text-muted-foreground hover:text-foreground border border-transparent"
-            }`}
-          >
-            🏠 DASHBOARD
-          </button>
-          <button
-            onClick={() => setActiveTab("scouting")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap ${
-              activeTab === "scouting" ? "bg-accent/20 text-accent border border-accent/40" : "text-muted-foreground hover:text-foreground border border-transparent"
-            }`}
-          >
-            📋 SCOUTING FORM
-          </button>
-          <button
-            onClick={() => setActiveTab("livestream")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap ${
-              activeTab === "livestream" ? "bg-red-500/20 text-red-400 border border-red-500/40" : "text-muted-foreground hover:text-foreground border border-transparent"
-            }`}
-          >
-            🔴 LIVE STREAM
-          </button>
-          <button
-            onClick={() => setActiveTab("drivedata")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap ${
-              activeTab === "drivedata" ? "bg-blue-500/20 text-blue-400 border border-blue-500/40" : "text-muted-foreground hover:text-foreground border border-transparent"
-            }`}
-          >
-            🔵 DRIVE DATA
-          </button>
-        </div>
-        )}
+        <HamburgerTabs
+          tabs={[
+            { id: "dashboard", label: "DASHBOARD", icon: "🏠" },
+            { id: "scouting", label: "SCOUTING FORM", icon: "📋", activeClass: "bg-accent/20 text-accent border border-accent/40" },
+            { id: "livestream", label: "LIVE STREAM", icon: "🔴", activeClass: "bg-red-500/20 text-red-400 border border-red-500/40" },
+            { id: "drivedata", label: "DRIVE DATA", icon: "🔵", activeClass: "bg-blue-500/20 text-blue-400 border border-blue-500/40" },
+          ]}
+          activeTab={activeTab}
+          onTabChange={(id) => setActiveTab(id as typeof activeTab)}
+        />
       </header>
 
       {/* ══ DASHBOARD TAB ══ */}
@@ -1028,17 +999,6 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           )}
         </div>
       )}
-      {isMobile && <div className="h-20" />}
-      <MobileTabBar
-        tabs={[
-          { id: "dashboard", label: "HOME", icon: "🏠" },
-          { id: "scouting", label: "SCOUT", icon: "📋", activeClass: "text-accent bg-accent/10" },
-          { id: "livestream", label: "LIVE", icon: "🔴", activeClass: "text-red-400 bg-red-500/10" },
-          { id: "drivedata", label: "DRIVE", icon: "🔵", activeClass: "text-blue-400 bg-blue-500/10" },
-        ] as TabItem[]}
-        activeTab={activeTab}
-        onTabChange={(id) => setActiveTab(id as typeof activeTab)}
-      />
     </div>
   );
 };
