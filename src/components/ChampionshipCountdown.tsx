@@ -27,7 +27,10 @@ const ChampionshipCountdown = () => {
     );
   }
 
+  const weeks = Math.round(days / 7);
+
   const blocks = [
+    { value: `~${weeks}`, label: "WKS" },
     { value: days, label: "DAYS" },
     { value: hours, label: "HRS" },
     { value: mins, label: "MIN" },
@@ -44,7 +47,7 @@ const ChampionshipCountdown = () => {
           {blocks.map((b) => (
             <div key={b.label} className="flex flex-col items-center">
               <span className="text-foreground font-display text-xl sm:text-2xl font-black tabular-nums leading-none">
-                {String(b.value).padStart(2, "0")}
+                {typeof b.value === "number" ? String(b.value).padStart(2, "0") : b.value}
               </span>
               <span className="text-muted-foreground text-[10px] sm:text-xs font-display tracking-wider mt-0.5">
                 {b.label}
