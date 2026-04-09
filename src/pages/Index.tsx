@@ -38,7 +38,7 @@ const FloatingChat = ({ userName }: { userName: string }) => {
 
   // Mini bubble mode
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-80 h-96 rounded-2xl border border-border bg-card shadow-2xl flex flex-col overflow-hidden">
+    <div className="fixed bottom-6 right-6 z-50 w-80 h-96 rounded-2xl border border-border bg-card shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 fade-in duration-300">
       {/* Mini header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-card/90 backdrop-blur-sm">
         <button
