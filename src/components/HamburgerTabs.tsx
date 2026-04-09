@@ -37,7 +37,7 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange }: HamburgerTabsPro
   // Wide desktop → normal tab row
   if (!isMobile) {
     return (
-      <div className="px-4 flex gap-1 pb-2 overflow-x-auto" style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
+      <div className="px-4 flex gap-1 pb-2 pt-1 overflow-x-auto overflow-y-visible" style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
