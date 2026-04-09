@@ -20,8 +20,8 @@ const AIChatBot = ({ onBack, userName }: AIChatBotProps) => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const send = async () => {
-    const text = input.trim();
+  const send = async (directText?: string) => {
+    const text = (directText ?? input).trim();
     if (!text || isLoading) return;
 
     const userMsg: Msg = { role: "user", content: text };
