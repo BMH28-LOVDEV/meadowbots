@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
+import { MobileTabBar, type TabItem } from "@/components/MobileTabBar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ScoutingFormProps {
   scouterName: string;
@@ -413,6 +415,7 @@ const DriveDataForm = ({ scouterName, teamSummaries, loadingData }: {
 
 const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) => {
   const { celebrating } = useCelebration();
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata">("dashboard");
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
@@ -626,7 +629,8 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs - Desktop only */}
+        {!isMobile && (
         <div className="max-w-4xl mx-auto px-4 flex gap-1 pb-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab("dashboard")}
@@ -661,6 +665,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             🔵 DRIVE DATA
           </button>
         </div>
+        )}
       </header>
 
       {/* ══ DASHBOARD TAB ══ */}
@@ -1023,6 +1028,17 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           )}
         </div>
       )}
+      {isMobile && <div className="h-20" />}
+      <MobileTabBar
+        tabs={[
+          { id: "dashboard", label: "HOME", icon: "🏠" },
+          { id: "scouting", label: "SCOUT", icon: "📋", activeClass: "text-accent bg-accent/10" },
+          { id: "livestream", label: "LIVE", icon: "🔴", activeClass: "text-red-400 bg-red-500/10" },
+          { id: "drivedata", label: "DRIVE", icon: "🔵", activeClass: "text-blue-400 bg-blue-500/10" },
+        ] as TabItem[]}
+        activeTab={activeTab}
+        onTabChange={(id) => setActiveTab(id as typeof activeTab)}
+      />
     </div>
   );
 };

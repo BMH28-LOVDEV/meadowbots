@@ -5,6 +5,8 @@ import { TEAM_MEMBERS, DRIVE_TEAM } from "@/lib/teamAuth";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import LockdownDashboard from "@/components/LockdownDashboard";
+import { MobileTabBar, type TabItem } from "@/components/MobileTabBar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface MasterDashboardProps {
   onLogout: () => void;
@@ -113,6 +115,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
   const [pendingPassword, setPendingPassword] = useState("");
   const [pendingError, setPendingError] = useState("");
 
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments" | "bluedrivedata" | "silverdrivedata" | "livestream" | "approvals">("dashboard");
   const [driveEntries, setDriveEntries] = useState<ScoutingEntry[]>([]);
   const [driveProfiles, setDriveProfiles] = useState<{ display_name: string; username: string; role: string; user_id: string }[]>([]);
@@ -478,7 +481,8 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs - Desktop only */}
+        {!isMobile && (
         <div className="px-4 flex gap-1 pb-2 overflow-x-auto" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
           <button
             onClick={() => setActiveTab("dashboard")}
@@ -566,6 +570,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             )}
           </button>
         </div>
+        )}
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
@@ -1526,6 +1531,18 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
           )}
         </div>
       )}
+      {isMobile && <div className="h-20" />}
+      <MobileTabBar
+        tabs={[
+          { id: "dashboard", label: "HOME", icon: "🛰️" },
+          { id: "rankings", label: "RANKS", icon: "🏆" },
+          { id: "progress", label: "SCOUTS", icon: "📊" },
+          { id: "assignments", label: "ASSIGN", icon: "📋" },
+          { id: "approvals", label: "APPROVE", icon: "👤", activeClass: "text-amber-400 bg-amber-500/10", badge: pendingUsers.filter(u => u.approval_status === "pending").length, onClick: () => fetchPendingUsers() },
+        ] as TabItem[]}
+        activeTab={activeTab}
+        onTabChange={(id) => setActiveTab(id as typeof activeTab)}
+      />
     </div>
   );
 };

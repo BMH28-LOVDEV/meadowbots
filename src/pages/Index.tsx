@@ -32,17 +32,24 @@ const Index = () => {
   const [viewAsScouter, setViewAsScouter] = useState(false);
   const [showChat, setShowChat] = useState(false);
 
-  const fetchProfile = async (userId: string) => {
-    try {
-      const { data } = await supabase
-        .from("profiles")
-        .select("display_name, username, role, approval_status")
-        .eq("user_id", userId)
-        .single();
-      setProfile(data ?? null);
-    } catch {
-      setProfile(null);
+  const fetchProfile = async (userId: string, retries = 3) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const { data } = await supabase
+          .from("profiles")
+          .select("display_name, username, role, approval_status")
+          .eq("user_id", userId)
+          .single();
+        if (data) {
+          setProfile(data);
+          return;
+        }
+      } catch {
+        // profile not yet created by trigger
+      }
+      if (i < retries - 1) await new Promise(r => setTimeout(r, 500));
     }
+    setProfile(null);
   };
 
   useEffect(() => {
