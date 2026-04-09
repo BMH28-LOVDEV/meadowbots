@@ -1207,15 +1207,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
         </div>
       )}
 
-              </div>
-            </div>
-          </div>
-
-          {/* Qual Match Schedule Manager */}
-          <div className="glass rounded-xl overflow-hidden border border-slate-400/20">
-            <div className="px-5 py-4 border-b border-slate-400/20 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(148,163,184,0.08), rgba(100,116,139,0.04))" }}>
-              <span className="text-lg">📅</span>
-              <h3 className="font-display text-sm tracking-wider text-slate-300">QUAL MATCH SCHEDULE</h3>
               <span className="ml-auto text-xs text-slate-400/60 font-body">{silverMatches.length} matches added</span>
             </div>
             <div className="px-5 py-4 space-y-4">
