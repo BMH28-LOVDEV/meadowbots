@@ -3,6 +3,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
+import { MobileTabBar, type TabItem } from "@/components/MobileTabBar";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ScoutingFormProps {
   scouterName: string;
@@ -413,6 +415,7 @@ const DriveDataForm = ({ scouterName, teamSummaries, loadingData }: {
 
 const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) => {
   const { celebrating } = useCelebration();
+  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata">("dashboard");
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
