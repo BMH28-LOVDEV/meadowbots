@@ -197,7 +197,7 @@ const AIChatBot = ({ onBack, userName }: AIChatBotProps) => {
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send()}
             placeholder="Ask about scouting data..."
             disabled={isLoading}
-            className="flex-1 bg-input border border-border rounded-xl px-4 py-3 text-sm text-foreground font-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+            className="flex-1 bg-input border border-border rounded-xl px-4 py-3 text-base text-foreground font-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
           />
           <button
             onClick={() => send()}
