@@ -33,21 +33,37 @@ const ChampionshipCountdown = () => {
 
   return (
     <div className="w-full py-3 px-4 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border-b border-primary/20">
-      <div className="flex flex-col items-center gap-1.5">
-        <span className="text-primary font-display text-xs sm:text-sm tracking-[0.2em] font-bold">
-          🏆 FIRST WORLD CHAMPIONSHIP 🏆
-        </span>
-        <div className="flex items-center gap-2 sm:gap-4">
-          {blocks.map((b) => (
-            <div key={b.label} className="flex flex-col items-center">
-              <span className="text-foreground font-display text-xl sm:text-2xl font-black tabular-nums leading-none">
-                {typeof b.value === "number" ? String(b.value).padStart(2, "0") : b.value}
-              </span>
-              <span className="text-muted-foreground text-[10px] sm:text-xs font-display tracking-wider mt-0.5">
-                {b.label}
-              </span>
-            </div>
-          ))}
+      <div className="flex items-center justify-between gap-4">
+        {/* Left spacer for balance on desktop */}
+        <div className="hidden sm:block flex-1" />
+
+        {/* Center: title + countdown */}
+        <div className="flex flex-col items-center gap-1.5">
+          <span className="text-primary font-display text-xs sm:text-sm tracking-[0.2em] font-bold">
+            🏆 FIRST WORLD CHAMPIONSHIP 🏆
+          </span>
+          <div className="flex items-center gap-2 sm:gap-4">
+            {blocks.map((b) => (
+              <div key={b.label} className="flex flex-col items-center">
+                <span className="text-foreground font-display text-xl sm:text-2xl font-black tabular-nums leading-none">
+                  {typeof b.value === "number" ? String(b.value).padStart(2, "0") : b.value}
+                </span>
+                <span className="text-muted-foreground text-[10px] sm:text-xs font-display tracking-wider mt-0.5">
+                  {b.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: date & location */}
+        <div className="hidden sm:flex flex-1 flex-col items-end text-right gap-0.5">
+          <span className="text-foreground font-display text-xs tracking-wider font-bold">
+            April 29 – May 2
+          </span>
+          <span className="text-muted-foreground font-body text-[10px] leading-tight">
+            George R. Brown Convention Centre<br />Houston, TX
+          </span>
         </div>
       </div>
     </div>
