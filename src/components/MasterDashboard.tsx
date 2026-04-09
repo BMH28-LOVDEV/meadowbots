@@ -1288,6 +1288,17 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
           )}
         </div>
       )}
+
+      {/* ── SCOUT AI TAB ── */}
+      {activeTab === "scoutai" && (
+        <div className="max-w-7xl mx-auto px-4 py-8" style={{ height: "calc(100vh - 200px)" }}>
+          <AIChatBot
+            onBack={() => setActiveTab("dashboard")}
+            userName={username}
+            backLabel="← Dashboard"
+          />
+        </div>
+      )}
     </div>
   );
 };

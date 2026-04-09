@@ -1001,6 +1001,17 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           )}
         </div>
       )}
+
+      {/* ── SCOUT AI TAB ── */}
+      {activeTab === "scoutai" && (
+        <div className="max-w-7xl mx-auto px-4 py-8" style={{ height: "calc(100vh - 200px)" }}>
+          <AIChatBot
+            onBack={() => setActiveTab("dashboard")}
+            userName={scouterName}
+            backLabel="← Dashboard"
+          />
+        </div>
+      )}
     </div>
   );
 };
