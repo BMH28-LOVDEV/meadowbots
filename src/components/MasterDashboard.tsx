@@ -1206,15 +1206,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
           </div>
         </div>
       )}
-
-
-
-                  ADD
-                </button>
-              </div>
-              {/* Match chips */}
-              {silverMatches.length === 0 ? (
-                <p className="text-sm text-muted-foreground font-body text-center py-2">No matches added yet. Add them once the schedule is released.</p>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {silverMatches.map((m) => {
