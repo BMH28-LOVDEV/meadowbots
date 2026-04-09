@@ -5,7 +5,7 @@ import { TEAM_MEMBERS, DRIVE_TEAM } from "@/lib/teamAuth";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import LockdownDashboard from "@/components/LockdownDashboard";
-import { HamburgerTabs, type TabItem } from "@/components/HamburgerTabs";
+import { HamburgerTabs, type TabItem, type ActionItem } from "@/components/HamburgerTabs";
 
 interface MasterDashboardProps {
   onLogout: () => void;
