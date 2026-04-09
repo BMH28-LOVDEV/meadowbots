@@ -421,52 +421,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             <p className="text-xs text-muted-foreground font-body">Team Rankings Dashboard</p>
           </div>
           <div className="flex items-center gap-3">
-            {isBen && (
-              <button
-                onClick={() => triggerCelebration()}
-                className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-green-500/50 text-green-400 hover:border-green-400 hover:bg-green-500/10 transition-all duration-200"
-              >
-                🎉 LET'S GO!
-              </button>
-            )}
-            {isBen && (
-              <button
-                onClick={() => setShowLockdown(true)}
-                className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/60 text-destructive hover:bg-destructive/10 transition-all duration-200"
-              >
-                🔴 LOCKDOWN
-              </button>
-            )}
-            {isBen && (
-              <button
-                onClick={() => { setShowClearAll(true); setClearAllPassword(""); setClearAllError(""); }}
-                className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/40 text-destructive/70 hover:border-destructive hover:text-destructive transition-all duration-200"
-              >
-                🗑 CLEAR ALL
-              </button>
-            )}
-            {isBen && onViewAsBlueDriver && (
-              <button
-                onClick={onViewAsBlueDriver}
-                className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-blue-500/40 text-blue-400 hover:border-blue-400 hover:text-blue-300 transition-all duration-200 whitespace-nowrap"
-              >
-                🔷 BLUE FORM
-              </button>
-            )}
-            {(isJude || isBen) && onViewAsScouter && (
-              <button
-                onClick={onViewAsScouter}
-                className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-primary/40 text-primary hover:border-primary hover:text-primary transition-all duration-200 whitespace-nowrap"
-              >
-                📋 SCOUT FORM
-              </button>
-            )}
-            <button
-              onClick={() => { fetchEntries(); fetchAssignments(); fetchDriveData(); fetchDriveTeamMatches(); }}
-              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200"
-            >
-              ↻ REFRESH
-            </button>
             <button
               onClick={onLogout}
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-destructive hover:text-destructive transition-all duration-200"
