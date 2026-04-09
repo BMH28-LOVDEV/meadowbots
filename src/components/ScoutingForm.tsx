@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import { HamburgerTabs, type TabItem } from "@/components/HamburgerTabs";
+import AIChatBot from "@/components/AIChatBot";
 
 interface ScoutingFormProps {
   scouterName: string;
@@ -414,7 +415,7 @@ const DriveDataForm = ({ scouterName, teamSummaries, loadingData }: {
 
 const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) => {
   const { celebrating } = useCelebration();
-  const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata" | "scoutai">("dashboard");
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [assignments, setAssignments] = useState<{ team_number: string; team_name: string; qual_matches: string[] }[]>([]);
@@ -633,6 +634,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             { id: "scouting", label: "SCOUTING FORM", icon: "📋", activeClass: "bg-accent/20 text-accent border border-accent/40" },
             { id: "livestream", label: "LIVE STREAM", icon: "🔴", activeClass: "bg-red-500/20 text-red-400 border border-red-500/40" },
             { id: "drivedata", label: "DRIVE DATA", icon: "🔵", activeClass: "bg-blue-500/20 text-blue-400 border border-blue-500/40" },
+            { id: "scoutai", label: "SCOUT AI", icon: "🤖", activeClass: "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" },
           ]}
           activeTab={activeTab}
           onTabChange={(id) => setActiveTab(id as typeof activeTab)}
@@ -997,6 +999,17 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── SCOUT AI TAB ── */}
+      {activeTab === "scoutai" && (
+        <div className="max-w-7xl mx-auto px-4 py-8" style={{ height: "calc(100vh - 200px)" }}>
+          <AIChatBot
+            onBack={() => setActiveTab("dashboard")}
+            userName={scouterName}
+            backLabel="← Dashboard"
+          />
         </div>
       )}
     </div>

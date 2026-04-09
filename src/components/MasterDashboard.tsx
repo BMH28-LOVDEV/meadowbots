@@ -6,6 +6,7 @@ import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import LockdownDashboard from "@/components/LockdownDashboard";
 import { HamburgerTabs, type TabItem, type ActionItem } from "@/components/HamburgerTabs";
+import AIChatBot from "@/components/AIChatBot";
 
 interface MasterDashboardProps {
   onLogout: () => void;
@@ -114,7 +115,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
   const [pendingPassword, setPendingPassword] = useState("");
   const [pendingError, setPendingError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments" | "bluedrivedata" | "livestream" | "approvals">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments" | "bluedrivedata" | "livestream" | "approvals" | "scoutai">("dashboard");
   const [driveEntries, setDriveEntries] = useState<ScoutingEntry[]>([]);
   const [driveProfiles, setDriveProfiles] = useState<{ display_name: string; username: string; role: string; user_id: string }[]>([]);
   const [pendingUsers, setPendingUsers] = useState<{ id: string; display_name: string; username: string; role: string; approval_status: string; created_at: string }[]>([]);
@@ -469,6 +470,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             { id: "bluedrivedata", label: "BLUE DATA", icon: "🔷", activeClass: "bg-blue-500/20 text-blue-400 border border-blue-500/40" },
             { id: "livestream", label: "LIVE STREAM", icon: "🔴", activeClass: "bg-red-500/20 text-red-400 border border-red-500/40" },
             { id: "approvals", label: "APPROVALS", icon: "👤", activeClass: "bg-amber-500/20 text-amber-400 border border-amber-500/40", badge: pendingUsers.filter(u => u.approval_status === "pending").length, onClick: () => fetchPendingUsers() },
+            { id: "scoutai", label: "SCOUT AI", icon: "🤖", activeClass: "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" },
           ]}
           activeTab={activeTab}
           onTabChange={(id) => setActiveTab(id as typeof activeTab)}
@@ -1284,6 +1286,17 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── SCOUT AI TAB ── */}
+      {activeTab === "scoutai" && (
+        <div className="max-w-7xl mx-auto px-4 py-8" style={{ height: "calc(100vh - 200px)" }}>
+          <AIChatBot
+            onBack={() => setActiveTab("dashboard")}
+            userName={username}
+            backLabel="← Dashboard"
+          />
         </div>
       )}
     </div>
