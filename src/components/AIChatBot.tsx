@@ -8,9 +8,11 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-with-da
 interface AIChatBotProps {
   onBack: () => void;
   userName: string;
+  mini?: boolean;
+  backLabel?: string;
 }
 
-const AIChatBot = ({ onBack, userName }: AIChatBotProps) => {
+const AIChatBot = ({ onBack, userName, mini, backLabel }: AIChatBotProps) => {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
