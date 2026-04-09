@@ -80,7 +80,7 @@ const LockdownDashboard = ({ onLogout }: LockdownDashboardProps) => {
 
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-10 bg-background/80 backdrop-blur-md border-b border-destructive/20">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="font-display text-xl text-destructive tracking-wider">
               🔒 LOCKDOWN CONSOLE
@@ -97,7 +97,7 @@ const LockdownDashboard = ({ onLogout }: LockdownDashboardProps) => {
       </div>
 
       {/* Main content */}
-      <div className="pt-24 pb-16 px-4 w-full max-w-lg text-center space-y-8">
+      <div className="pt-24 pb-16 px-4 w-full max-w-7xl text-center space-y-8">
         <div className="glass rounded-xl p-10 border border-destructive/20 space-y-6">
           <div className="text-6xl">⚠️</div>
           <h2 className="font-display text-2xl text-foreground tracking-wide">EMERGENCY SHUTDOWN</h2>

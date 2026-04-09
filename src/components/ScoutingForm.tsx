@@ -593,7 +593,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
 
       {/* ── Header ── */}
       <header className="sticky top-0 z-50 glass border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="font-display text-xl text-primary text-glow tracking-wider">SCOUT PORTAL</h1>
             <p className="text-xs text-muted-foreground font-body">
@@ -641,7 +641,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
 
       {/* ══ DASHBOARD TAB ══ */}
       {activeTab === "dashboard" && (
-        <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
           <div className="glass rounded-xl p-6 border border-accent/30 glow-primary">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-4">
@@ -743,7 +743,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
 
       {/* ══ SCOUTING FORM TAB ══ */}
       {activeTab === "scouting" && (
-        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+        <form onSubmit={handleSubmit} className="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
           {assignments.length > 0 && (
             <div className="glass rounded-xl p-4 border border-primary/40 glow-primary space-y-3">
@@ -964,7 +964,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
 
       {/* ══ LIVE STREAM TAB ══ */}
       {activeTab === "livestream" && (
-        <div className="max-w-4xl mx-auto px-4 py-8 space-y-4">
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
           <div className="glass rounded-xl p-4 border border-red-500/30">
             <div className="flex items-center gap-3 mb-1">
               <span className="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse" />
