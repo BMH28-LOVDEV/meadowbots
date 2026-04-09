@@ -416,7 +416,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
 
       {/* Header */}
       <header className="sticky top-0 z-50 glass border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="w-full px-6 py-4 flex items-center justify-between">
           <div>
             <h1 className="font-display text-xl text-accent text-glow tracking-wider" style={{ textShadow: "0 0 10px hsl(260 80% 60% / 0.5)" }}>
               MASTER MEADOWBOT
