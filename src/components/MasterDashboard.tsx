@@ -114,7 +114,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
   const [pendingPassword, setPendingPassword] = useState("");
   const [pendingError, setPendingError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments" | "bluedrivedata" | "silverdrivedata" | "livestream" | "approvals">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments" | "bluedrivedata" | "livestream" | "approvals">("dashboard");
   const [driveEntries, setDriveEntries] = useState<ScoutingEntry[]>([]);
   const [driveProfiles, setDriveProfiles] = useState<{ display_name: string; username: string; role: string; user_id: string }[]>([]);
   const [pendingUsers, setPendingUsers] = useState<{ id: string; display_name: string; username: string; role: string; approval_status: string; created_at: string }[]>([]);
@@ -124,8 +124,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
 
   // Drive team match schedules (from DB)
   const [blueMatches, setBlueMatches] = useState<{ id: string; match_label: string; sort_order: number }[]>([]);
-  const [silverMatches, setSilverMatches] = useState<{ id: string; match_label: string; sort_order: number }[]>([]);
-  const [driveMatchInput, setDriveMatchInput] = useState<Record<string, string>>({ blue: "", silver: "" });
+  const [driveMatchInput, setDriveMatchInput] = useState<Record<string, string>>({ blue: "" });
   const [savingDriveMatch, setSavingDriveMatch] = useState(false);
 
   const fetchEntries = async () => {
@@ -218,23 +217,21 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
     const { data } = await (supabase as any).from("drive_team_matches").select("id, team_number, match_label, sort_order").order("sort_order", { ascending: true });
     if (data) {
       setBlueMatches(data.filter((r: any) => r.team_number === "14841").map((r: any) => ({ id: r.id, match_label: r.match_label, sort_order: r.sort_order })));
-      setSilverMatches(data.filter((r: any) => r.team_number === "19792").map((r: any) => ({ id: r.id, match_label: r.match_label, sort_order: r.sort_order })));
     }
   };
 
   const addDriveTeamMatch = async (teamNumber: string) => {
-    const key = teamNumber === "14841" ? "blue" : "silver";
-    const raw = (driveMatchInput[key] || "").trim().toUpperCase();
+    const raw = (driveMatchInput.blue || "").trim().toUpperCase();
     if (!raw) return;
-    const existing = teamNumber === "14841" ? blueMatches : silverMatches;
+    const existing = blueMatches;
     if (existing.some(m => m.match_label === raw)) {
-      setDriveMatchInput(prev => ({ ...prev, [key]: "" }));
+      setDriveMatchInput(prev => ({ ...prev, blue: "" }));
       return;
     }
     setSavingDriveMatch(true);
     await (supabase as any).from("drive_team_matches").insert({ team_number: teamNumber, match_label: raw, sort_order: existing.length });
     await fetchDriveTeamMatches();
-    setDriveMatchInput(prev => ({ ...prev, [key]: "" }));
+    setDriveMatchInput(prev => ({ ...prev, blue: "" }));
     setSavingDriveMatch(false);
   };
 
@@ -486,7 +483,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             { id: "progress", label: "SCOUT PROGRESS", icon: "📊" },
             { id: "assignments", label: "ASSIGNMENTS", icon: "📋" },
             { id: "bluedrivedata", label: "BLUE DATA", icon: "🔷", activeClass: "bg-blue-500/20 text-blue-400 border border-blue-500/40" },
-            { id: "silverdrivedata", label: "SILVER DATA", icon: "🪙", activeClass: "bg-slate-400/20 text-slate-300 border border-slate-400/40" },
             { id: "livestream", label: "LIVE STREAM", icon: "🔴", activeClass: "bg-red-500/20 text-red-400 border border-red-500/40" },
             { id: "approvals", label: "APPROVALS", icon: "👤", activeClass: "bg-amber-500/20 text-amber-400 border border-amber-500/40", badge: pendingUsers.filter(u => u.approval_status === "pending").length, onClick: () => fetchPendingUsers() },
           ]}
@@ -593,48 +589,25 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
               </div>
             )}
 
-            {/* Drive Teams */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Silver Drive Team */}
-              <div className="glass rounded-xl overflow-hidden border border-zinc-400/40">
-                <div className="px-5 py-3.5 border-b border-zinc-400/30" style={{ background: "linear-gradient(135deg, rgba(180,180,180,0.12), rgba(120,120,120,0.06))" }}>
-                  <h3 className="font-display text-sm tracking-wider" style={{ color: "#C0C0C0", textShadow: "0 0 8px rgba(192,192,192,0.5)" }}>SILVER DRIVE TEAM</h3>
-                </div>
-                <div className="divide-y divide-zinc-400/20">
-                  {[
-                    { name: "William Hu", role: "Driver 1" },
-                    { name: "Rock Kuperman", role: "Drive Coach" },
-                    { name: "Devin Allen", role: "Drive Coach" },
-                    { name: "Isabelle Liang", role: "Human Player" },
-                  ].map(({ name, role }) => (
-                    <div key={role} className="px-5 py-2.5 flex items-center justify-between">
-                      <span className="font-body text-sm" style={{ color: "#A0A0A0" }}>{name}</span>
-                      <span className="text-xs font-display tracking-wider" style={{ color: "#888" }}>{role}</span>
-                    </div>
-                  ))}
-                </div>
+            {/* Drive Team */}
+            <div className="glass rounded-xl overflow-hidden border border-blue-400/40">
+              <div className="px-5 py-3.5 border-b border-blue-400/30" style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.12), rgba(37,99,235,0.06))" }}>
+                <h3 className="font-display text-sm tracking-wider" style={{ color: "#60a5fa", textShadow: "0 0 8px rgba(96,165,250,0.5)" }}>BLUE DRIVE TEAM</h3>
               </div>
-
-              {/* Blue Drive Team */}
-              <div className="glass rounded-xl overflow-hidden border border-blue-400/40">
-                <div className="px-5 py-3.5 border-b border-blue-400/30" style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.12), rgba(37,99,235,0.06))" }}>
-                  <h3 className="font-display text-sm tracking-wider" style={{ color: "#60a5fa", textShadow: "0 0 8px rgba(96,165,250,0.5)" }}>BLUE DRIVE TEAM</h3>
-                </div>
-                <div className="divide-y divide-blue-400/20">
-                  {[
-                    { name: "Max Tran", role: "Driver 1 / Human Player" },
-                    { name: "Cole Schubert", role: "Driver 1 / Human Player" },
-                    { name: "Benjamin Hale", role: "Driver 2" },
-                    { name: "Travis Quinn", role: "Human Player (Sub)" },
-                    { name: "Aiden Rubbo", role: "Drive Coach" },
-                    { name: "Mason Howard", role: "Build / Drive Coach" },
-                  ].map(({ name, role }, idx) => (
-                    <div key={`${name}-${idx}`} className="px-5 py-2.5 flex items-center justify-between">
-                      <span className="font-body text-sm" style={{ color: "#60a5fa" }}>{name}</span>
-                      <span className="text-xs font-display tracking-wider text-blue-400">{role}</span>
-                    </div>
-                  ))}
-                </div>
+              <div className="divide-y divide-blue-400/20">
+                {[
+                  { name: "Max Tran", role: "Driver 1 / Human Player" },
+                  { name: "Cole Schubert", role: "Driver 1 / Human Player" },
+                  { name: "Benjamin Hale", role: "Driver 2" },
+                  { name: "Travis Quinn", role: "Human Player (Sub)" },
+                  { name: "Aiden Rubbo", role: "Drive Coach" },
+                  { name: "Mason Howard", role: "Build / Drive Coach" },
+                ].map(({ name, role }, idx) => (
+                  <div key={`${name}-${idx}`} className="px-5 py-2.5 flex items-center justify-between">
+                    <span className="font-body text-sm" style={{ color: "#60a5fa" }}>{name}</span>
+                    <span className="text-xs font-display tracking-wider text-blue-400">{role}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -1202,138 +1175,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                           </p>
                           <p className="text-xs text-muted-foreground font-body mt-0.5">
                             🔵 <span className="text-blue-400">{entry.scouterName}</span> · {new Date(entry.timestamp).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => { setDeleteTarget({ id: entry.id }); setDeletePassword(""); setDeleteError(""); }}
-                        className="px-3 py-1 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all shrink-0"
-                      >DELETE</button>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-body">
-                      {entry.autoArtifactsScored && <DataCell label="Auto Artifacts" value={entry.autoArtifactsScored} />}
-                      {entry.teleopArtifactClassification && <DataCell label="Teleop Artifacts" value={entry.teleopArtifactClassification} />}
-                      {entry.teleopCycleSpeed && <DataCell label="Cycles" value={entry.teleopCycleSpeed} />}
-                      {entry.teleopBallCapacity && <DataCell label="Cycle Time" value={entry.teleopBallCapacity} />}
-                      {entry.endgameParking && <DataCell label="Park" value={entry.endgameParking} />}
-                      {entry.penaltyPointsGiven != null && <DataCell label="Penalty Pts Received" value={String(entry.penaltyPointsGiven)} />}
-                    </div>
-                    {(entry.penalties || []).filter(p => p !== "None observed").length > 0 && (
-                      <div>
-                        <span className="text-xs text-muted-foreground font-body">Penalties we received: </span>
-                        {entry.penalties.filter(p => p !== "None observed").map((p, i) => (
-                          <span key={i} className="inline-block text-xs px-2 py-0.5 rounded mr-1 mt-1 bg-destructive/20 text-destructive">{p}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ── SILVER DRIVE TEAM DATA TAB ── */}
-      {activeTab === "silverdrivedata" && (
-        <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-          {/* Header */}
-          <div className="glass rounded-xl p-6 border border-slate-400/40" style={{ boxShadow: "0 0 20px rgba(148,163,184,0.15)" }}>
-            <div className="flex items-center gap-4">
-              <span className="text-4xl">⚪</span>
-              <div>
-                <h2 className="font-display text-xl tracking-wider text-slate-300">SILVER DATA</h2>
-                <p className="text-xs text-muted-foreground font-body mt-1">Naila Nauman</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Qual Match Schedule Manager */}
-          <div className="glass rounded-xl overflow-hidden border border-slate-400/20">
-            <div className="px-5 py-4 border-b border-slate-400/20 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(148,163,184,0.08), rgba(100,116,139,0.04))" }}>
-              <span className="text-lg">📅</span>
-              <h3 className="font-display text-sm tracking-wider text-slate-300">QUAL MATCH SCHEDULE</h3>
-              <span className="ml-auto text-xs text-slate-400/60 font-body">{silverMatches.length} matches added</span>
-            </div>
-            <div className="px-5 py-4 space-y-4">
-              {/* Add match input */}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={driveMatchInput.silver}
-                  onChange={(e) => setDriveMatchInput(prev => ({ ...prev, silver: e.target.value }))}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addDriveTeamMatch("19792"); } }}
-                  placeholder="Type Q5 then Enter to add…"
-                  className="flex-1 px-3 py-2 rounded-lg bg-muted border border-slate-400/30 focus:border-slate-300 focus:ring-1 focus:ring-slate-300 text-foreground placeholder:text-muted-foreground/40 font-body text-sm outline-none transition-all"
-                />
-                <button
-                  onClick={() => addDriveTeamMatch("19792")}
-                  disabled={savingDriveMatch || !driveMatchInput.silver.trim()}
-                  className="px-4 py-2 rounded-lg text-xs font-display tracking-wider bg-slate-600 text-white hover:bg-slate-500 disabled:opacity-40 transition-all"
-                >
-                  ADD
-                </button>
-              </div>
-              {/* Match chips */}
-              {silverMatches.length === 0 ? (
-                <p className="text-sm text-muted-foreground font-body text-center py-2">No matches added yet. Add them once the schedule is released.</p>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {silverMatches.map((m) => {
-                    const done = driveEntries.some(e => e.scouterName === "Naila Nauman" && e.teamNumber === "19792" && e.matchNumber.toUpperCase() === m.match_label);
-                    return (
-                      <div key={m.id} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-body font-semibold border transition-all ${
-                        done ? "bg-green-500/20 border-green-500 text-green-400" : "bg-slate-500/10 border-slate-400/40 text-slate-300"
-                      }`}>
-                        {done ? "✓ " : ""}{m.match_label}
-                        <button onClick={() => removeDriveTeamMatch(m.id)} className="ml-1 text-xs opacity-50 hover:opacity-100 transition-opacity">×</button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-              {silverMatches.length > 0 && (
-                <p className="text-xs text-muted-foreground font-body">
-                  ✓ = Naila submitted data · {silverMatches.filter(m => driveEntries.some(e => e.scouterName === "Naila Nauman" && e.teamNumber === "19792" && e.matchNumber.toUpperCase() === m.match_label)).length}/{silverMatches.length} complete
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Ranked Match Entries */}
-          <div className="glass rounded-xl overflow-hidden border border-slate-400/20">
-            <div className="px-5 py-4 border-b border-slate-400/20 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(148,163,184,0.08), rgba(100,116,139,0.04))" }}>
-              <span className="text-lg">🏆</span>
-              <h3 className="font-display text-sm tracking-wider text-slate-300">BEST QUAL MATCHES — RANKED</h3>
-              <span className="ml-auto text-xs text-slate-400/60 font-body">
-                {driveEntries.filter(e => e.scouterName === "Naila Nauman" && e.teamNumber === "19792").length} ENTRIES
-              </span>
-            </div>
-            {driveEntries.filter(e => e.scouterName === "Naila Nauman" && e.teamNumber === "19792").length === 0 ? (
-              <div className="px-5 py-10 text-center text-sm text-muted-foreground font-body">No Silver Drive Data submitted for Team #19792 yet.</div>
-            ) : (
-              <div className="divide-y divide-border/30">
-                {[...driveEntries.filter(e => e.scouterName === "Naila Nauman" && e.teamNumber === "19792")]
-                  .sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0))
-                  .map((entry, idx) => (
-                  <div key={entry.id} className="px-5 py-4 space-y-3">
-                    <div className="flex items-start justify-between gap-3 flex-wrap">
-                      <div className="flex items-center gap-3">
-                        <span className="font-display text-lg w-8 text-center text-slate-300">
-                          {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`}
-                        </span>
-                        <div>
-                          <p className="font-display text-sm text-foreground tracking-wide">
-                            Match {entry.matchNumber || "N/A"}
-                            {entry.matchScore != null && <span className="ml-2 text-slate-300">· Score: {entry.matchScore}</span>}
-                            {entry.allianceWon && (
-                              <span className={`ml-2 text-xs ${entry.allianceWon === "Yes – Won" ? "text-green-400" : entry.allianceWon === "No – Lost" ? "text-destructive" : "text-muted-foreground"}`}>
-                                {entry.allianceWon === "Yes – Won" ? "🏆 Won" : entry.allianceWon === "No – Lost" ? "❌ Lost" : "🤝 Tie"}
-                              </span>
-                            )}
-                          </p>
-                          <p className="text-xs text-muted-foreground font-body mt-0.5">
-                            ⚪ <span className="text-slate-300">{entry.scouterName}</span> · {new Date(entry.timestamp).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
