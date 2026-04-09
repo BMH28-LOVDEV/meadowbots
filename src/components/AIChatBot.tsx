@@ -20,8 +20,8 @@ const AIChatBot = ({ onBack, userName }: AIChatBotProps) => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const send = async () => {
-    const text = input.trim();
+  const send = async (directText?: string) => {
+    const text = (directText ?? input).trim();
     if (!text || isLoading) return;
 
     const userMsg: Msg = { role: "user", content: text };
@@ -140,7 +140,7 @@ const AIChatBot = ({ onBack, userName }: AIChatBotProps) => {
               ].map((q) => (
                 <button
                   key={q}
-                  onClick={() => { setInput(q); }}
+                  onClick={() => { send(q); }}
                   className="text-xs px-3 py-2 rounded-lg border border-border bg-card hover:bg-secondary text-foreground font-body transition-colors"
                 >
                   {q}
@@ -200,7 +200,7 @@ const AIChatBot = ({ onBack, userName }: AIChatBotProps) => {
             className="flex-1 bg-input border border-border rounded-xl px-4 py-3 text-sm text-foreground font-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
           />
           <button
-            onClick={send}
+            onClick={() => send()}
             disabled={isLoading || !input.trim()}
             className="px-5 py-3 bg-primary text-primary-foreground font-display font-bold tracking-wider rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
