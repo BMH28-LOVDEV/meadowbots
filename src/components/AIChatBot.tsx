@@ -200,7 +200,7 @@ const AIChatBot = ({ onBack, userName }: AIChatBotProps) => {
             className="flex-1 bg-input border border-border rounded-xl px-4 py-3 text-sm text-foreground font-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
           />
           <button
-            onClick={send}
+            onClick={() => send()}
             disabled={isLoading || !input.trim()}
             className="px-5 py-3 bg-primary text-primary-foreground font-display font-bold tracking-wider rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
