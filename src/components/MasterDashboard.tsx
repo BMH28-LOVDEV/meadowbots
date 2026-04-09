@@ -437,12 +437,12 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                   🗑 CLEAR ALL
                 </button>
               )}
-              {isBen && onViewAsBlueDriver && (
+              {onViewAsBlueDriver && (
                 <button onClick={onViewAsBlueDriver} className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-blue-500/40 text-blue-400 hover:border-blue-400 hover:text-blue-300 transition-all duration-200 whitespace-nowrap">
                   🔷 DRIVER DATA
                 </button>
               )}
-              {(isJude || isBen) && onViewAsScouter && (
+              {onViewAsScouter && (
                 <button onClick={onViewAsScouter} className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-primary/40 text-primary hover:border-primary hover:text-primary transition-all duration-200 whitespace-nowrap">
                   📋 SCOUT FORM
                 </button>
@@ -476,8 +476,8 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             ...(isBen ? [{ id: "letsgo", label: "LET'S GO!", icon: "🎉", className: "text-green-400 hover:text-green-300", onClick: () => triggerCelebration() }] : []),
             ...(isBen ? [{ id: "lockdown", label: "LOCKDOWN", icon: "🔴", className: "text-destructive hover:text-destructive", onClick: () => setShowLockdown(true) }] : []),
             ...(isBen ? [{ id: "clearall", label: "CLEAR ALL", icon: "🗑", className: "text-destructive/70 hover:text-destructive", onClick: () => { setShowClearAll(true); setClearAllPassword(""); setClearAllError(""); } }] : []),
-            ...(isBen && onViewAsBlueDriver ? [{ id: "blueform", label: "DRIVER DATA", icon: "🔷", className: "text-blue-400 hover:text-blue-300", onClick: onViewAsBlueDriver }] : []),
-            ...((isJude || isBen) && onViewAsScouter ? [{ id: "scoutform", label: "SCOUT FORM", icon: "📋", className: "text-primary hover:text-primary", onClick: onViewAsScouter }] : []),
+            ...(onViewAsBlueDriver ? [{ id: "blueform", label: "DRIVER DATA", icon: "🔷", className: "text-blue-400 hover:text-blue-300", onClick: onViewAsBlueDriver }] : []),
+            ...(onViewAsScouter ? [{ id: "scoutform", label: "SCOUT FORM", icon: "📋", className: "text-primary hover:text-primary", onClick: onViewAsScouter }] : []),
             { id: "refresh", label: "REFRESH", icon: "↻", onClick: () => { fetchEntries(); fetchAssignments(); fetchDriveData(); fetchDriveTeamMatches(); } },
           ]}
         />
