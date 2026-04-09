@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import { HamburgerTabs, type TabItem } from "@/components/HamburgerTabs";
+import AIChatBot from "@/components/AIChatBot";
 
 interface ScoutingFormProps {
   scouterName: string;

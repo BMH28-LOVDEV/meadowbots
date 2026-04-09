@@ -6,6 +6,7 @@ import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import LockdownDashboard from "@/components/LockdownDashboard";
 import { HamburgerTabs, type TabItem, type ActionItem } from "@/components/HamburgerTabs";
+import AIChatBot from "@/components/AIChatBot";
 
 interface MasterDashboardProps {
   onLogout: () => void;
