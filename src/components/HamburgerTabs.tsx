@@ -60,22 +60,6 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange, actions }: Hamburg
             </button>
           ))}
         </div>
-
-        {/* Actions inline on desktop */}
-        {actions && actions.length > 0 && (
-          <div className="flex gap-1 shrink-0 border-l border-border/50 pl-2 ml-1">
-            {actions.map((action) => (
-              <button
-                key={action.id}
-                onClick={action.onClick}
-                className={`px-3 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap border border-transparent hover:bg-accent/10 ${action.className || "text-muted-foreground hover:text-foreground"}`}
-              >
-                {action.icon && <span className="mr-1">{action.icon}</span>}
-                {action.label}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
     );
   }
