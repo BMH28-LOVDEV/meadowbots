@@ -61,42 +61,20 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange, actions }: Hamburg
           ))}
         </div>
 
-        {/* Actions drawer trigger (desktop) */}
+        {/* Actions inline on desktop */}
         {actions && actions.length > 0 && (
-          <Drawer open={actionsOpen} onOpenChange={setActionsOpen}>
-            <DrawerTrigger asChild>
+          <div className="flex gap-1 shrink-0 border-l border-border/50 pl-2 ml-1">
+            {actions.map((action) => (
               <button
-                className="p-2 rounded-lg border border-accent/40 text-accent hover:border-accent hover:bg-accent/10 transition-all duration-200"
-                aria-label="Toggle actions menu"
+                key={action.id}
+                onClick={action.onClick}
+                className={`px-3 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap border border-transparent hover:bg-accent/10 ${action.className || "text-muted-foreground hover:text-foreground"}`}
               >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="10" cy="4" r="1.5" fill="currentColor" />
-                  <circle cx="10" cy="10" r="1.5" fill="currentColor" />
-                  <circle cx="10" cy="16" r="1.5" fill="currentColor" />
-                </svg>
+                {action.icon && <span className="mr-1">{action.icon}</span>}
+                {action.label}
               </button>
-            </DrawerTrigger>
-            <DrawerContent className="glass border-t border-accent/30">
-              <div className="px-4 pt-2 pb-6 max-w-lg mx-auto w-full">
-                <h3 className="font-display text-xs tracking-wider text-muted-foreground mb-3">COMMANDS</h3>
-                <div className="space-y-1">
-                  {actions.map((action) => (
-                    <button
-                      key={action.id}
-                      onClick={() => {
-                        action.onClick();
-                        setActionsOpen(false);
-                      }}
-                      className={`w-full px-4 py-3 rounded-lg text-left text-sm font-display tracking-wider transition-all duration-200 flex items-center gap-3 hover:bg-accent/10 ${action.className || "text-muted-foreground hover:text-foreground"}`}
-                    >
-                      {action.icon && <span className="text-base">{action.icon}</span>}
-                      <span>{action.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </DrawerContent>
-          </Drawer>
+            ))}
+          </div>
         )}
       </div>
     );
