@@ -483,7 +483,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
         />
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
 
         {/* ── DASHBOARD TAB ── */}
         {activeTab === "dashboard" && (
@@ -1069,7 +1069,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
 
       {/* ── BLUE DRIVE TEAM DATA TAB ── */}
       {activeTab === "bluedrivedata" && (
-        <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
           {/* Header */}
           <div className="glass rounded-xl p-6 border border-blue-500/40" style={{ boxShadow: "0 0 20px hsl(220 100% 60% / 0.15)" }}>
             <div className="flex items-center gap-4">
@@ -1201,7 +1201,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
 
       {/* ── LIVESTREAM TAB content is rendered inside main scroll area ── */}
       {activeTab === "livestream" && (
-        <div className="max-w-4xl mx-auto px-4 py-8 space-y-4">
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
           <div className="glass rounded-xl p-4 border border-red-500/30">
             <div className="flex items-center gap-3 mb-1">
               <span className="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse" />
