@@ -483,7 +483,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             { id: "progress", label: "SCOUT PROGRESS", icon: "📊" },
             { id: "assignments", label: "ASSIGNMENTS", icon: "📋" },
             { id: "bluedrivedata", label: "BLUE DATA", icon: "🔷", activeClass: "bg-blue-500/20 text-blue-400 border border-blue-500/40" },
-            { id: "silverdrivedata", label: "SILVER DATA", icon: "🪙", activeClass: "bg-slate-400/20 text-slate-300 border border-slate-400/40" },
             { id: "livestream", label: "LIVE STREAM", icon: "🔴", activeClass: "bg-red-500/20 text-red-400 border border-red-500/40" },
             { id: "approvals", label: "APPROVALS", icon: "👤", activeClass: "bg-amber-500/20 text-amber-400 border border-amber-500/40", badge: pendingUsers.filter(u => u.approval_status === "pending").length, onClick: () => fetchPendingUsers() },
           ]}
