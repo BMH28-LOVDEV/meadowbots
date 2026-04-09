@@ -479,96 +479,20 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
           </div>
         </div>
 
-        {/* Tabs - Desktop only */}
-        {!isMobile && (
-        <div className="px-4 flex gap-1 pb-2 overflow-x-auto" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
-          <button
-            onClick={() => setActiveTab("dashboard")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 ${
-              activeTab === "dashboard"
-                ? "bg-primary/20 text-primary border border-primary/40"
-                : "text-muted-foreground hover:text-foreground border border-transparent"
-            }`}
-          >
-            DASHBOARD
-          </button>
-          <button
-            onClick={() => setActiveTab("rankings")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 ${
-              activeTab === "rankings"
-                ? "bg-primary/20 text-primary border border-primary/40"
-                : "text-muted-foreground hover:text-foreground border border-transparent"
-            }`}
-          >
-            RANKINGS
-          </button>
-          <button
-            onClick={() => setActiveTab("progress")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 ${
-              activeTab === "progress"
-                ? "bg-primary/20 text-primary border border-primary/40"
-                : "text-muted-foreground hover:text-foreground border border-transparent"
-            }`}
-          >
-            SCOUT PROGRESS
-          </button>
-          <button
-            onClick={() => setActiveTab("assignments")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 ${
-              activeTab === "assignments"
-                ? "bg-primary/20 text-primary border border-primary/40"
-                : "text-muted-foreground hover:text-foreground border border-transparent"
-            }`}
-          >
-            ASSIGNMENTS
-          </button>
-          <button
-            onClick={() => setActiveTab("bluedrivedata")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 ${
-              activeTab === "bluedrivedata"
-                ? "bg-blue-500/20 text-blue-400 border border-blue-500/40"
-                : "text-muted-foreground hover:text-foreground border border-transparent"
-            }`}
-          >
-            BLUE DATA
-          </button>
-          <button
-            onClick={() => setActiveTab("silverdrivedata")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 ${
-              activeTab === "silverdrivedata"
-                ? "bg-slate-400/20 text-slate-300 border border-slate-400/40"
-                : "text-muted-foreground hover:text-foreground border border-transparent"
-            }`}
-          >
-            SILVER DATA
-          </button>
-          <button
-            onClick={() => setActiveTab("livestream")}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 ${
-              activeTab === "livestream"
-                ? "bg-red-500/20 text-red-400 border border-red-500/40"
-                : "text-muted-foreground hover:text-foreground border border-transparent"
-            }`}
-          >
-            🔴 LIVE STREAM
-          </button>
-          <button
-            onClick={() => { setActiveTab("approvals"); fetchPendingUsers(); }}
-            className={`px-4 py-1.5 rounded-lg text-xs font-display tracking-wider transition-all duration-200 whitespace-nowrap shrink-0 relative ${
-              activeTab === "approvals"
-                ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
-                : "text-muted-foreground hover:text-foreground border border-transparent"
-            }`}
-          >
-            👤 APPROVALS
-            {pendingUsers.filter(u => u.approval_status === "pending").length > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full text-[10px] font-bold text-black flex items-center justify-center">
-                {pendingUsers.filter(u => u.approval_status === "pending").length}
-              </span>
-            )}
-          </button>
-        </div>
-        )}
+        <HamburgerTabs
+          tabs={[
+            { id: "dashboard", label: "DASHBOARD", icon: "🛰️" },
+            { id: "rankings", label: "RANKINGS", icon: "🏆" },
+            { id: "progress", label: "SCOUT PROGRESS", icon: "📊" },
+            { id: "assignments", label: "ASSIGNMENTS", icon: "📋" },
+            { id: "bluedrivedata", label: "BLUE DATA", icon: "🔷", activeClass: "bg-blue-500/20 text-blue-400 border border-blue-500/40" },
+            { id: "silverdrivedata", label: "SILVER DATA", icon: "🪙", activeClass: "bg-slate-400/20 text-slate-300 border border-slate-400/40" },
+            { id: "livestream", label: "LIVE STREAM", icon: "🔴", activeClass: "bg-red-500/20 text-red-400 border border-red-500/40" },
+            { id: "approvals", label: "APPROVALS", icon: "👤", activeClass: "bg-amber-500/20 text-amber-400 border border-amber-500/40", badge: pendingUsers.filter(u => u.approval_status === "pending").length, onClick: () => fetchPendingUsers() },
+          ]}
+          activeTab={activeTab}
+          onTabChange={(id) => setActiveTab(id as typeof activeTab)}
+        />
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
