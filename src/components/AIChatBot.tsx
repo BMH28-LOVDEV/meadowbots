@@ -140,7 +140,7 @@ const AIChatBot = ({ onBack, userName }: AIChatBotProps) => {
               ].map((q) => (
                 <button
                   key={q}
-                  onClick={() => { setInput(q); }}
+                  onClick={() => { send(q); }}
                   className="text-xs px-3 py-2 rounded-lg border border-border bg-card hover:bg-secondary text-foreground font-body transition-colors"
                 >
                   {q}
