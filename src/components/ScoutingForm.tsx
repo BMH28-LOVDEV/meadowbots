@@ -629,7 +629,8 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs - Desktop only */}
+        {!isMobile && (
         <div className="max-w-4xl mx-auto px-4 flex gap-1 pb-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab("dashboard")}
@@ -664,6 +665,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             🔵 DRIVE DATA
           </button>
         </div>
+        )}
       </header>
 
       {/* ══ DASHBOARD TAB ══ */}
