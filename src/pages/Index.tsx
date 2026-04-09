@@ -10,7 +10,16 @@ import type { User } from "@supabase/supabase-js";
 
 const FloatingChat = ({ userName }: { userName: string }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const [isEnlarged, setIsEnlarged] = useState(false);
+
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+    }, 300);
+  };
 
   if (!isOpen) {
     return (
@@ -36,10 +45,8 @@ const FloatingChat = ({ userName }: { userName: string }) => {
     );
   }
 
-  // Mini bubble mode
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-80 h-96 rounded-2xl border border-border bg-card shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 fade-in duration-300">
-      {/* Mini header */}
+    <div className={`fixed bottom-6 right-6 z-50 w-80 h-96 rounded-2xl border border-border bg-card shadow-2xl flex flex-col overflow-hidden ${isClosing ? 'animate-out slide-out-to-bottom-5 fade-out duration-300' : 'animate-in slide-in-from-bottom-5 fade-in duration-300'}`}>
       <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-card/90 backdrop-blur-sm">
         <button
           onClick={() => setIsEnlarged(true)}
@@ -49,16 +56,15 @@ const FloatingChat = ({ userName }: { userName: string }) => {
         </button>
         <span className="text-sm font-display font-bold text-primary">🤖</span>
         <button
-          onClick={() => setIsOpen(false)}
+          onClick={handleClose}
           className="text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
           ✕
         </button>
       </div>
-      {/* Mini chat body */}
       <div className="flex-1 overflow-hidden">
         <AIChatBot
-          onBack={() => setIsOpen(false)}
+          onBack={handleClose}
           userName={userName}
           mini
         />
