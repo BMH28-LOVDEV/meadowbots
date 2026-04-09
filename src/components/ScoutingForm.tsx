@@ -3,8 +3,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
-import { MobileTabBar, type TabItem } from "@/components/MobileTabBar";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { HamburgerTabs, type TabItem } from "@/components/HamburgerTabs";
 
 interface ScoutingFormProps {
   scouterName: string;
