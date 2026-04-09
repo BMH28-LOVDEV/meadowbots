@@ -8,9 +8,11 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-with-da
 interface AIChatBotProps {
   onBack: () => void;
   userName: string;
+  mini?: boolean;
+  backLabel?: string;
 }
 
-const AIChatBot = ({ onBack, userName }: AIChatBotProps) => {
+const AIChatBot = ({ onBack, userName, mini, backLabel }: AIChatBotProps) => {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -99,6 +101,90 @@ const AIChatBot = ({ onBack, userName }: AIChatBotProps) => {
     }
   };
 
+  if (mini) {
+    return (
+      <div className="flex flex-col h-full">
+        {/* Mini messages */}
+        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
+          {messages.length === 0 && (
+            <div className="text-center py-6">
+              <div className="text-3xl mb-2">🤖</div>
+              <h2 className="text-sm font-display font-bold text-primary tracking-wider mb-1">
+                Hey, {userName}!
+              </h2>
+              <p className="text-xs text-muted-foreground font-body mb-3">
+                Ask me anything about our data!
+              </p>
+              <div className="flex flex-col gap-1.5">
+                {["Best auto team?", "Top 3 scouted teams", "Drive team matches?"].map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => send(q)}
+                    className="text-xs px-2 py-1.5 rounded-lg border border-border bg-background hover:bg-secondary text-foreground font-body transition-colors"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {messages.map((msg, i) => (
+            <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div className={`max-w-[90%] rounded-xl px-3 py-2 text-xs ${
+                msg.role === "user"
+                  ? "bg-primary text-primary-foreground rounded-br-sm"
+                  : "bg-background border border-border rounded-bl-sm"
+              }`}>
+                {msg.role === "assistant" ? (
+                  <div className="prose prose-xs prose-invert max-w-none font-body text-foreground [&_strong]:text-primary [&_code]:bg-secondary [&_code]:px-1 [&_code]:rounded text-xs">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                ) : (
+                  <p className="font-body">{msg.content}</p>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
+            <div className="flex justify-start">
+              <div className="bg-background border border-border rounded-xl rounded-bl-sm px-3 py-2">
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Mini input */}
+        <div className="border-t border-border p-2">
+          <div className="flex gap-1.5">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send()}
+              placeholder="Ask something..."
+              disabled={isLoading}
+              className="flex-1 bg-input border border-border rounded-lg px-3 py-2 text-base text-foreground font-body placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
+            />
+            <button
+              onClick={() => send()}
+              disabled={isLoading || !input.trim()}
+              className="px-3 py-2 bg-primary text-primary-foreground font-display font-bold text-xs tracking-wider rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+            >
+              ↑
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
@@ -107,7 +193,7 @@ const AIChatBot = ({ onBack, userName }: AIChatBotProps) => {
           onClick={onBack}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors font-display tracking-wider"
         >
-          ← BACK
+          {backLabel || "← BACK"}
         </button>
         <div className="flex-1 text-center">
           <h1 className="text-lg font-display font-bold text-primary tracking-wider">
@@ -126,7 +212,7 @@ const AIChatBot = ({ onBack, userName }: AIChatBotProps) => {
           <div className="text-center py-16">
             <div className="text-6xl mb-4">🤖</div>
             <h2 className="text-xl font-display font-bold text-primary tracking-wider mb-2">
-              Hey {userName}!
+              Hey, {userName}!
             </h2>
             <p className="text-muted-foreground font-body max-w-md mx-auto mb-6">
               I have access to all of our scouting data, team assignments, and match schedules. Ask me anything!
@@ -197,7 +283,7 @@ const AIChatBot = ({ onBack, userName }: AIChatBotProps) => {
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send()}
             placeholder="Ask about scouting data..."
             disabled={isLoading}
-            className="flex-1 bg-input border border-border rounded-xl px-4 py-3 text-base text-foreground font-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+            className="flex-1 bg-input border border-border rounded-xl px-4 py-3 text-base text-foreground font-body placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
           />
           <button
             onClick={() => send()}
