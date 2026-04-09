@@ -8,15 +8,64 @@ import AIChatBot from "@/components/AIChatBot";
 import ChampionshipCountdown from "@/components/ChampionshipCountdown";
 import type { User } from "@supabase/supabase-js";
 
-const FloatingChatButton = ({ onClick }: { onClick: () => void }) => (
-  <button
-    onClick={onClick}
-    className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-110 transition-transform flex items-center justify-center text-2xl"
-    title="Ask MeadowBot AI"
-  >
-    🤖
-  </button>
-);
+const FloatingChat = ({ userName }: { userName: string }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isEnlarged, setIsEnlarged] = useState(false);
+
+  if (!isOpen) {
+    return (
+      <button
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-110 transition-transform flex items-center justify-center text-2xl"
+        title="Ask MeadowBot AI"
+      >
+        🤖
+      </button>
+    );
+  }
+
+  if (isEnlarged) {
+    return (
+      <div className="fixed inset-0 z-50">
+        <AIChatBot
+          onBack={() => setIsEnlarged(false)}
+          userName={userName}
+          backLabel="← Minimize"
+        />
+      </div>
+    );
+  }
+
+  // Mini bubble mode
+  return (
+    <div className="fixed bottom-6 right-6 z-50 w-80 h-96 rounded-2xl border border-border bg-card shadow-2xl flex flex-col overflow-hidden">
+      {/* Mini header */}
+      <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-card/90 backdrop-blur-sm">
+        <button
+          onClick={() => setIsEnlarged(true)}
+          className="text-xs font-display tracking-wider text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+        >
+          Enlarge →
+        </button>
+        <span className="text-sm font-display font-bold text-primary">🤖</span>
+        <button
+          onClick={() => setIsOpen(false)}
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          ✕
+        </button>
+      </div>
+      {/* Mini chat body */}
+      <div className="flex-1 overflow-hidden">
+        <AIChatBot
+          onBack={() => setIsOpen(false)}
+          userName={userName}
+          mini
+        />
+      </div>
+    </div>
+  );
+};
 
 interface Profile {
   display_name: string;
