@@ -1207,16 +1207,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
         </div>
       )}
 
-      {/* ── SILVER DRIVE TEAM DATA TAB ── */}
-      {activeTab === "silverdrivedata" && (
-        <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-          {/* Header */}
-          <div className="glass rounded-xl p-6 border border-slate-400/40" style={{ boxShadow: "0 0 20px rgba(148,163,184,0.15)" }}>
-            <div className="flex items-center gap-4">
-              <span className="text-4xl">⚪</span>
-              <div>
-                <h2 className="font-display text-xl tracking-wider text-slate-300">SILVER DATA</h2>
-                <p className="text-xs text-muted-foreground font-body mt-1">Naila Nauman</p>
               </div>
             </div>
           </div>
