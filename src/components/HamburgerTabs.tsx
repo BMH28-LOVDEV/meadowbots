@@ -52,7 +52,7 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange }: HamburgerTabsPro
             }`}
           >
             {tab.icon ? `${tab.icon} ${tab.label}` : tab.label}
-            {tab.badge && tab.badge > 0 && (
+            {tab.badge != null && tab.badge > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 rounded-full text-[10px] font-bold text-black flex items-center justify-center">
                 {tab.badge}
               </span>
@@ -108,7 +108,7 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange }: HamburgerTabsPro
                 className="w-full px-4 py-3 text-left text-xs font-display tracking-wider text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-all duration-200 flex items-center justify-between border-b border-border/50 last:border-b-0 relative"
               >
                 <span>{tab.icon ? `${tab.icon} ${tab.label}` : tab.label}</span>
-                {tab.badge && tab.badge > 0 && (
+                {tab.badge != null && tab.badge > 0 && (
                   <span className="w-5 h-5 bg-amber-500 rounded-full text-[10px] font-bold text-black flex items-center justify-center">
                     {tab.badge}
                   </span>
