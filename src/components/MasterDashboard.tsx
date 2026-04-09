@@ -1207,24 +1207,8 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
         </div>
       )}
 
-              <span className="ml-auto text-xs text-slate-400/60 font-body">{silverMatches.length} matches added</span>
-            </div>
-            <div className="px-5 py-4 space-y-4">
-              {/* Add match input */}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={driveMatchInput.silver}
-                  onChange={(e) => setDriveMatchInput(prev => ({ ...prev, silver: e.target.value }))}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addDriveTeamMatch("19792"); } }}
-                  placeholder="Type Q5 then Enter to add…"
-                  className="flex-1 px-3 py-2 rounded-lg bg-muted border border-slate-400/30 focus:border-slate-300 focus:ring-1 focus:ring-slate-300 text-foreground placeholder:text-muted-foreground/40 font-body text-sm outline-none transition-all"
-                />
-                <button
-                  onClick={() => addDriveTeamMatch("19792")}
-                  disabled={savingDriveMatch || !driveMatchInput.silver.trim()}
-                  className="px-4 py-2 rounded-lg text-xs font-display tracking-wider bg-slate-600 text-white hover:bg-slate-500 disabled:opacity-40 transition-all"
-                >
+
+
                   ADD
                 </button>
               </div>
