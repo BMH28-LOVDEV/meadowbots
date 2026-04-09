@@ -415,7 +415,7 @@ const DriveDataForm = ({ scouterName, teamSummaries, loadingData }: {
 
 const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) => {
   const { celebrating } = useCelebration();
-  const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata" | "scoutai">("dashboard");
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [assignments, setAssignments] = useState<{ team_number: string; team_name: string; qual_matches: string[] }[]>([]);
