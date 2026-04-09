@@ -1453,18 +1453,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
           )}
         </div>
       )}
-      {isMobile && <div className="h-20" />}
-      <MobileTabBar
-        tabs={[
-          { id: "dashboard", label: "HOME", icon: "🛰️" },
-          { id: "rankings", label: "RANKS", icon: "🏆" },
-          { id: "progress", label: "SCOUTS", icon: "📊" },
-          { id: "assignments", label: "ASSIGN", icon: "📋" },
-          { id: "approvals", label: "APPROVE", icon: "👤", activeClass: "text-amber-400 bg-amber-500/10", badge: pendingUsers.filter(u => u.approval_status === "pending").length, onClick: () => fetchPendingUsers() },
-        ] as TabItem[]}
-        activeTab={activeTab}
-        onTabChange={(id) => setActiveTab(id as typeof activeTab)}
-      />
     </div>
   );
 };
