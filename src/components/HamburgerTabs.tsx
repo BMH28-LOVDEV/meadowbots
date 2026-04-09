@@ -78,7 +78,7 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange, actions }: Hamburg
             </DrawerTrigger>
             <DrawerContent className="glass border-t border-accent/30">
               <div className="px-4 pt-2 pb-6 max-w-lg mx-auto w-full">
-                <h3 className="font-display text-xs tracking-wider text-muted-foreground mb-3">ACTIONS</h3>
+                <h3 className="font-display text-xs tracking-wider text-muted-foreground mb-3">COMMANDS</h3>
                 <div className="space-y-1">
                   {actions.map((action) => (
                     <button
@@ -128,7 +128,7 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange, actions }: Hamburg
             </DrawerTrigger>
             <DrawerContent className="glass border-t border-accent/30">
               <div className="px-4 pt-2 pb-6">
-                <h3 className="font-display text-xs tracking-wider text-muted-foreground mb-3">ACTIONS</h3>
+                <h3 className="font-display text-xs tracking-wider text-muted-foreground mb-3">COMMANDS</h3>
                 <div className="space-y-1">
                   {actions.map((action) => (
                     <button
@@ -165,7 +165,7 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange, actions }: Hamburg
           </DrawerTrigger>
           <DrawerContent className="glass border-t border-border">
             <div className="px-4 pt-2 pb-6">
-              <h3 className="font-display text-xs tracking-wider text-muted-foreground mb-3">SECTIONS</h3>
+              <h3 className="font-display text-xs tracking-wider text-muted-foreground mb-3">TABS</h3>
               <div className="space-y-1">
                 {tabs.map((tab) => (
                   <button
