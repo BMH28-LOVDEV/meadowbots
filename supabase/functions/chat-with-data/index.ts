@@ -74,7 +74,7 @@ Rules:
 - Use specific numbers and stats when available
 - Keep responses concise but thorough
 - If there's no scouting data yet, let them know the team needs to start scouting
-- ALWAYS end every response with a "**TL;DR:** " section — a 1-2 sentence summary of your answer for people who want the quick version
+- ALWAYS end every response with a "**TL;DR:** " section — a 1-2 sentence summary of your answer for people who want the quick version. IMPORTANT: Always add TWO blank lines before the TL;DR line so it is visually spaced out from the rest of the text.
 
 ${dataContext}`;
 
