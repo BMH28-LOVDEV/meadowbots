@@ -221,18 +221,17 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
   };
 
   const addDriveTeamMatch = async (teamNumber: string) => {
-    const key = teamNumber === "14841" ? "blue" : "silver";
-    const raw = (driveMatchInput[key] || "").trim().toUpperCase();
+    const raw = (driveMatchInput.blue || "").trim().toUpperCase();
     if (!raw) return;
-    const existing = teamNumber === "14841" ? blueMatches : silverMatches;
+    const existing = blueMatches;
     if (existing.some(m => m.match_label === raw)) {
-      setDriveMatchInput(prev => ({ ...prev, [key]: "" }));
+      setDriveMatchInput(prev => ({ ...prev, blue: "" }));
       return;
     }
     setSavingDriveMatch(true);
     await (supabase as any).from("drive_team_matches").insert({ team_number: teamNumber, match_label: raw, sort_order: existing.length });
     await fetchDriveTeamMatches();
-    setDriveMatchInput(prev => ({ ...prev, [key]: "" }));
+    setDriveMatchInput(prev => ({ ...prev, blue: "" }));
     setSavingDriveMatch(false);
   };
 
