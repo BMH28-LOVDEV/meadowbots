@@ -18,13 +18,7 @@ const ChampionshipCountdown = () => {
   const secs = Math.floor((diff % 60000) / 1000);
 
   if (diff <= 0) {
-    return (
-      <div className="w-full py-3 px-4 bg-primary/10 border-b border-primary/20 text-center">
-        <span className="text-primary font-display text-sm tracking-widest animate-pulse">
-          🏆 FIRST WORLD CHAMPIONSHIP IS LIVE! 🏆
-        </span>
-      </div>
-    );
+    return null;
   }
 
   const weeks = Math.round(days / 7);
