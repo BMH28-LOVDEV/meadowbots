@@ -481,7 +481,8 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs - Desktop only */}
+        {!isMobile && (
         <div className="px-4 flex gap-1 pb-2 overflow-x-auto" style={{scrollbarWidth: 'none', msOverflowStyle: 'none'}}>
           <button
             onClick={() => setActiveTab("dashboard")}
@@ -569,6 +570,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             )}
           </button>
         </div>
+        )}
       </header>
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
