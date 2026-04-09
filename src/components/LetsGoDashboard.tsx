@@ -41,7 +41,7 @@ const LetsGoDashboard = ({ onLogout }: LetsGoDashboardProps) => {
 
       {/* Header */}
       <div className="fixed top-0 left-0 right-0 z-[9999] bg-background/80 backdrop-blur-md border-b border-green-500/20">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
             <h1 className="font-display text-xl tracking-wider" style={{ color: "#4ade80", textShadow: "0 0 12px rgba(74,222,128,0.5)" }}>
               🎉 LET'S GO!
@@ -58,7 +58,7 @@ const LetsGoDashboard = ({ onLogout }: LetsGoDashboardProps) => {
       </div>
 
       {/* Main content */}
-      <div className="pt-24 pb-16 px-4 w-full max-w-lg text-center space-y-8">
+      <div className="pt-24 pb-16 px-4 w-full max-w-7xl text-center space-y-8">
         <div className="glass rounded-xl p-10 border border-green-500/20 space-y-6">
           <div className="text-6xl">{celebrating ? "🏆" : "🎉"}</div>
           <h2 className="font-display text-2xl text-foreground tracking-wide">TEAM CELEBRATION</h2>
