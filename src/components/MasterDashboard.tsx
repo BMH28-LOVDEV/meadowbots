@@ -446,7 +446,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             ...(isBen ? [{ id: "letsgo", label: "LET'S GO!", icon: "🎉", className: "text-green-400 hover:text-green-300", onClick: () => triggerCelebration() }] : []),
             ...(isBen ? [{ id: "lockdown", label: "LOCKDOWN", icon: "🔴", className: "text-destructive hover:text-destructive", onClick: () => setShowLockdown(true) }] : []),
             ...(isBen ? [{ id: "clearall", label: "CLEAR ALL", icon: "🗑", className: "text-destructive/70 hover:text-destructive", onClick: () => { setShowClearAll(true); setClearAllPassword(""); setClearAllError(""); } }] : []),
-            ...(isBen && onViewAsBlueDriver ? [{ id: "blueform", label: "BLUE FORM", icon: "🔷", className: "text-blue-400 hover:text-blue-300", onClick: onViewAsBlueDriver }] : []),
+            ...(isBen && onViewAsBlueDriver ? [{ id: "blueform", label: "DRIVER DATA", icon: "🔷", className: "text-blue-400 hover:text-blue-300", onClick: onViewAsBlueDriver }] : []),
             ...((isJude || isBen) && onViewAsScouter ? [{ id: "scoutform", label: "SCOUT FORM", icon: "📋", className: "text-primary hover:text-primary", onClick: onViewAsScouter }] : []),
             { id: "refresh", label: "REFRESH", icon: "↻", onClick: () => { fetchEntries(); fetchAssignments(); fetchDriveData(); fetchDriveTeamMatches(); } },
           ]}
