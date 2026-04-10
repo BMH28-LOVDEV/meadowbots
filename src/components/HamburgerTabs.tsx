@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { haptics } from "@/hooks/useHaptics";
 
 export interface TabItem {
   id: string;
