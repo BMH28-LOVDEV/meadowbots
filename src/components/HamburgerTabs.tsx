@@ -43,6 +43,7 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange, actions }: Hamburg
             <button
               key={tab.id}
               onClick={() => {
+                haptics.light();
                 tab.onClick?.();
                 onTabChange(tab.id);
               }}
@@ -97,6 +98,7 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange, actions }: Hamburg
                     <button
                       key={action.id}
                       onClick={() => {
+                        haptics.medium();
                         action.onClick();
                         setActionsOpen(false);
                       }}
@@ -134,6 +136,7 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange, actions }: Hamburg
                   <button
                     key={tab.id}
                     onClick={() => {
+                      haptics.light();
                       tab.onClick?.();
                       onTabChange(tab.id);
                       setTabsOpen(false);
