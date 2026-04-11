@@ -5,7 +5,7 @@ import ScoutingForm from "@/components/ScoutingForm";
 import MasterDashboard from "@/components/MasterDashboard";
 import LetsGoDashboard from "@/components/LetsGoDashboard";
 import AIChatBot from "@/components/AIChatBot";
-import ChampionshipCountdown from "@/components/ChampionshipCountdown";
+
 import type { User } from "@supabase/supabase-js";
 
 const FloatingChat = ({ userName }: { userName: string }) => {
@@ -267,7 +267,6 @@ const Index = () => {
     }
     return (
       <>
-        <ChampionshipCountdown />
         <MasterDashboard
           onLogout={handleLogout}
           username={profile.display_name}
@@ -282,7 +281,6 @@ const Index = () => {
   if (profile.role === "letsgo") {
     return (
       <>
-        <ChampionshipCountdown />
         <LetsGoDashboard onLogout={handleLogout} />
         <FloatingChat userName={profile.display_name} />
       </>
@@ -292,7 +290,7 @@ const Index = () => {
   // scout, viewer, bluedriver — all get ScoutingForm (with role passed for Drive Data access)
   return (
     <>
-      <ChampionshipCountdown />
+      
       <ScoutingForm scouterName={profile.display_name} onLogout={handleLogout} userRole={profile.role} />
       <FloatingChat userName={profile.display_name} />
     </>
