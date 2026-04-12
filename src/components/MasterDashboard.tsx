@@ -504,6 +504,9 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             <p className="text-xs text-muted-foreground font-body">Team Rankings Dashboard</p>
           </div>
           <div className="flex items-center gap-3">
+            <button onClick={() => { fetchEntries(); fetchAssignments(); fetchDriveData(); fetchDriveTeamMatches(); }} className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200">
+              ↻ REFRESH
+            </button>
             <div className="hidden md:flex items-center gap-2">
               {isBen && (
                 <button onClick={() => triggerCelebration()} className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-green-500/50 text-green-400 hover:border-green-400 hover:bg-green-500/10 transition-all duration-200">
@@ -530,9 +533,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                   📋 SCOUT FORM
                 </button>
               )}
-              <button onClick={() => { fetchEntries(); fetchAssignments(); fetchDriveData(); fetchDriveTeamMatches(); }} className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200">
-                ↻ REFRESH
-              </button>
             </div>
             <button
               onClick={onLogout}
@@ -650,7 +650,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                     <div key={team.teamNumber} className="px-5 py-3.5 flex items-center gap-4">
                       <span className="text-xl w-8 text-center">{getRankIcon(index + 1)}</span>
                       <div className="flex-1">
-                        <p className="font-display text-sm text-foreground tracking-wide">Team {team.teamNumber}</p>
+                        <p className="font-display text-sm text-foreground tracking-wide">{teamNameMap[team.teamNumber] ? `${teamNameMap[team.teamNumber]} ` : ""}#{team.teamNumber}</p>
                         <p className="text-xs text-muted-foreground font-body">{team.entries.length} match{team.entries.length !== 1 ? "es" : ""} scouted</p>
                       </div>
                       <p className="font-display text-lg text-primary text-glow">{Math.round(team.avgScore)} pts</p>

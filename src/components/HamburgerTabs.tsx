@@ -66,55 +66,11 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange, actions }: Hamburg
     );
   }
 
-  // Mobile → current tab + two drawer triggers
+  // Mobile → tabs drawer LEFT, current tab CENTER, actions drawer RIGHT
   return (
     <div className="px-4 pb-2">
       <div className="flex items-center gap-2">
-        {/* Current tab indicator */}
-        <div className={`flex-1 px-4 py-1.5 rounded-lg text-xs font-display tracking-wider ${currentTab.activeClass || "bg-primary/20 text-primary border border-primary/40"}`}>
-          {currentTab.icon ? `${currentTab.icon} ${currentTab.label}` : currentTab.label}
-        </div>
-
-        {/* Actions drawer (mobile) */}
-        {actions && actions.length > 0 && (
-          <Drawer open={actionsOpen} onOpenChange={setActionsOpen}>
-            <DrawerTrigger asChild>
-              <button
-                className="p-2 rounded-lg border border-accent/40 text-accent hover:border-accent hover:bg-accent/10 transition-all duration-200"
-                aria-label="Toggle actions menu"
-              >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="10" cy="4" r="1.5" fill="currentColor" />
-                  <circle cx="10" cy="10" r="1.5" fill="currentColor" />
-                  <circle cx="10" cy="16" r="1.5" fill="currentColor" />
-                </svg>
-              </button>
-            </DrawerTrigger>
-            <DrawerContent className="glass border-t border-accent/30">
-              <div className="px-4 pt-2 pb-6">
-                <h3 className="font-display text-xs tracking-wider text-muted-foreground mb-3">COMMANDS</h3>
-                <div className="space-y-1">
-                  {actions.map((action) => (
-                    <button
-                      key={action.id}
-                      onClick={() => {
-                        haptics.medium();
-                        action.onClick();
-                        setActionsOpen(false);
-                      }}
-                      className={`w-full px-4 py-3 rounded-lg text-left text-sm font-display tracking-wider transition-all duration-200 flex items-center gap-3 hover:bg-accent/10 ${action.className || "text-muted-foreground hover:text-foreground"}`}
-                    >
-                      {action.icon && <span className="text-base">{action.icon}</span>}
-                      <span>{action.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </DrawerContent>
-          </Drawer>
-        )}
-
-        {/* Tabs drawer (mobile) */}
+        {/* Tabs drawer (mobile) — LEFT */}
         <Drawer open={tabsOpen} onOpenChange={setTabsOpen}>
           <DrawerTrigger asChild>
             <button
@@ -162,6 +118,50 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange, actions }: Hamburg
             </div>
           </DrawerContent>
         </Drawer>
+
+        {/* Current tab indicator — CENTER */}
+        <div className={`flex-1 px-4 py-1.5 rounded-lg text-xs font-display tracking-wider ${currentTab.activeClass || "bg-primary/20 text-primary border border-primary/40"}`}>
+          {currentTab.icon ? `${currentTab.icon} ${currentTab.label}` : currentTab.label}
+        </div>
+
+        {/* Actions drawer (mobile) — RIGHT */}
+        {actions && actions.length > 0 && (
+          <Drawer open={actionsOpen} onOpenChange={setActionsOpen}>
+            <DrawerTrigger asChild>
+              <button
+                className="p-2 rounded-lg border border-accent/40 text-accent hover:border-accent hover:bg-accent/10 transition-all duration-200"
+                aria-label="Toggle actions menu"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="10" cy="4" r="1.5" fill="currentColor" />
+                  <circle cx="10" cy="10" r="1.5" fill="currentColor" />
+                  <circle cx="10" cy="16" r="1.5" fill="currentColor" />
+                </svg>
+              </button>
+            </DrawerTrigger>
+            <DrawerContent className="glass border-t border-accent/30">
+              <div className="px-4 pt-2 pb-6">
+                <h3 className="font-display text-xs tracking-wider text-muted-foreground mb-3">COMMANDS</h3>
+                <div className="space-y-1">
+                  {actions.map((action) => (
+                    <button
+                      key={action.id}
+                      onClick={() => {
+                        haptics.medium();
+                        action.onClick();
+                        setActionsOpen(false);
+                      }}
+                      className={`w-full px-4 py-3 rounded-lg text-left text-sm font-display tracking-wider transition-all duration-200 flex items-center gap-3 hover:bg-accent/10 ${action.className || "text-muted-foreground hover:text-foreground"}`}
+                    >
+                      {action.icon && <span className="text-base">{action.icon}</span>}
+                      <span>{action.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </DrawerContent>
+          </Drawer>
+        )}
       </div>
     </div>
   );
