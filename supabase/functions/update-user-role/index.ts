@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
     }
 
     // Allowed roles that can be assigned
-    const ALLOWED_ROLES = ["scout", "driveteam", "bluedriver", "viewer", "teacher", "letsgo"];
+    const ALLOWED_ROLES = ["scout", "driveteam", "bluedriver", "viewer", "teacher", "letsgo", "master", "coach"];
     if (!ALLOWED_ROLES.includes(newRole)) {
       return new Response(JSON.stringify({ error: "Invalid role" }), {
         status: 400,
