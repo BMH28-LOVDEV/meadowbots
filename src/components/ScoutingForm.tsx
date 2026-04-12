@@ -482,7 +482,7 @@ const NotifyDriveTeamButton = ({ scouterName }: { scouterName: string }) => {
 
 const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) => {
   const { celebrating } = useCelebration();
-  const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata" | "scoutai" | "notify">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata" | "scoutai" | "notify" | "rankings">("dashboard");
   const [scoutingMode, setScoutingMode] = useState<null | "pit" | "match">(null);
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
