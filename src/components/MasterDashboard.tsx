@@ -592,10 +592,9 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                 {[
                   { name: "Max Tran", role: "Driver 1 / Human Player" },
                   { name: "Cole Schubert", role: "Driver 1 / Human Player" },
-                  { name: "Benjamin Hale", role: "Driver 2" },
-                  { name: "Travis Quinn", role: "Human Player (Sub)" },
-                  { name: "Aiden Rubbo", role: "Drive Coach" },
-                  { name: "Mason Howard", role: "Build / Drive Coach" },
+                  { name: "Benjamin Hale", role: "Driver 2 (Aux)" },
+                  { name: "Michael Xie", role: "Drive Coach" },
+                  { name: "Travis Quinn", role: "Build Assistance" },
                 ].map(({ name, role }, idx) => (
                   <div key={`${name}-${idx}`} className="px-5 py-2.5 flex items-center justify-between">
                     <span className="font-body text-sm" style={{ color: "#60a5fa" }}>{name}</span>
@@ -611,11 +610,19 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                 <span className="text-lg">🎓</span>
                 <h3 className="font-display text-sm tracking-wider text-amber-400" style={{ textShadow: "0 0 8px rgba(251,191,36,0.4)" }}>COACHES</h3>
               </div>
-              <div className="flex flex-wrap gap-0 divide-y divide-amber-400/10">
-                {["Mrs. Trujillo", "Mr. Trujillo", "Aiden Rubbo", "Devin Allen"].map((name) => (
-                  <div key={name} className="px-5 py-2.5 w-full sm:w-1/2 flex items-center gap-3">
-                    <span className="text-amber-400/60 text-xs">★</span>
-                    <span className="font-body text-sm text-amber-100">{name}</span>
+              <div className="divide-y divide-amber-400/10">
+                {[
+                  { name: "Mrs. Trujillo", program: "FRC" },
+                  { name: "Aiden Rubbo", program: "FRC" },
+                  { name: "Mr. Trujillo", program: "FTC" },
+                  { name: "Devin Allen", program: "FTC" },
+                ].map(({ name, program }) => (
+                  <div key={name} className="px-5 py-2.5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-amber-400/60 text-xs">★</span>
+                      <span className="font-body text-sm text-amber-100">{name}</span>
+                    </div>
+                    <span className="text-xs font-display tracking-wider text-amber-400/70">{program}</span>
                   </div>
                 ))}
               </div>
