@@ -56,8 +56,17 @@
     @apply border-border;
   }
 
+  html {
+    height: 100%;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+
   body {
     @apply bg-background text-foreground font-body antialiased;
+    min-height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   h1, h2, h3, h4, h5, h6 {
