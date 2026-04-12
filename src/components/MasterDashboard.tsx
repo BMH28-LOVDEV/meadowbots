@@ -190,9 +190,9 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
   const [upgradeTarget, setUpgradeTarget] = useState<{ userId: string; displayName: string } | null>(null);
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
-  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
-  const [deleteConfirmText, setDeleteConfirmText] = useState("");
-  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [showRevokeAccess, setShowRevokeAccess] = useState(false);
+  const [revokeConfirmText, setRevokeConfirmText] = useState("");
+  const [revokingAccess, setRevokingAccess] = useState(false);
 
   // Drive team match schedules (from DB)
   const [blueMatches, setBlueMatches] = useState<{ id: string; match_label: string; sort_order: number }[]>([]);
@@ -538,10 +538,10 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
               LOGOUT
             </button>
             <button
-              onClick={() => { setShowDeleteAccount(true); setDeleteConfirmText(""); }}
+              onClick={() => { setShowRevokeAccess(true); setRevokeConfirmText(""); }}
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/40 text-destructive/70 hover:border-destructive hover:text-destructive transition-all duration-200"
             >
-              🗑 DELETE
+              ⛔ LEAVE
             </button>
           </div>
         </div>
@@ -1484,50 +1484,48 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
           />
         </div>
       )}
-      {/* Delete Account Modal */}
-      {showDeleteAccount && (
+      {/* Revoke Access Modal */}
+      {showRevokeAccess && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
           <div className="glass rounded-2xl border border-destructive/40 p-6 max-w-md w-full space-y-4">
-            <h2 className="font-display text-lg text-destructive tracking-wider">DELETE ACCOUNT</h2>
+            <h2 className="font-display text-lg text-destructive tracking-wider">REVOKE YOUR ACCESS</h2>
             <p className="text-sm text-muted-foreground font-body">
-              This will permanently delete your account and all associated data. This action cannot be undone.
+              This will revoke your access to the scouting portal. You will need to be re-approved by an admin to regain access.
             </p>
             <p className="text-sm text-foreground font-body">
-              Type <span className="font-bold text-destructive">DELETE</span> to confirm:
+              Type <span className="font-bold text-destructive">REVOKE</span> to confirm:
             </p>
             <input
               type="text"
-              value={deleteConfirmText}
-              onChange={(e) => setDeleteConfirmText(e.target.value)}
-              placeholder="Type DELETE"
+              value={revokeConfirmText}
+              onChange={(e) => setRevokeConfirmText(e.target.value)}
+              placeholder="Type REVOKE"
               className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-destructive focus:ring-1 focus:ring-destructive text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all text-sm"
             />
             <div className="flex gap-3">
               <button
-                onClick={() => setShowDeleteAccount(false)}
+                onClick={() => setShowRevokeAccess(false)}
                 className="flex-1 py-2.5 rounded-lg border border-border text-muted-foreground font-display text-xs tracking-wider hover:bg-muted transition-all"
               >
                 CANCEL
               </button>
               <button
-                disabled={deleteConfirmText !== "DELETE" || deletingAccount}
+                disabled={revokeConfirmText !== "REVOKE" || revokingAccess}
                 onClick={async () => {
-                  setDeletingAccount(true);
+                  setRevokingAccess(true);
                   try {
                     const { data: { session } } = await supabase.auth.getSession();
                     if (!session) { toast.error("Not authenticated"); return; }
-                    const res = await supabase.functions.invoke("delete-account", {
-                      headers: { Authorization: `Bearer ${session.access_token}` },
-                    });
-                    if (res.error) { toast.error("Failed to delete account"); return; }
-                    toast.success("Account deleted.");
+                    const { error } = await supabase.from("profiles").update({ approval_status: "denied" }).eq("user_id", session.user.id);
+                    if (error) { toast.error("Failed to revoke access"); return; }
+                    toast.success("Access revoked.");
                     await supabase.auth.signOut();
                     onLogout();
-                  } catch { toast.error("Failed to delete account"); } finally { setDeletingAccount(false); }
+                  } catch { toast.error("Failed to revoke access"); } finally { setRevokingAccess(false); }
                 }}
                 className="flex-1 py-2.5 rounded-lg bg-destructive text-destructive-foreground font-display text-xs tracking-wider hover:bg-destructive/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {deletingAccount ? "DELETING..." : "DELETE ACCOUNT"}
+                {revokingAccess ? "REVOKING..." : "REVOKE ACCESS"}
               </button>
             </div>
           </div>
