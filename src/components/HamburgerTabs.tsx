@@ -124,10 +124,6 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange, actions }: Hamburg
           </DrawerContent>
         </Drawer>
 
-        {/* Current tab indicator — CENTER */}
-        <div className={`flex-1 px-4 py-1.5 rounded-lg text-xs font-display tracking-wider ${currentTab.activeClass || "bg-primary/20 text-primary border border-primary/40"}`}>
-          {currentTab.icon ? `${currentTab.icon} ${currentTab.label}` : currentTab.label}
-        </div>
 
         {/* Actions drawer (mobile) — RIGHT */}
         {actions && actions.length > 0 && (
