@@ -1414,13 +1414,29 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                       }</span>
                     </p>
                   </div>
-                  <button
-                    onClick={() => setUpgradeTarget({ userId: user.user_id, displayName: user.display_name })}
-                    disabled={updatingRole === user.user_id}
-                    className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/30 text-xs font-display tracking-wider hover:bg-primary/20 hover:border-primary/50 transition-all disabled:opacity-50"
-                  >
-                    ⬆ UPGRADE
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={async () => {
+                        setUpdatingRole(user.user_id);
+                        const { error } = await supabase.from("profiles").update({ approval_status: "denied" }).eq("user_id", user.user_id);
+                        setUpdatingRole(null);
+                        if (error) { toast.error("Failed to revoke"); return; }
+                        toast.success(`${user.display_name} access revoked.`);
+                        fetchPendingUsers();
+                      }}
+                      disabled={updatingRole === user.user_id}
+                      className="px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive border border-destructive/30 text-xs font-display tracking-wider hover:bg-destructive/20 hover:border-destructive/50 transition-all disabled:opacity-50"
+                    >
+                      ⛔ REVOKE
+                    </button>
+                    <button
+                      onClick={() => setUpgradeTarget({ userId: user.user_id, displayName: user.display_name })}
+                      disabled={updatingRole === user.user_id}
+                      className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/30 text-xs font-display tracking-wider hover:bg-primary/20 hover:border-primary/50 transition-all disabled:opacity-50"
+                    >
+                      ⬆ UPGRADE
+                    </button>
+                  </div>
                 </div>
               ))}
               {approvedUsers.length === 0 && (
