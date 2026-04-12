@@ -552,6 +552,12 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
       setForm((prev) => ({ ...prev, teamNumber: assignmentData[0].team_number, teamName: assignmentData[0].team_name }));
     }
 
+    if (allAssignments) {
+      const nameMap: Record<string, string> = {};
+      allAssignments.forEach(a => { if (a.team_name) nameMap[a.team_number] = a.team_name; });
+      setAllTeamNames(nameMap);
+    }
+
     setLoadingData(false);
   };
 
