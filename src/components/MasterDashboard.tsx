@@ -865,7 +865,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-baseline gap-3">
-                            <span className="font-display text-lg text-foreground tracking-wider">Team {team.teamNumber}</span>
+                            <span className="font-display text-lg text-foreground tracking-wider">{teamNameMap[team.teamNumber] ? `${teamNameMap[team.teamNumber]} ` : ""}#{team.teamNumber}</span>
                             <span className="text-xs text-muted-foreground font-body">
                               {team.entries.length} match{team.entries.length !== 1 ? "es" : ""} scouted
                             </span>
