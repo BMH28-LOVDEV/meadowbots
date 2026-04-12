@@ -190,9 +190,9 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
   const [upgradeTarget, setUpgradeTarget] = useState<{ userId: string; displayName: string } | null>(null);
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
-  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
-  const [deleteConfirmText, setDeleteConfirmText] = useState("");
-  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [showRevokeAccess, setShowRevokeAccess] = useState(false);
+  const [revokeConfirmText, setRevokeConfirmText] = useState("");
+  const [revokingAccess, setRevokingAccess] = useState(false);
 
   // Drive team match schedules (from DB)
   const [blueMatches, setBlueMatches] = useState<{ id: string; match_label: string; sort_order: number }[]>([]);
