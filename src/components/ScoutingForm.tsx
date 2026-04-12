@@ -495,9 +495,6 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
   const [allTeamNames, setAllTeamNames] = useState<Record<string, string>>({});
   const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
   const [loadingData, setLoadingData] = useState(true);
-  const [showRevokeAccess, setShowRevokeAccess] = useState(false);
-  const [revokeConfirmText, setRevokeConfirmText] = useState("");
-  const [revokingAccess, setRevokingAccess] = useState(false);
 
   const assignment = assignments[selectedTeamIdx] || null;
 
@@ -710,12 +707,6 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-destructive hover:text-destructive transition-all duration-200"
             >
               LOGOUT
-            </button>
-            <button
-              onClick={() => { setShowRevokeAccess(true); setRevokeConfirmText(""); }}
-              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/40 text-destructive/70 hover:border-destructive hover:text-destructive transition-all duration-200"
-            >
-              ⛔ LEAVE
             </button>
           </div>
         </div>
