@@ -1316,62 +1316,146 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             <p className="text-xs text-muted-foreground font-body">Approve or deny new account requests</p>
           </div>
 
-          {pendingUsers.length === 0 ? (
+          {/* Pending */}
+          {pendingUsers.filter(u => u.approval_status === "pending").length > 0 && (
+            <div>
+              <h3 className="text-xs font-display tracking-wider text-amber-400 mb-2 px-1">PENDING ({pendingUsers.filter(u => u.approval_status === "pending").length})</h3>
+              {pendingUsers.filter(u => u.approval_status === "pending").map(user => (
+                <div key={user.id} className="glass rounded-xl p-4 border border-amber-500/30 flex items-center justify-between mb-2">
+                  <div>
+                    <p className="font-display text-sm text-foreground tracking-wider">{user.display_name}</p>
+                    <p className="text-xs text-muted-foreground font-body">{user.username} · {user.role}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleApproval(user.id, "approved")}
+                      className="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-display tracking-wider hover:bg-emerald-500/30 transition-all"
+                    >
+                      ✓ APPROVE
+                    </button>
+                    <button
+                      onClick={() => handleApproval(user.id, "denied")}
+                      className="px-3 py-1.5 rounded-lg bg-destructive/20 text-destructive border border-destructive/40 text-xs font-display tracking-wider hover:bg-destructive/30 transition-all"
+                    >
+                      ✗ DENY
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Denied */}
+          {pendingUsers.filter(u => u.approval_status === "denied").length > 0 && (
+            <div>
+              <h3 className="text-xs font-display tracking-wider text-destructive mb-2 px-1">DENIED ({pendingUsers.filter(u => u.approval_status === "denied").length})</h3>
+              {pendingUsers.filter(u => u.approval_status === "denied").map(user => (
+                <div key={user.id} className="glass rounded-xl p-4 border border-destructive/30 flex items-center justify-between mb-2 opacity-70">
+                  <div>
+                    <p className="font-display text-sm text-foreground tracking-wider">{user.display_name}</p>
+                    <p className="text-xs text-muted-foreground font-body">{user.username} · {user.role}</p>
+                  </div>
+                  <button
+                    onClick={() => handleApproval(user.id, "approved")}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-display tracking-wider hover:bg-emerald-500/30 transition-all"
+                  >
+                    ✓ APPROVE
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {pendingUsers.length === 0 && (
             <div className="glass rounded-xl p-8 border border-border/50 text-center">
               <span className="text-4xl mb-3 block">✅</span>
               <p className="text-muted-foreground font-body">No pending accounts to review</p>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {pendingUsers.filter(u => u.approval_status === "pending").length > 0 && (
-                <div>
-                  <h3 className="text-xs font-display tracking-wider text-amber-400 mb-2 px-1">PENDING ({pendingUsers.filter(u => u.approval_status === "pending").length})</h3>
-                  {pendingUsers.filter(u => u.approval_status === "pending").map(user => (
-                    <div key={user.id} className="glass rounded-xl p-4 border border-amber-500/30 flex items-center justify-between mb-2">
-                      <div>
-                        <p className="font-display text-sm text-foreground tracking-wider">{user.display_name}</p>
-                        <p className="text-xs text-muted-foreground font-body">{user.username} · {user.role}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleApproval(user.id, "approved")}
-                          className="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-display tracking-wider hover:bg-emerald-500/30 transition-all"
-                        >
-                          ✓ APPROVE
-                        </button>
-                        <button
-                          onClick={() => handleApproval(user.id, "denied")}
-                          className="px-3 py-1.5 rounded-lg bg-destructive/20 text-destructive border border-destructive/40 text-xs font-display tracking-wider hover:bg-destructive/30 transition-all"
-                        >
-                          ✗ DENY
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+          )}
 
-              {pendingUsers.filter(u => u.approval_status === "denied").length > 0 && (
-                <div>
-                  <h3 className="text-xs font-display tracking-wider text-destructive mb-2 px-1">DENIED ({pendingUsers.filter(u => u.approval_status === "denied").length})</h3>
-                  {pendingUsers.filter(u => u.approval_status === "denied").map(user => (
-                    <div key={user.id} className="glass rounded-xl p-4 border border-destructive/30 flex items-center justify-between mb-2 opacity-70">
-                      <div>
-                        <p className="font-display text-sm text-foreground tracking-wider">{user.display_name}</p>
-                        <p className="text-xs text-muted-foreground font-body">{user.username} · {user.role}</p>
-                      </div>
-                      <button
-                        onClick={() => handleApproval(user.id, "approved")}
-                        className="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-display tracking-wider hover:bg-emerald-500/30 transition-all"
-                      >
-                        ✓ APPROVE
-                      </button>
-                    </div>
-                  ))}
+          {/* Accepted Users */}
+          <div className="glass rounded-xl overflow-hidden border border-emerald-500/30">
+            <div className="px-5 py-3.5 border-b border-emerald-500/20 flex items-center justify-between" style={{ background: "linear-gradient(135deg, rgba(16,185,129,0.08), rgba(5,150,105,0.04))" }}>
+              <div className="flex items-center gap-3">
+                <span className="text-lg">✅</span>
+                <h3 className="font-display text-sm tracking-wider text-emerald-400">ACCEPTED</h3>
+              </div>
+              <span className="text-xs font-display tracking-wider text-emerald-400/70">{approvedUsers.length} users</span>
+            </div>
+            <div className="divide-y divide-emerald-500/10 max-h-96 overflow-y-auto">
+              {approvedUsers.map(user => (
+                <div key={user.id} className="px-5 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="font-display text-sm text-foreground tracking-wider">{user.display_name}</p>
+                    <p className="text-xs text-muted-foreground font-body">
+                      {user.username} · <span className={
+                        user.role === "master" ? "text-amber-400" :
+                        user.role === "bluedriver" ? "text-blue-400" :
+                        user.role === "coach" ? "text-amber-300" :
+                        "text-muted-foreground"
+                      }>{
+                        user.role === "master" ? "Master" :
+                        user.role === "bluedriver" ? "Driver Data" :
+                        user.role === "coach" ? "Coach" :
+                        user.role === "driveteam" ? "Drive Team" :
+                        "Scout"
+                      }</span>
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setUpgradeTarget({ userId: user.user_id, displayName: user.display_name })}
+                    disabled={updatingRole === user.user_id}
+                    className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/30 text-xs font-display tracking-wider hover:bg-primary/20 hover:border-primary/50 transition-all disabled:opacity-50"
+                  >
+                    ⬆ UPGRADE
+                  </button>
+                </div>
+              ))}
+              {approvedUsers.length === 0 && (
+                <div className="px-5 py-6 text-center">
+                  <p className="text-muted-foreground font-body text-sm">No accepted users yet</p>
                 </div>
               )}
             </div>
-          )}
+          </div>
+        </div>
+      )}
+
+      {/* Upgrade Role Modal */}
+      {upgradeTarget && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="glass rounded-xl p-6 w-full max-w-sm mx-4 border border-primary/40 space-y-4">
+            <h3 className="font-display text-lg text-primary tracking-wider">⬆ UPGRADE ACCESS</h3>
+            <p className="text-sm text-muted-foreground font-body">
+              Change role for <span className="text-foreground font-bold">{upgradeTarget.displayName}</span>
+            </p>
+            <div className="space-y-2">
+              {[
+                { role: "bluedriver", label: "🔵 Driver Data", desc: "Can submit drive data entries" },
+                { role: "master", label: "👑 Master", desc: "Full admin access" },
+              ].map(({ role, label, desc }) => (
+                <button
+                  key={role}
+                  disabled={updatingRole === upgradeTarget.userId}
+                  onClick={async () => {
+                    await handleRoleUpdate(upgradeTarget.userId, role);
+                    setUpgradeTarget(null);
+                    fetchPendingUsers();
+                  }}
+                  className="w-full py-3 px-4 rounded-lg bg-muted border border-border text-left hover:border-primary/60 hover:bg-primary/10 transition-all disabled:opacity-50"
+                >
+                  <p className="font-display text-sm text-foreground tracking-wider">{label}</p>
+                  <p className="text-xs text-muted-foreground font-body mt-0.5">{desc}</p>
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setUpgradeTarget(null)}
+              className="w-full py-2 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:bg-muted/30 transition-all"
+            >
+              CANCEL
+            </button>
+          </div>
         </div>
       )}
 
