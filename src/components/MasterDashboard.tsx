@@ -1429,6 +1429,20 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                     >
                       ⛔ REVOKE
                     </button>
+                    {user.role === "master" && (
+                      <button
+                        onClick={async () => {
+                          setUpdatingRole(user.user_id);
+                          await handleRoleUpdate(user.user_id, "scout");
+                          setUpdatingRole(null);
+                          fetchPendingUsers();
+                        }}
+                        disabled={updatingRole === user.user_id}
+                        className="px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-display tracking-wider hover:bg-amber-500/20 hover:border-amber-500/50 transition-all disabled:opacity-50"
+                      >
+                        ⬇ DOWNGRADE
+                      </button>
+                    )}
                     <button
                       onClick={() => setUpgradeTarget({ userId: user.user_id, displayName: user.display_name })}
                       disabled={updatingRole === user.user_id}
