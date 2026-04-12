@@ -726,6 +726,10 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             setActiveTab(id as typeof activeTab);
             if (id !== "scouting") setScoutingMode(null);
           }}
+          actions={[
+            { id: "refresh", label: "REFRESH", icon: "↻", onClick: fetchData },
+            { id: "logout", label: "LOGOUT", icon: "🚪", className: "text-destructive hover:text-destructive", onClick: onLogout },
+          ]}
         />
       </header>
 
