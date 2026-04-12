@@ -635,7 +635,10 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             { id: "scoutai", label: "SCOUT AI", icon: "🤖", activeClass: "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" },
           ]}
           activeTab={activeTab}
-          onTabChange={(id) => setActiveTab(id as typeof activeTab)}
+          onTabChange={(id) => {
+            setActiveTab(id as typeof activeTab);
+            if (id !== "scouting") setScoutingMode(null);
+          }}
         />
       </header>
 
