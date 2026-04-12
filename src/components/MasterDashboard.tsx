@@ -457,6 +457,12 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
     return summaries;
   }, [entries]);
 
+  const teamNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    assignments.forEach(a => { if (a.team_name) map[a.team_number] = a.team_name; });
+    return map;
+  }, [assignments]);
+
   // Only show scouts that have an assignment
   const assignedScouts = assignments.filter((a) => a.team_number);
   const uniqueAssignedScoutNames = [...new Set(assignedScouts.map(a => a.scout_name))];
