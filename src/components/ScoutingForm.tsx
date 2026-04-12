@@ -482,7 +482,7 @@ const NotifyDriveTeamButton = ({ scouterName }: { scouterName: string }) => {
 
 const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) => {
   const { celebrating } = useCelebration();
-  const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata" | "scoutai">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata" | "scoutai" | "notify">("dashboard");
   const [scoutingMode, setScoutingMode] = useState<null | "pit" | "match">(null);
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
@@ -697,6 +697,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           tabs={[
             { id: "dashboard", label: "DASHBOARD", icon: "🏠" },
             { id: "scouting", label: "SCOUTING FORM", icon: "📋", activeClass: "bg-accent/20 text-accent border border-accent/40" },
+            { id: "notify", label: "NOTIFY", icon: "📢", activeClass: "bg-blue-500/20 text-blue-400 border border-blue-500/40" },
             { id: "livestream", label: "LIVE STREAM", icon: "🔴", activeClass: "bg-red-500/20 text-red-400 border border-red-500/40" },
             { id: "drivedata", label: "DRIVE DATA", icon: "🔵", activeClass: "bg-blue-500/20 text-blue-400 border border-blue-500/40" },
             { id: "scoutai", label: "SCOUT AI", icon: "🤖", activeClass: "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" },
