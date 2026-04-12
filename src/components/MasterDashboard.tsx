@@ -190,9 +190,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
   const [upgradeTarget, setUpgradeTarget] = useState<{ userId: string; displayName: string } | null>(null);
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
-  const [showRevokeAccess, setShowRevokeAccess] = useState(false);
-  const [revokeConfirmText, setRevokeConfirmText] = useState("");
-  const [revokingAccess, setRevokingAccess] = useState(false);
 
   // Drive team match schedules (from DB)
   const [blueMatches, setBlueMatches] = useState<{ id: string; match_label: string; sort_order: number }[]>([]);
@@ -542,12 +539,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-destructive hover:text-destructive transition-all duration-200"
             >
               LOGOUT
-            </button>
-            <button
-              onClick={() => { setShowRevokeAccess(true); setRevokeConfirmText(""); }}
-              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/40 text-destructive/70 hover:border-destructive hover:text-destructive transition-all duration-200"
-            >
-              ⛔ LEAVE
             </button>
           </div>
         </div>
