@@ -547,6 +547,9 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         penalties: row.penalties || [],
         specialFeatures: row.special_features || "",
         goodMatch: row.good_match || "",
+        matchScore: row.match_score ?? null,
+        allianceWon: row.alliance_won || "",
+        timestamp: row.timestamp || "",
       })));
     }
 
