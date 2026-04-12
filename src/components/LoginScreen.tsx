@@ -200,7 +200,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-background relative">
       {/* ACCESS DENIED OVERLAY */}
       {accessDenied && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-destructive/95 backdrop-blur-sm">
