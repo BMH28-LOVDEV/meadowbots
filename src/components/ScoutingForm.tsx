@@ -416,6 +416,7 @@ const DriveDataForm = ({ scouterName, teamSummaries, loadingData }: {
 const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) => {
   const { celebrating } = useCelebration();
   const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata" | "scoutai">("dashboard");
+  const [scoutingMode, setScoutingMode] = useState<null | "pit" | "match">(null);
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [assignments, setAssignments] = useState<{ team_number: string; team_name: string; qual_matches: string[] }[]>([]);
@@ -634,7 +635,10 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             { id: "scoutai", label: "SCOUT AI", icon: "🤖", activeClass: "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" },
           ]}
           activeTab={activeTab}
-          onTabChange={(id) => setActiveTab(id as typeof activeTab)}
+          onTabChange={(id) => {
+            setActiveTab(id as typeof activeTab);
+            if (id !== "scouting") setScoutingMode(null);
+          }}
         />
       </header>
 
@@ -741,8 +745,64 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
       )}
 
       {/* ══ SCOUTING FORM TAB ══ */}
-      {activeTab === "scouting" && (
+      {activeTab === "scouting" && scoutingMode === null && (
+        <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col items-center justify-center" style={{ minHeight: "60vh" }}>
+          <div className="glass rounded-2xl p-8 border border-primary/30 glow-primary text-center space-y-6 max-w-md w-full">
+            <span className="text-5xl block">📋</span>
+            <h2 className="font-display text-2xl text-primary text-glow tracking-wider">SCOUTING TYPE</h2>
+            <p className="text-sm text-muted-foreground font-body">What type of scouting are you doing?</p>
+            <div className="flex flex-col gap-4">
+              <button
+                onClick={() => setScoutingMode("pit")}
+                className="w-full py-5 rounded-xl bg-accent/20 border-2 border-accent/50 text-accent font-display font-bold text-lg tracking-widest hover:bg-accent/30 hover:border-accent transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                🏗️ PIT SCOUT
+              </button>
+              <button
+                onClick={() => setScoutingMode("match")}
+                className="w-full py-5 rounded-xl bg-primary/20 border-2 border-primary/50 text-primary font-display font-bold text-lg tracking-widest hover:bg-primary/30 hover:border-primary transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                🎯 MATCH SCOUT
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ══ PIT SCOUTING FORM ══ */}
+      {activeTab === "scouting" && scoutingMode === "pit" && (
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+          <div className="flex items-center gap-3 mb-2">
+            <button
+              onClick={() => setScoutingMode(null)}
+              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200"
+            >
+              ← BACK
+            </button>
+            <h2 className="font-display text-lg text-accent tracking-wider">🏗️ PIT SCOUTING</h2>
+          </div>
+
+          <div className="glass rounded-xl p-8 border border-accent/30 text-center space-y-4">
+            <span className="text-4xl block">🚧</span>
+            <h3 className="font-display text-lg text-foreground tracking-wider">PIT SCOUT QUESTIONS COMING SOON</h3>
+            <p className="text-sm text-muted-foreground font-body">The pit scouting questions will be added here.</p>
+          </div>
+        </div>
+      )}
+
+      {/* ══ MATCH SCOUTING FORM ══ */}
+      {activeTab === "scouting" && scoutingMode === "match" && (
         <form onSubmit={handleSubmit} className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+          <div className="flex items-center gap-3 mb-2">
+            <button
+              type="button"
+              onClick={() => setScoutingMode(null)}
+              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200"
+            >
+              ← BACK
+            </button>
+            <h2 className="font-display text-lg text-primary tracking-wider">🎯 MATCH SCOUTING</h2>
+          </div>
 
           {assignments.length > 0 && (
             <div className="glass rounded-xl p-4 border border-primary/40 glow-primary space-y-3">
