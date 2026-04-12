@@ -330,12 +330,20 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
   };
 
   const fetchPendingUsers = async () => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("id, display_name, username, role, approval_status, created_at")
-      .in("approval_status", ["pending", "denied"])
-      .order("created_at", { ascending: false });
-    setPendingUsers(data ?? []);
+    const [{ data: pendingData }, { data: approvedData }] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("id, user_id, display_name, username, role, approval_status, created_at")
+        .in("approval_status", ["pending", "denied"])
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("profiles")
+        .select("id, user_id, display_name, username, role, approval_status, created_at")
+        .eq("approval_status", "approved")
+        .order("display_name"),
+    ]);
+    setPendingUsers((pendingData as any) ?? []);
+    setApprovedUsers((approvedData as any) ?? []);
   };
 
   const handleApproval = async (profileId: string, status: "approved" | "denied") => {
