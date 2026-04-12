@@ -917,7 +917,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
                       onClick={() => setExpandedTeam(isExpanded ? null : team.teamNumber)}
                       className="w-full px-6 py-5 flex items-center gap-4 text-left hover:bg-muted/30 transition-colors"
                     >
-                      <div className={`text-2xl font-display font-bold w-12 text-center ${rank === 1 ? "text-yellow-400" : rank === 2 ? "text-gray-300" : rank === 3 ? "text-amber-600" : "text-muted-foreground"}`}>
+                      <div className={`text-2xl font-display font-bold min-w-12 w-12 shrink-0 text-center ${rank === 1 ? "text-yellow-400" : rank === 2 ? "text-gray-300" : rank === 3 ? "text-amber-600" : "text-muted-foreground"}`}>
                         {getRankIcon(rank)}
                       </div>
                       <div className="flex-1 min-w-0">
