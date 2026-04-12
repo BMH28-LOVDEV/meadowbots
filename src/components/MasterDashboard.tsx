@@ -537,6 +537,12 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             >
               LOGOUT
             </button>
+            <button
+              onClick={() => { setShowDeleteAccount(true); setDeleteConfirmText(""); }}
+              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/40 text-destructive/70 hover:border-destructive hover:text-destructive transition-all duration-200"
+            >
+              🗑 DELETE
+            </button>
           </div>
         </div>
 
