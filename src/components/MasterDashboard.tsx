@@ -1347,22 +1347,29 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
 
           {/* Denied */}
           {pendingUsers.filter(u => u.approval_status === "denied").length > 0 && (
-            <div>
-              <h3 className="text-xs font-display tracking-wider text-destructive mb-2 px-1">DENIED ({pendingUsers.filter(u => u.approval_status === "denied").length})</h3>
-              {pendingUsers.filter(u => u.approval_status === "denied").map(user => (
-                <div key={user.id} className="glass rounded-xl p-4 border border-destructive/30 flex items-center justify-between mb-2 opacity-70">
-                  <div>
-                    <p className="font-display text-sm text-foreground tracking-wider">{user.display_name}</p>
-                    <p className="text-xs text-muted-foreground font-body">{user.username} · {user.role}</p>
-                  </div>
-                  <button
-                    onClick={() => handleApproval(user.id, "approved")}
-                    className="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-display tracking-wider hover:bg-emerald-500/30 transition-all"
-                  >
-                    ✓ APPROVE
-                  </button>
+            <div className="glass rounded-xl overflow-hidden border border-destructive/30">
+              <div className="px-5 py-3.5 border-b border-destructive/20 flex items-center justify-between" style={{ background: "linear-gradient(135deg, rgba(239,68,68,0.08), rgba(220,38,38,0.04))" }}>
+                <div className="flex items-center gap-3">
+                  <h3 className="font-display text-sm tracking-wider text-destructive">DENIED</h3>
                 </div>
-              ))}
+                <span className="text-xs font-display tracking-wider text-destructive/70">{pendingUsers.filter(u => u.approval_status === "denied").length} users</span>
+              </div>
+              <div className="divide-y divide-destructive/10">
+                {pendingUsers.filter(u => u.approval_status === "denied").map(user => (
+                  <div key={user.id} className="px-5 py-3 flex items-center justify-between opacity-70">
+                    <div>
+                      <p className="font-display text-sm text-foreground tracking-wider">{user.display_name}</p>
+                      <p className="text-xs text-muted-foreground font-body">{user.username} · {user.role}</p>
+                    </div>
+                    <button
+                      onClick={() => handleApproval(user.id, "approved")}
+                      className="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-display tracking-wider hover:bg-emerald-500/30 transition-all"
+                    >
+                      APPROVE
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
@@ -1377,12 +1384,11 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
           <div className="glass rounded-xl overflow-hidden border border-emerald-500/30">
             <div className="px-5 py-3.5 border-b border-emerald-500/20 flex items-center justify-between" style={{ background: "linear-gradient(135deg, rgba(16,185,129,0.08), rgba(5,150,105,0.04))" }}>
               <div className="flex items-center gap-3">
-                <span className="text-lg">✅</span>
                 <h3 className="font-display text-sm tracking-wider text-emerald-400">ACCEPTED</h3>
               </div>
               <span className="text-xs font-display tracking-wider text-emerald-400/70">{approvedUsers.length} users</span>
             </div>
-            <div className="divide-y divide-emerald-500/10 max-h-96 overflow-y-auto">
+            <div className="divide-y divide-emerald-500/10">
               {approvedUsers.map(user => (
                 <div key={user.id} className="px-5 py-3 flex items-center justify-between">
                   <div>
