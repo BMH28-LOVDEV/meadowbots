@@ -826,7 +826,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
                       <div key={team.teamNumber} className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 border border-border/30">
                         <span className="font-display text-sm w-8 text-center text-primary">{getRankIcon(i + 1)}</span>
                         <div className="flex-1">
-                          <p className="font-display text-sm text-foreground">Team {team.teamNumber}</p>
+                          <p className="font-display text-sm text-foreground">{allTeamNames[team.teamNumber] ? `${allTeamNames[team.teamNumber]} ` : ""}#{team.teamNumber}</p>
                           <p className="text-xs text-muted-foreground font-body">{team.entries.length} match{team.entries.length !== 1 ? "es" : ""}</p>
                         </div>
                         <p className="font-display text-sm text-primary">{Math.round(team.avgScore)}</p>
