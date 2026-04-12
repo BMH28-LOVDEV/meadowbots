@@ -70,7 +70,12 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange, actions }: Hamburg
   return (
     <div className="px-4 pb-2">
       <div className="flex items-center gap-2">
-        {/* Tabs drawer (mobile) — LEFT */}
+        {/* Current tab indicator — LEFT */}
+        <div className={`flex-1 px-4 py-1.5 rounded-lg text-xs font-display tracking-wider ${currentTab.activeClass || "bg-primary/20 text-primary border border-primary/40"}`}>
+          {currentTab.icon ? `${currentTab.icon} ${currentTab.label}` : currentTab.label}
+        </div>
+
+        {/* Tabs drawer — RIGHT (first) */}
         <Drawer open={tabsOpen} onOpenChange={setTabsOpen}>
           <DrawerTrigger asChild>
             <button
@@ -119,10 +124,6 @@ export const HamburgerTabs = ({ tabs, activeTab, onTabChange, actions }: Hamburg
           </DrawerContent>
         </Drawer>
 
-        {/* Current tab indicator — CENTER */}
-        <div className={`flex-1 px-4 py-1.5 rounded-lg text-xs font-display tracking-wider ${currentTab.activeClass || "bg-primary/20 text-primary border border-primary/40"}`}>
-          {currentTab.icon ? `${currentTab.icon} ${currentTab.label}` : currentTab.label}
-        </div>
 
         {/* Actions drawer (mobile) — RIGHT */}
         {actions && actions.length > 0 && (
