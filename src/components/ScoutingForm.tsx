@@ -489,6 +489,8 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
   const [assignments, setAssignments] = useState<{ team_number: string; team_name: string; qual_matches: string[] }[]>([]);
   const [selectedTeamIdx, setSelectedTeamIdx] = useState(0);
   const [entries, setEntries] = useState<ScoutingEntry[]>([]);
+  const [allTeamNames, setAllTeamNames] = useState<Record<string, string>>({});
+  const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [showRevokeAccess, setShowRevokeAccess] = useState(false);
   const [revokeConfirmText, setRevokeConfirmText] = useState("");
