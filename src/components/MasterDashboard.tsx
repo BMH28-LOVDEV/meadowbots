@@ -851,7 +851,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                         onClick={() => setExpandedTeam(isExpanded ? null : team.teamNumber)}
                         className="w-full px-6 py-5 flex items-center gap-4 text-left hover:bg-muted/30 transition-colors"
                       >
-                        <div className={`text-2xl font-display font-bold w-12 text-center ${getRankColor(rank)}`}>
+                        <div className={`text-2xl font-display font-bold min-w-12 w-12 shrink-0 text-center ${getRankColor(rank)}`}>
                           {getRankIcon(rank)}
                         </div>
                         <div className="flex-1 min-w-0">
