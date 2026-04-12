@@ -44,6 +44,7 @@ interface ScoutingEntry {
   teamNumber: string;
   matchNumber: string;
   scouterName: string;
+  timestamp: string;
   autoArtifactsScored: string;
   autoPatternAlignment: string;
   autoLaunchLine: string;
@@ -61,6 +62,8 @@ interface ScoutingEntry {
   penalties: string[];
   specialFeatures: string;
   goodMatch: string;
+  matchScore: number | null;
+  allianceWon: string;
 }
 
 const PENALTY_OPTIONS = [
