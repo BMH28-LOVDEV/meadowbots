@@ -91,6 +91,72 @@ interface TeamSummary {
   goodMatchResponses: { scouter: string; response: string }[];
 }
 
+// ── Notify Drive Team Button ──────────────────────────────────────────────────
+const NotifyDriveTeamButton = ({ senderName }: { senderName: string }) => {
+  const [open, setOpen] = useState(false);
+  const [customMsg, setCustomMsg] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const sendNotification = async (message: string) => {
+    setSending(true);
+    toast.success(`Notification sent to Drive Team: "${message}"`, { duration: 5000 });
+    setOpen(false);
+    setCustomMsg("");
+    setSending(false);
+  };
+
+  return (
+    <div className="space-y-2">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full py-3.5 rounded-xl border-2 border-blue-400/50 bg-blue-500/10 text-blue-400 font-display font-bold tracking-widest text-sm hover:bg-blue-500/20 hover:border-blue-400 transition-all duration-300 flex items-center justify-center gap-2"
+      >
+        📢 NOTIFY DRIVE TEAM
+        <span className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}>▼</span>
+      </button>
+      {open && (
+        <div className="glass rounded-xl p-5 border border-blue-400/30 space-y-4 animate-in slide-in-from-top-2 fade-in duration-200">
+          <p className="text-sm font-display tracking-wider text-blue-400">WHAT DO YOU NEED TO TELL DRIVE TEAM?</p>
+          <div className="space-y-2">
+            {[
+              { label: "⚖️ Judges Just Came By Pit", msg: "Judges Just Came By Pit" },
+              { label: "🔧 Need You In Pit", msg: "Need You In Pit" },
+            ].map(({ label, msg }) => (
+              <button
+                key={msg}
+                disabled={sending}
+                onClick={() => sendNotification(`${msg} — from ${senderName}`)}
+                className="w-full py-3 rounded-lg bg-muted border border-border text-foreground font-body text-sm hover:border-blue-400/60 hover:bg-blue-500/10 transition-all text-left px-4 disabled:opacity-50"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="space-y-2">
+            <label className="block text-xs text-muted-foreground font-body">Other:</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={customMsg}
+                onChange={(e) => setCustomMsg(e.target.value)}
+                placeholder="Type your message..."
+                className="flex-1 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-blue-400 focus:ring-1 focus:ring-blue-400 text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all text-sm"
+              />
+              <button
+                disabled={!customMsg.trim() || sending}
+                onClick={() => sendNotification(`${customMsg.trim()} — from ${senderName}`)}
+                className="px-4 py-2.5 rounded-lg bg-blue-500/20 border border-blue-400/50 text-blue-400 font-display text-xs tracking-wider hover:bg-blue-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                SEND
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScouter }: MasterDashboardProps) => {
   const isBen = username === "Benjamin Hale";
   const isJude = username === "Jude Trujillo";
@@ -592,10 +658,9 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                 {[
                   { name: "Max Tran", role: "Driver 1 / Human Player" },
                   { name: "Cole Schubert", role: "Driver 1 / Human Player" },
-                  { name: "Benjamin Hale", role: "Driver 2" },
-                  { name: "Travis Quinn", role: "Human Player (Sub)" },
-                  { name: "Aiden Rubbo", role: "Drive Coach" },
-                  { name: "Mason Howard", role: "Build / Drive Coach" },
+                  { name: "Benjamin Hale", role: "Driver 2 (Aux)" },
+                  { name: "Michael Xie", role: "Drive Coach" },
+                  { name: "Travis Quinn", role: "Build Assistance" },
                 ].map(({ name, role }, idx) => (
                   <div key={`${name}-${idx}`} className="px-5 py-2.5 flex items-center justify-between">
                     <span className="font-body text-sm" style={{ color: "#60a5fa" }}>{name}</span>
@@ -611,15 +676,26 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                 <span className="text-lg">🎓</span>
                 <h3 className="font-display text-sm tracking-wider text-amber-400" style={{ textShadow: "0 0 8px rgba(251,191,36,0.4)" }}>COACHES</h3>
               </div>
-              <div className="flex flex-wrap gap-0 divide-y divide-amber-400/10">
-                {["Mrs. Trujillo", "Mr. Trujillo", "Aiden Rubbo", "Devin Allen"].map((name) => (
-                  <div key={name} className="px-5 py-2.5 w-full sm:w-1/2 flex items-center gap-3">
-                    <span className="text-amber-400/60 text-xs">★</span>
-                    <span className="font-body text-sm text-amber-100">{name}</span>
+              <div className="divide-y divide-amber-400/10">
+                {[
+                  { name: "Mrs. Trujillo", program: "FRC" },
+                  { name: "Aiden Rubbo", program: "FRC" },
+                  { name: "Mr. Trujillo", program: "FTC" },
+                  { name: "Devin Allen", program: "FTC" },
+                ].map(({ name, program }) => (
+                  <div key={name} className="px-5 py-2.5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-amber-400/60 text-xs">★</span>
+                      <span className="font-body text-sm text-amber-100">{name}</span>
+                    </div>
+                    <span className="text-xs font-display tracking-wider text-amber-400/70">{program}</span>
                   </div>
                 ))}
               </div>
             </div>
+
+            {/* Notify Drive Team */}
+            <NotifyDriveTeamButton senderName={username} />
 
             {/* Quick nav */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
