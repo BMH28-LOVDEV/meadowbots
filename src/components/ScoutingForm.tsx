@@ -495,9 +495,6 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
   const [allTeamNames, setAllTeamNames] = useState<Record<string, string>>({});
   const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
   const [loadingData, setLoadingData] = useState(true);
-  const [showRevokeAccess, setShowRevokeAccess] = useState(false);
-  const [revokeConfirmText, setRevokeConfirmText] = useState("");
-  const [revokingAccess, setRevokingAccess] = useState(false);
 
   const assignment = assignments[selectedTeamIdx] || null;
 
@@ -710,12 +707,6 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-destructive hover:text-destructive transition-all duration-200"
             >
               LOGOUT
-            </button>
-            <button
-              onClick={() => { setShowRevokeAccess(true); setRevokeConfirmText(""); }}
-              className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/40 text-destructive/70 hover:border-destructive hover:text-destructive transition-all duration-200"
-            >
-              ⛔ LEAVE
             </button>
           </div>
         </div>
@@ -1362,53 +1353,6 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             userName={scouterName}
             backLabel="← Dashboard"
           />
-        </div>
-      )}
-      {/* Revoke Access Modal */}
-      {showRevokeAccess && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
-          <div className="glass rounded-2xl border border-destructive/40 p-6 max-w-md w-full space-y-4">
-            <h2 className="font-display text-lg text-destructive tracking-wider">REVOKE YOUR ACCESS</h2>
-            <p className="text-sm text-muted-foreground font-body">
-              This will revoke your access to the scouting portal. You will need to be re-approved by an admin to regain access.
-            </p>
-            <p className="text-sm text-foreground font-body">
-              Type <span className="font-bold text-destructive">REVOKE</span> to confirm:
-            </p>
-            <input
-              type="text"
-              value={revokeConfirmText}
-              onChange={(e) => setRevokeConfirmText(e.target.value)}
-              placeholder="Type REVOKE"
-              className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-destructive focus:ring-1 focus:ring-destructive text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all text-sm"
-            />
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowRevokeAccess(false)}
-                className="flex-1 py-2.5 rounded-lg border border-border text-muted-foreground font-display text-xs tracking-wider hover:bg-muted transition-all"
-              >
-                CANCEL
-              </button>
-              <button
-                disabled={revokeConfirmText !== "REVOKE" || revokingAccess}
-                onClick={async () => {
-                  setRevokingAccess(true);
-                  try {
-                    const { data: { session } } = await supabase.auth.getSession();
-                    if (!session) { toast.error("Not authenticated"); return; }
-                    const { error } = await supabase.from("profiles").update({ approval_status: "denied" }).eq("user_id", session.user.id);
-                    if (error) { toast.error("Failed to revoke access"); return; }
-                    toast.success("Access revoked.");
-                    await supabase.auth.signOut();
-                    onLogout();
-                  } catch { toast.error("Failed to revoke access"); } finally { setRevokingAccess(false); }
-                }}
-                className="flex-1 py-2.5 rounded-lg bg-destructive text-destructive-foreground font-display text-xs tracking-wider hover:bg-destructive/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {revokingAccess ? "REVOKING..." : "REVOKE ACCESS"}
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>
