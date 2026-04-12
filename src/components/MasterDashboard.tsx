@@ -670,7 +670,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                   { name: "Cole Schubert", role: "Driver 1 / Human Player" },
                   { name: "Benjamin Hale", role: "Driver 2 (Aux)" },
                   { name: "Michael Xie", role: "Drive Coach" },
-                  { name: "Travis Quinn", role: "Build Assistance" },
+                  { name: "Travis Quinn", role: "Build Assistance / Human Player Sub" },
                 ].map(({ name, role }, idx) => (
                   <div key={`${name}-${idx}`} className="px-5 py-2.5 flex items-center justify-between">
                     <span className="font-body text-sm" style={{ color: "#60a5fa" }}>{name}</span>
