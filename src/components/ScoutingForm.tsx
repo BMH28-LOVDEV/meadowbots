@@ -717,6 +717,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         <HamburgerTabs
           tabs={[
             { id: "dashboard", label: "DASHBOARD", icon: "🏠" },
+            { id: "rankings", label: "RANKINGS", icon: "🏆", activeClass: "bg-amber-500/20 text-amber-400 border border-amber-500/40" },
             { id: "scouting", label: "SCOUTING FORM", icon: "📋", activeClass: "bg-accent/20 text-accent border border-accent/40" },
             { id: "notify", label: "NOTIFY", icon: "📢", activeClass: "bg-blue-500/20 text-blue-400 border border-blue-500/40" },
             { id: "livestream", label: "LIVE STREAM", icon: "🔴", activeClass: "bg-red-500/20 text-red-400 border border-red-500/40" },
