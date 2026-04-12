@@ -457,6 +457,12 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
     return summaries;
   }, [entries]);
 
+  const teamNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    assignments.forEach(a => { if (a.team_name) map[a.team_number] = a.team_name; });
+    return map;
+  }, [assignments]);
+
   // Only show scouts that have an assignment
   const assignedScouts = assignments.filter((a) => a.team_number);
   const uniqueAssignedScoutNames = [...new Set(assignedScouts.map(a => a.scout_name))];
@@ -859,7 +865,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-baseline gap-3">
-                            <span className="font-display text-lg text-foreground tracking-wider">Team {team.teamNumber}</span>
+                            <span className="font-display text-lg text-foreground tracking-wider">{teamNameMap[team.teamNumber] ? `${teamNameMap[team.teamNumber]} ` : ""}#{team.teamNumber}</span>
                             <span className="text-xs text-muted-foreground font-body">
                               {team.entries.length} match{team.entries.length !== 1 ? "es" : ""} scouted
                             </span>

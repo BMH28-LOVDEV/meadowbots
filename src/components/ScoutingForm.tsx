@@ -44,6 +44,7 @@ interface ScoutingEntry {
   teamNumber: string;
   matchNumber: string;
   scouterName: string;
+  timestamp: string;
   autoArtifactsScored: string;
   autoPatternAlignment: string;
   autoLaunchLine: string;
@@ -61,6 +62,8 @@ interface ScoutingEntry {
   penalties: string[];
   specialFeatures: string;
   goodMatch: string;
+  matchScore: number | null;
+  allianceWon: string;
 }
 
 const PENALTY_OPTIONS = [
@@ -482,13 +485,15 @@ const NotifyDriveTeamButton = ({ scouterName }: { scouterName: string }) => {
 
 const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) => {
   const { celebrating } = useCelebration();
-  const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata" | "scoutai" | "notify">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata" | "scoutai" | "notify" | "rankings">("dashboard");
   const [scoutingMode, setScoutingMode] = useState<null | "pit" | "match">(null);
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [assignments, setAssignments] = useState<{ team_number: string; team_name: string; qual_matches: string[] }[]>([]);
   const [selectedTeamIdx, setSelectedTeamIdx] = useState(0);
   const [entries, setEntries] = useState<ScoutingEntry[]>([]);
+  const [allTeamNames, setAllTeamNames] = useState<Record<string, string>>({});
+  const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [showRevokeAccess, setShowRevokeAccess] = useState(false);
   const [revokeConfirmText, setRevokeConfirmText] = useState("");
@@ -515,9 +520,10 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
 
   const fetchData = async () => {
     setLoadingData(true);
-    const [{ data: rawEntries }, { data: assignmentData }] = await Promise.all([
+    const [{ data: rawEntries }, { data: assignmentData }, { data: allAssignments }] = await Promise.all([
       supabase.from("scouting_entries").select("*").order("timestamp", { ascending: true }),
       supabase.from("team_assignments").select("team_number, team_name, qual_matches").eq("scout_name", scouterName),
+      supabase.from("team_assignments").select("team_number, team_name"),
     ]);
 
     if (rawEntries) {
@@ -541,12 +547,21 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         penalties: row.penalties || [],
         specialFeatures: row.special_features || "",
         goodMatch: row.good_match || "",
+        matchScore: row.match_score ?? null,
+        allianceWon: row.alliance_won || "",
+        timestamp: row.timestamp || "",
       })));
     }
 
     if (assignmentData && assignmentData.length > 0) {
       setAssignments(assignmentData.map(a => ({ team_number: a.team_number, team_name: a.team_name, qual_matches: a.qual_matches || [] })));
       setForm((prev) => ({ ...prev, teamNumber: assignmentData[0].team_number, teamName: assignmentData[0].team_name }));
+    }
+
+    if (allAssignments) {
+      const nameMap: Record<string, string> = {};
+      allAssignments.forEach(a => { if (a.team_name) nameMap[a.team_number] = a.team_name; });
+      setAllTeamNames(nameMap);
     }
 
     setLoadingData(false);
@@ -575,6 +590,9 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         teamNumber,
         avgScore: teamEntries.reduce((sum, e) => sum + scoreEntry(e), 0) / teamEntries.length,
         entries: teamEntries,
+        goodMatchResponses: teamEntries
+          .filter((e) => e.goodMatch?.trim())
+          .map((e) => ({ scouter: "Scouter", response: e.goodMatch })),
       }))
       .sort((a, b) => b.avgScore - a.avgScore);
   }, [entries]);
@@ -705,6 +723,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         <HamburgerTabs
           tabs={[
             { id: "dashboard", label: "DASHBOARD", icon: "🏠" },
+            { id: "rankings", label: "RANKINGS", icon: "🏆", activeClass: "bg-amber-500/20 text-amber-400 border border-amber-500/40" },
             { id: "scouting", label: "SCOUTING FORM", icon: "📋", activeClass: "bg-accent/20 text-accent border border-accent/40" },
             { id: "notify", label: "NOTIFY", icon: "📢", activeClass: "bg-blue-500/20 text-blue-400 border border-blue-500/40" },
             { id: "livestream", label: "LIVE STREAM", icon: "🔴", activeClass: "bg-red-500/20 text-red-400 border border-red-500/40" },
@@ -807,7 +826,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
                       <div key={team.teamNumber} className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 border border-border/30">
                         <span className="font-display text-sm w-8 text-center text-primary">{getRankIcon(i + 1)}</span>
                         <div className="flex-1">
-                          <p className="font-display text-sm text-foreground">Team {team.teamNumber}</p>
+                          <p className="font-display text-sm text-foreground">{allTeamNames[team.teamNumber] ? `${allTeamNames[team.teamNumber]} ` : ""}#{team.teamNumber}</p>
                           <p className="text-xs text-muted-foreground font-body">{team.entries.length} match{team.entries.length !== 1 ? "es" : ""}</p>
                         </div>
                         <p className="font-display text-sm text-primary">{Math.round(team.avgScore)}</p>
@@ -869,7 +888,147 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         </div>
       )}
 
-      {/* ══ SCOUTING FORM TAB ══ */}
+      {/* ══ RANKINGS TAB ══ */}
+      {activeTab === "rankings" && (
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
+          <h2 className="font-display text-lg text-primary tracking-wider text-glow">🏆 TEAM RANKINGS</h2>
+          {loadingData ? (
+            <div className="glass rounded-xl p-12 text-center">
+              <p className="text-4xl mb-4 animate-pulse">📡</p>
+              <p className="text-muted-foreground font-body">Loading scouting data...</p>
+            </div>
+          ) : teamSummaries.length === 0 ? (
+            <div className="glass rounded-xl p-12 text-center">
+              <p className="text-4xl mb-4">📭</p>
+              <p className="text-muted-foreground font-body">No scouting data yet. Teams will appear here once scouts submit data.</p>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground font-body">
+                {teamSummaries.length} team{teamSummaries.length !== 1 ? "s" : ""} scouted • Ranked by composite score
+              </p>
+
+              {teamSummaries.map((team, index) => {
+                const rank = index + 1;
+                const isExpanded = expandedTeam === team.teamNumber;
+                const teamName = allTeamNames[team.teamNumber];
+
+                return (
+                  <div
+                    key={team.teamNumber}
+                    className={`glass rounded-xl overflow-hidden transition-all duration-300 ${rank <= 3 ? "glow-primary" : ""}`}
+                  >
+                    <button
+                      onClick={() => setExpandedTeam(isExpanded ? null : team.teamNumber)}
+                      className="w-full px-6 py-5 flex items-center gap-4 text-left hover:bg-muted/30 transition-colors"
+                    >
+                      <div className={`text-2xl font-display font-bold w-12 text-center ${rank === 1 ? "text-yellow-400" : rank === 2 ? "text-gray-300" : rank === 3 ? "text-amber-600" : "text-muted-foreground"}`}>
+                        {getRankIcon(rank)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-baseline gap-3 flex-wrap">
+                          <span className="font-display text-lg text-foreground tracking-wider">
+                            {teamName ? `${teamName} ` : ""}#{team.teamNumber}
+                          </span>
+                          <span className="text-xs text-muted-foreground font-body">
+                            {team.entries.length} match{team.entries.length !== 1 ? "es" : ""} scouted
+                          </span>
+                        </div>
+                        {team.goodMatchResponses.length > 0 && (
+                          <p className="text-sm text-primary font-body mt-1 truncate">
+                            💬 "{team.goodMatchResponses[0].response}"
+                          </p>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <p className="font-display text-xl text-primary text-glow">{Math.round(team.avgScore)}</p>
+                        <p className="text-xs text-muted-foreground font-body">pts avg</p>
+                      </div>
+                      <span className={`text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}>▼</span>
+                    </button>
+
+                    {isExpanded && (
+                      <div className="px-6 pb-6 space-y-6 border-t border-border/50">
+                        {team.goodMatchResponses.length > 0 && (
+                          <div className="mt-4 p-4 rounded-lg bg-primary/10 border border-primary/30">
+                            <h4 className="font-display text-sm text-primary tracking-wider mb-3">
+                              🌟 "DO YOU THINK THIS TEAM WILL BE A GOOD MATCH FOR US?"
+                            </h4>
+                            <div className="space-y-2">
+                              {team.goodMatchResponses.map((r, i) => (
+                                <div key={i} className="flex gap-2">
+                                  <span className="text-xs text-muted-foreground font-body shrink-0">Scouter:</span>
+                                  <p className="text-sm text-foreground font-body">{r.response}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {team.entries.map((entry, i) => (
+                          <div key={i} className="p-4 rounded-lg bg-muted/30 border border-border/50 space-y-3">
+                            <div>
+                              <span className="font-display text-sm text-foreground tracking-wider">
+                                Match {entry.matchNumber || "N/A"} • Score: {scoreEntry(entry)}
+                                {entry.matchScore != null ? (
+                                  <span className="ml-2 text-primary/80">· Solo: ~{entry.matchScore}</span>
+                                ) : null}
+                                {entry.allianceWon ? (
+                                  <span className={`ml-2 text-xs ${entry.allianceWon === "Yes – Won" ? "text-green-400" : entry.allianceWon === "No – Lost" ? "text-destructive" : "text-muted-foreground"}`}>
+                                    {entry.allianceWon === "Yes – Won" ? "🏆 Won" : entry.allianceWon === "No – Lost" ? "❌ Lost" : "🤝 Tie"}
+                                  </span>
+                                ) : null}
+                              </span>
+                              <p className="text-xs text-muted-foreground font-body mt-0.5">
+                                🧑‍💻 Scouted by <span className="text-foreground">Scouter</span> • {new Date(entry.timestamp).toLocaleDateString()}
+                              </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-body">
+                              <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-muted-foreground">Auto Artifacts: </span><span className="text-foreground">{entry.autoArtifactsScored || "—"}</span></div>
+                              <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-muted-foreground">Auto Pattern: </span><span className="text-foreground">{entry.autoPatternAlignment || "—"}</span></div>
+                              <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-muted-foreground">Launch Line: </span><span className="text-foreground">{entry.autoLaunchLine || "—"}</span></div>
+                              <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-muted-foreground">Auto Leave: </span><span className="text-foreground">{entry.autoLeave || "—"}</span></div>
+                              <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-muted-foreground">Auto Consistency: </span><span className="text-foreground">{entry.autoConsistency || "—"}</span></div>
+                              <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-muted-foreground">Intake: </span><span className="text-foreground">{entry.teleopIntakeMethod || "—"}</span></div>
+                              <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-muted-foreground">Ball Capacity: </span><span className="text-foreground">{entry.teleopBallCapacity || "—"}</span></div>
+                              <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-muted-foreground">Shooting: </span><span className="text-foreground">{entry.teleopShootingAccuracy || "—"}</span></div>
+                              <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-muted-foreground">Gate: </span><span className="text-foreground">{entry.teleopGateInteraction || "—"}</span></div>
+                              <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-muted-foreground">Overflow: </span><span className="text-foreground">{entry.teleopOverflowManagement || "—"}</span></div>
+                              <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-muted-foreground">Cycle Speed: </span><span className="text-foreground">{entry.teleopCycleSpeed || "—"}</span></div>
+                              <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-muted-foreground">Classification: </span><span className="text-foreground">{entry.teleopArtifactClassification || "—"}</span></div>
+                              <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-muted-foreground">Parking: </span><span className="text-foreground">{entry.endgameParking || "—"}</span></div>
+                              <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-muted-foreground">Alliance Assist: </span><span className="text-foreground">{entry.endgameAllianceAssist || "—"}</span></div>
+                            </div>
+
+                            {(entry.penalties || []).length > 0 && (
+                              <div>
+                                <span className="text-xs text-muted-foreground font-body">Penalties: </span>
+                                {(entry.penalties || []).map((p, j) => (
+                                  <span key={j} className={`inline-block text-xs px-2 py-0.5 rounded mr-1 mt-1 ${
+                                    p === "None observed" ? "bg-green-500/20 text-green-400" : "bg-destructive/20 text-destructive"
+                                  }`}>{p}</span>
+                                ))}
+                              </div>
+                            )}
+
+                            {entry.specialFeatures && (
+                              <div>
+                                <span className="text-xs text-muted-foreground font-body">Notes: </span>
+                                <span className="text-xs text-foreground font-body">{entry.specialFeatures}</span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </>
+          )}
+        </div>
+      )}
       {activeTab === "scouting" && scoutingMode === null && (
         <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col items-center justify-center" style={{ minHeight: "60vh" }}>
           <div className="glass rounded-2xl p-8 border border-primary/30 glow-primary text-center space-y-6 max-w-md w-full">
