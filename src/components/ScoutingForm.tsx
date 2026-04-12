@@ -584,6 +584,9 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         teamNumber,
         avgScore: teamEntries.reduce((sum, e) => sum + scoreEntry(e), 0) / teamEntries.length,
         entries: teamEntries,
+        goodMatchResponses: teamEntries
+          .filter((e) => e.goodMatch?.trim())
+          .map((e) => ({ scouter: "Scouter", response: e.goodMatch })),
       }))
       .sort((a, b) => b.avgScore - a.avgScore);
   }, [entries]);
