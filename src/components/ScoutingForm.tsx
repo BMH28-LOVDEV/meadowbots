@@ -1205,6 +1205,55 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           />
         </div>
       )}
+      {/* Delete Account Modal */}
+      {showDeleteAccount && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+          <div className="glass rounded-2xl border border-destructive/40 p-6 max-w-md w-full space-y-4">
+            <h2 className="font-display text-lg text-destructive tracking-wider">DELETE ACCOUNT</h2>
+            <p className="text-sm text-muted-foreground font-body">
+              This will permanently delete your account and all associated data. This action cannot be undone.
+            </p>
+            <p className="text-sm text-foreground font-body">
+              Type <span className="font-bold text-destructive">DELETE</span> to confirm:
+            </p>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Type DELETE"
+              className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-destructive focus:ring-1 focus:ring-destructive text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all text-sm"
+            />
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteAccount(false)}
+                className="flex-1 py-2.5 rounded-lg border border-border text-muted-foreground font-display text-xs tracking-wider hover:bg-muted transition-all"
+              >
+                CANCEL
+              </button>
+              <button
+                disabled={deleteConfirmText !== "DELETE" || deletingAccount}
+                onClick={async () => {
+                  setDeletingAccount(true);
+                  try {
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (!session) { toast.error("Not authenticated"); return; }
+                    const res = await supabase.functions.invoke("delete-account", {
+                      headers: { Authorization: `Bearer ${session.access_token}` },
+                    });
+                    if (res.error) { toast.error("Failed to delete account"); return; }
+                    toast.success("Account deleted.");
+                    await supabase.auth.signOut();
+                    onLogout();
+                  } catch { toast.error("Failed to delete account"); } finally { setDeletingAccount(false); }
+                }}
+                className="flex-1 py-2.5 rounded-lg bg-destructive text-destructive-foreground font-display text-xs tracking-wider hover:bg-destructive/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {deletingAccount ? "DELETING..." : "DELETE ACCOUNT"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
