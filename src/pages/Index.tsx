@@ -41,6 +41,8 @@ const FloatingChat = ({ userName }: { userName: string }) => {
           onBack={() => setIsEnlarged(false)}
           userName={userName}
           backLabel="← Minimize"
+          externalMessages={sharedMessages}
+          onExternalMessagesChange={setSharedMessages}
         />
       </div>
     );
@@ -68,6 +70,8 @@ const FloatingChat = ({ userName }: { userName: string }) => {
           onBack={handleClose}
           userName={userName}
           mini
+          externalMessages={sharedMessages}
+          onExternalMessagesChange={setSharedMessages}
         />
       </div>
     </div>
