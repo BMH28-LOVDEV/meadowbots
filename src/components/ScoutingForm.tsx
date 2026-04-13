@@ -383,7 +383,7 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
 
         {/* Auto Description */}
         <div>
-          <label className="block text-sm font-body font-medium text-foreground mb-2">What does your Auto do?</label>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">What exactly does your Auto do?</label>
           <textarea value={pitForm.autoDescription} onChange={(e) => set("autoDescription", e.target.value)}
             placeholder="e.g. First go for Spike 1, then go for Spike 2, then clear..." rows={3} className={inputCls + " resize-none"} />
         </div>
