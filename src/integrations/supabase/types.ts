@@ -59,6 +59,36 @@ export type Database = {
         }
         Relationships: []
       }
+      pit_scouting_entries: {
+        Row: {
+          auto_artifacts_scored: string | null
+          created_at: string
+          id: string
+          scoring_zone: string | null
+          scouter_name: string
+          strengths_weaknesses: string | null
+          team_number: string
+        }
+        Insert: {
+          auto_artifacts_scored?: string | null
+          created_at?: string
+          id?: string
+          scoring_zone?: string | null
+          scouter_name: string
+          strengths_weaknesses?: string | null
+          team_number: string
+        }
+        Update: {
+          auto_artifacts_scored?: string | null
+          created_at?: string
+          id?: string
+          scoring_zone?: string | null
+          scouter_name?: string
+          strengths_weaknesses?: string | null
+          team_number?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           approval_status: string
