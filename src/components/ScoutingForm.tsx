@@ -30,6 +30,8 @@ interface FormData {
   teleopArtifactClassification: string;
   endgameParking: string;
   endgameAllianceAssist: string;
+  endgameParkFeatures: string;
+  endgameParkFeaturesOther: string;
   penalties: string[];
   cards: string[];
   penaltyPointsGiven: string;
@@ -85,7 +87,7 @@ const INITIAL_FORM: FormData = {
   autoArtifactsScored: "", autoPatternAlignment: "", autoLaunchLine: "", autoLeave: "", autoConsistency: "",
   teleopIntakeMethod: "", teleopBallCapacity: "", teleopShootingAccuracy: "", teleopGateInteraction: "",
   teleopOverflowManagement: "", teleopCycleSpeed: "", teleopArtifactClassification: "",
-  endgameParking: "", endgameAllianceAssist: "",
+  endgameParking: "", endgameAllianceAssist: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
   penalties: [], cards: [], penaltyPointsGiven: "",
   matchScore: "", allianceWon: "", specialFeatures: "", goodMatch: "",
 };
@@ -650,7 +652,10 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
       penalty_points_given: form.penaltyPointsGiven ? parseInt(form.penaltyPointsGiven) : null,
       match_score: form.matchScore ? parseInt(form.matchScore) : null,
       alliance_won: form.allianceWon || null,
-      special_features: form.specialFeatures || null,
+      special_features: [
+        form.specialFeatures ? `[Auto Notes] ${form.specialFeatures}` : "",
+        form.endgameParkFeatures ? `[Park Feature] ${form.endgameParkFeatures === "Other" ? form.endgameParkFeaturesOther || "Other" : form.endgameParkFeatures}` : "",
+      ].filter(Boolean).join(" | ") || null,
       good_match: form.goodMatch || null,
     });
     setSubmitting(false);
@@ -1205,7 +1210,34 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           <div className="glass rounded-xl p-6 border-glow space-y-5">
             <SectionHeader title="ENDGAME" icon="🏁" />
             <MCQuestion label="Did they park in the Base Zone?" name="endgameParking" options={["No", "Partial", "Yes – Full Park"]} value={form.endgameParking} onChange={handleChange} />
-            
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-2">Does This Team Have Any Special Park Features?</label>
+              <div className="flex flex-wrap gap-2">
+                {["Climb", "Ramp", "Wheel Kickers", "Other"].map((opt) => (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => handleChange("endgameParkFeatures", form.endgameParkFeatures === opt ? "" : opt)}
+                    className={`px-4 py-2.5 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
+                      form.endgameParkFeatures === opt
+                        ? "bg-primary/20 border-primary text-primary glow-primary"
+                        : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                    }`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+              {form.endgameParkFeatures === "Other" && (
+                <input
+                  type="text"
+                  value={form.endgameParkFeaturesOther}
+                  onChange={(e) => handleChange("endgameParkFeaturesOther", e.target.value)}
+                  placeholder="Describe their park feature..."
+                  className="w-full mt-3 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
+                />
+              )}
+            </div>
           </div>
 
           {/* Penalties */}
