@@ -290,43 +290,45 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
             {/* Real field image as background */}
             <img src={fieldMapImage} alt="FTC Field Map" className="absolute inset-0 w-full h-full object-cover" />
             
-            {/* Spike Mark Labels - positioned over the 3 sample rows on each side */}
-            {/* Blue side spike marks (left side of field, 3 vertical rows of samples) */}
-            <div className="absolute text-[9px] font-display text-yellow-300 font-bold bg-black/70 px-1 py-0.5 rounded" style={{ left: '8%', top: '20%' }}>①</div>
-            <div className="absolute text-[9px] font-display text-yellow-300 font-bold bg-black/70 px-1 py-0.5 rounded" style={{ left: '8%', top: '37%' }}>②</div>
-            <div className="absolute text-[9px] font-display text-yellow-300 font-bold bg-black/70 px-1 py-0.5 rounded" style={{ left: '8%', top: '52%' }}>③</div>
-            {/* Red side spike marks (right side, mirrored) */}
-            <div className="absolute text-[9px] font-display text-yellow-300 font-bold bg-black/70 px-1 py-0.5 rounded" style={{ right: '8%', top: '20%' }}>①</div>
-            <div className="absolute text-[9px] font-display text-yellow-300 font-bold bg-black/70 px-1 py-0.5 rounded" style={{ right: '8%', top: '37%' }}>②</div>
-            <div className="absolute text-[9px] font-display text-yellow-300 font-bold bg-black/70 px-1 py-0.5 rounded" style={{ right: '8%', top: '52%' }}>③</div>
+            {/* Spike Mark Labels - after vertical flip, spikes are now in lower rows */}
+            {/* Left side spike marks: ③ closest to top (farthest from goal), ① closest to bottom (nearest goal) */}
+            <div className="absolute text-[9px] font-display text-yellow-300 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ left: '6%', top: '52%' }}>③</div>
+            <div className="absolute text-[9px] font-display text-yellow-300 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ left: '6%', top: '68%' }}>②</div>
+            <div className="absolute text-[9px] font-display text-yellow-300 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ left: '6%', top: '83%' }}>①</div>
+            {/* Right side spike marks (mirrored) */}
+            <div className="absolute text-[9px] font-display text-yellow-300 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ right: '6%', top: '52%' }}>③</div>
+            <div className="absolute text-[9px] font-display text-yellow-300 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ right: '6%', top: '68%' }}>②</div>
+            <div className="absolute text-[9px] font-display text-yellow-300 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ right: '6%', top: '83%' }}>①</div>
 
-            {/* Side labels */}
-            <div className="absolute top-1/2 -translate-y-1/2 left-[1%] text-[8px] font-display text-blue-400 font-bold bg-black/70 px-1 py-0.5 rounded" style={{ writingMode: 'vertical-rl', transform: 'translateY(-50%) rotate(180deg)' }}>BLUE</div>
-            <div className="absolute top-1/2 -translate-y-1/2 right-[1%] text-[8px] font-display text-red-400 font-bold bg-black/70 px-1 py-0.5 rounded" style={{ writingMode: 'vertical-rl' }}>RED</div>
-            {/* Audience label */}
-            <div className="absolute bottom-[1%] left-1/2 -translate-x-1/2 text-[8px] font-display text-muted-foreground bg-black/70 px-2 py-0.5 rounded z-10">AUDIENCE</div>
-            
-            {/* Selectable 6x6 grid overlay matching the field tiles */}
-            <div className="absolute grid grid-cols-6 grid-rows-6" style={{ top: '4%', left: '4%', right: '4%', bottom: '4%' }}>
-              {Array.from({ length: 36 }, (_, i) => {
+            {/* Selectable 6x6 grid - precisely aligned to actual field tiles */}
+            {/* Grid boundaries from image analysis: x and y lines at 4.4%, 16.6%, 33.2%, 49.9%, 66.6%, 83.2%, 95.5% */}
+            {(() => {
+              const colEdges = [4.4, 16.6, 33.2, 49.9, 66.6, 83.2, 95.5];
+              const rowEdges = [4.4, 16.6, 33.2, 49.9, 66.6, 83.2, 95.5];
+              return Array.from({ length: 36 }, (_, i) => {
                 const row = Math.floor(i / 6);
                 const col = i % 6;
                 const label = `R${row + 1}C${col + 1}`;
                 const isSelected = pitForm.autoStartPosition === label;
+                const left = colEdges[col];
+                const top = rowEdges[row];
+                const width = colEdges[col + 1] - colEdges[col];
+                const height = rowEdges[row + 1] - rowEdges[row];
                 return (
                   <button
                     key={label}
                     type="button"
                     onClick={() => set("autoStartPosition", isSelected ? "" : label)}
-                    className={`border transition-all duration-200 ${
+                    className={`absolute transition-all duration-200 ${
                       isSelected
-                        ? "bg-primary/40 border-primary shadow-[0_0_15px_hsl(var(--primary)/0.5)] z-10"
-                        : "bg-transparent border-transparent hover:bg-white/10 hover:border-white/20"
+                        ? "bg-primary/40 border-2 border-primary shadow-[0_0_15px_hsl(var(--primary)/0.5)] z-10"
+                        : "bg-transparent border border-transparent hover:bg-white/10 hover:border-white/20"
                     }`}
+                    style={{ left: `${left}%`, top: `${top}%`, width: `${width}%`, height: `${height}%` }}
                   />
                 );
-              })}
-            </div>
+              });
+            })()}
           </div>
           {pitForm.autoStartPosition && (
             <p className="text-xs text-center text-primary font-body">Starting Position: <span className="font-bold">{pitForm.autoStartPosition}</span></p>
