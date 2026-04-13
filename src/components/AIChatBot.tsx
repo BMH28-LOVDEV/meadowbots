@@ -10,10 +10,16 @@ interface AIChatBotProps {
   userName: string;
   mini?: boolean;
   backLabel?: string;
+  externalMessages?: Msg[];
+  onExternalMessagesChange?: (msgs: Msg[]) => void;
 }
 
-const AIChatBot = ({ onBack, userName, mini, backLabel }: AIChatBotProps) => {
-  const [messages, setMessages] = useState<Msg[]>([]);
+export type { Msg as ChatMessage };
+
+const AIChatBot = ({ onBack, userName, mini, backLabel, externalMessages, onExternalMessagesChange }: AIChatBotProps) => {
+  const [internalMessages, setInternalMessages] = useState<Msg[]>([]);
+  const messages = externalMessages ?? internalMessages;
+  const setMessages = onExternalMessagesChange ?? setInternalMessages;
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
