@@ -658,7 +658,10 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
       alliance_won: form.allianceWon || null,
       special_features: [
         form.specialFeatures ? `[Auto Notes] ${form.specialFeatures}` : "",
+        form.autoBallsScored ? `[Auto Balls] ${form.autoBallsScored}` : "",
+        form.teleopBallsScored ? `[Teleop Balls] ${form.teleopBallsScored}` : "",
         form.endgameParkFeatures ? `[Park Feature] ${form.endgameParkFeatures === "Other" ? form.endgameParkFeaturesOther || "Other" : form.endgameParkFeatures}` : "",
+        form.pitScoutMatch ? `[Pit Scout Match] ${form.pitScoutMatch}${form.pitScoutMatchElaborate ? `: ${form.pitScoutMatchElaborate}` : ""}` : "",
       ].filter(Boolean).join(" | ") || null,
       good_match: form.goodMatch || null,
     });
