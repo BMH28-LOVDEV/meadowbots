@@ -200,7 +200,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background relative">
+    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden px-6">
       {/* ACCESS DENIED OVERLAY */}
       {accessDenied && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-destructive/95 backdrop-blur-sm">
@@ -229,7 +229,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px] animate-pulse-glow" />
       <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-accent/5 rounded-full blur-[100px] animate-pulse-glow" style={{ animationDelay: "1.5s" }} />
 
-      <div className={`w-full max-w-md mx-4 ${isShaking ? "animate-[shake_0.5s_ease-in-out]" : ""}`}>
+      <div className={`w-full max-w-sm ${isShaking ? "animate-[shake_0.5s_ease-in-out]" : ""}`}>
         {/* Team header */}
         <div className="text-center mb-10">
           <h1 className="text-3xl md:text-4xl font-display font-bold text-primary text-glow-strong tracking-wider">
@@ -246,7 +246,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         </div>
 
         {/* Card */}
-        <div className="glass rounded-xl p-8 glow-primary">
+        <div className="glass rounded-xl p-6 sm:p-8 glow-primary">
           {mode !== "forgot" && (
             <div className="flex mb-6 rounded-lg bg-muted p-1 gap-1">
               <button
