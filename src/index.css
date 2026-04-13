@@ -65,7 +65,7 @@
   body {
     @apply bg-background text-foreground font-body antialiased;
     min-height: 100%;
-    overflow-y: auto;
+    overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
   }
 
