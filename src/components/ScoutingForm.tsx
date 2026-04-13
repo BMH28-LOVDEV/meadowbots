@@ -279,6 +279,79 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
           <input type="text" value={pitForm.autoArtifacts} onChange={(e) => set("autoArtifacts", e.target.value)} placeholder="e.g. 3" className={shortInputCls} />
         </div>
         <ZoneButtons value={pitForm.autoScoringZone} field="autoScoringZone" />
+
+        {/* Interactive Field Map */}
+        <div className="space-y-3">
+          <p className="text-sm font-body text-foreground font-medium">Please mark where your Robot Starts</p>
+          <div className="relative w-full aspect-square max-w-[360px] mx-auto bg-[#2a2a2a] rounded-xl border border-border overflow-hidden">
+            {/* Field lines - audience view (rotated: goals at top, audience at bottom) */}
+            {/* Top wall / submersible area */}
+            <div className="absolute top-0 left-0 right-0 h-[8%] bg-[#1a1a1a] border-b border-white/20" />
+            {/* Red alliance triangle - top left */}
+            <div className="absolute top-[8%] left-0 w-[15%] h-[18%]">
+              <div className="w-full h-full bg-red-600/30 border-r border-b border-white/20" style={{ clipPath: "polygon(0 0, 100% 0, 0 100%)" }} />
+            </div>
+            {/* Blue alliance triangle - top right */}
+            <div className="absolute top-[8%] right-0 w-[15%] h-[18%]">
+              <div className="w-full h-full bg-blue-600/30 border-l border-b border-white/20" style={{ clipPath: "polygon(100% 0, 0 0, 100% 100%)" }} />
+            </div>
+            {/* Diagonal field lines */}
+            <div className="absolute inset-0 pointer-events-none">
+              <svg viewBox="0 0 100 100" className="w-full h-full">
+                <line x1="15" y1="8" x2="35" y2="55" stroke="white" strokeWidth="0.5" opacity="0.3" />
+                <line x1="85" y1="8" x2="65" y2="55" stroke="white" strokeWidth="0.5" opacity="0.3" />
+                <line x1="35" y1="55" x2="15" y2="92" stroke="white" strokeWidth="0.5" opacity="0.3" />
+                <line x1="65" y1="55" x2="85" y2="92" stroke="white" strokeWidth="0.5" opacity="0.3" />
+              </svg>
+            </div>
+            {/* Spike Marks labels */}
+            <div className="absolute top-[22%] left-[38%] text-[10px] font-display text-yellow-400 font-bold bg-black/60 px-1.5 py-0.5 rounded">① Spike 1</div>
+            <div className="absolute top-[22%] left-[53%] text-[10px] font-display text-yellow-400 font-bold bg-black/60 px-1.5 py-0.5 rounded">② Spike 2</div>
+            <div className="absolute top-[22%] left-[70%] text-[10px] font-display text-yellow-400 font-bold bg-black/60 px-1.5 py-0.5 rounded">③ Spike 3</div>
+            {/* Sample positions (decorative dots) */}
+            {[
+              { x: 40, y: 14 }, { x: 50, y: 14 }, { x: 60, y: 14 },
+              { x: 40, y: 18 }, { x: 50, y: 18 }, { x: 60, y: 18 },
+            ].map((dot, i) => (
+              <div key={i} className="absolute w-2 h-2 rounded-full bg-purple-500/50 border border-purple-400/50" style={{ left: `${dot.x}%`, top: `${dot.y}%` }} />
+            ))}
+            {/* Goal labels */}
+            <div className="absolute top-[2%] left-[30%] text-[9px] font-display text-red-400 font-bold bg-black/60 px-1 py-0.5 rounded">RED GOAL</div>
+            <div className="absolute top-[2%] right-[30%] text-[9px] font-display text-blue-400 font-bold bg-black/60 px-1 py-0.5 rounded">BLUE GOAL</div>
+            {/* Audience label */}
+            <div className="absolute bottom-[1%] left-1/2 -translate-x-1/2 text-[9px] font-display text-muted-foreground bg-black/60 px-2 py-0.5 rounded">AUDIENCE VIEW</div>
+            {/* Selectable grid - starting positions along the bottom half */}
+            <div className="absolute bottom-[4%] left-[10%] right-[10%] h-[40%] grid grid-cols-6 grid-rows-3 gap-1">
+              {Array.from({ length: 18 }, (_, i) => {
+                const row = Math.floor(i / 6);
+                const col = i % 6;
+                const label = `R${row + 1}C${col + 1}`;
+                return (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => set("autoStartPosition", pitForm.autoStartPosition === label ? "" : label)}
+                    className={`rounded-md border transition-all duration-200 text-[8px] font-display tracking-wide ${
+                      pitForm.autoStartPosition === label
+                        ? "bg-primary/30 border-primary text-primary glow-primary shadow-[0_0_12px_hsl(var(--primary)/0.4)]"
+                        : "bg-white/5 border-white/10 text-white/30 hover:bg-white/10 hover:border-white/20 hover:text-white/50"
+                    }`}
+                  />
+                );
+              })}
+            </div>
+          </div>
+          {pitForm.autoStartPosition && (
+            <p className="text-xs text-center text-primary font-body">Selected: <span className="font-bold">{pitForm.autoStartPosition}</span></p>
+          )}
+        </div>
+
+        {/* Auto Description */}
+        <div>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">What does your Auto do?</label>
+          <textarea value={pitForm.autoDescription} onChange={(e) => set("autoDescription", e.target.value)}
+            placeholder="e.g. First go for Spike 1, then clear Spike 2, push to observation zone, park..." rows={3} className={inputCls + " resize-none"} />
+        </div>
       </div>
 
       {/* Teleop */}
