@@ -21,6 +21,7 @@ interface FormData {
   autoLaunchLine: string;
   autoLeave: string;
   autoConsistency: string;
+  autoBallsScored: string;
   teleopIntakeMethod: string;
   teleopBallCapacity: string;
   teleopShootingAccuracy: string;
@@ -28,6 +29,7 @@ interface FormData {
   teleopOverflowManagement: string;
   teleopCycleSpeed: string;
   teleopArtifactClassification: string;
+  teleopBallsScored: string;
   endgameParking: string;
   endgameAllianceAssist: string;
   endgameParkFeatures: string;
@@ -39,6 +41,8 @@ interface FormData {
   allianceWon: string;
   specialFeatures: string;
   goodMatch: string;
+  pitScoutMatch: string;
+  pitScoutMatchElaborate: string;
 }
 
 interface ScoutingEntry {
@@ -84,12 +88,12 @@ const CARD_OPTIONS = ["Yellow Card", "Red Card"];
 
 const INITIAL_FORM: FormData = {
   teamNumber: "", teamName: "", matchNumber: "",
-  autoArtifactsScored: "", autoPatternAlignment: "", autoLaunchLine: "", autoLeave: "", autoConsistency: "",
+  autoArtifactsScored: "", autoPatternAlignment: "", autoLaunchLine: "", autoLeave: "", autoConsistency: "", autoBallsScored: "",
   teleopIntakeMethod: "", teleopBallCapacity: "", teleopShootingAccuracy: "", teleopGateInteraction: "",
-  teleopOverflowManagement: "", teleopCycleSpeed: "", teleopArtifactClassification: "",
+  teleopOverflowManagement: "", teleopCycleSpeed: "", teleopArtifactClassification: "", teleopBallsScored: "",
   endgameParking: "", endgameAllianceAssist: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
   penalties: [], cards: [], penaltyPointsGiven: "",
-  matchScore: "", allianceWon: "", specialFeatures: "", goodMatch: "",
+  matchScore: "", allianceWon: "", specialFeatures: "", goodMatch: "", pitScoutMatch: "", pitScoutMatchElaborate: "",
 };
 
 const scoreEntry = (entry: ScoutingEntry): number => {
@@ -654,7 +658,10 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
       alliance_won: form.allianceWon || null,
       special_features: [
         form.specialFeatures ? `[Auto Notes] ${form.specialFeatures}` : "",
+        form.autoBallsScored ? `[Auto Balls] ${form.autoBallsScored}` : "",
+        form.teleopBallsScored ? `[Teleop Balls] ${form.teleopBallsScored}` : "",
         form.endgameParkFeatures ? `[Park Feature] ${form.endgameParkFeatures === "Other" ? form.endgameParkFeaturesOther || "Other" : form.endgameParkFeatures}` : "",
+        form.pitScoutMatch ? `[Pit Scout Match] ${form.pitScoutMatch}${form.pitScoutMatchElaborate ? `: ${form.pitScoutMatchElaborate}` : ""}` : "",
       ].filter(Boolean).join(" | ") || null,
       good_match: form.goodMatch || null,
     });
@@ -1183,6 +1190,17 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             <MCQuestion label="Did they leave at the end of Autonomous?" name="autoLeave" options={["No", "Yes"]} value={form.autoLeave} onChange={handleChange} />
             <MCQuestion label="How consistent was their Autonomous routine?" name="autoConsistency" options={["No Auto", "Inconsistent", "Mostly Consistent", "Very Consistent"]} value={form.autoConsistency} onChange={handleChange} />
             <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-2">How many balls did the Team score individually? (Auto)</label>
+              <input
+                type="number"
+                min="0"
+                value={form.autoBallsScored}
+                onChange={(e) => handleChange("autoBallsScored", e.target.value)}
+                placeholder="e.g. 4"
+                className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
+              />
+            </div>
+            <div>
               <label className="block text-sm font-body font-medium text-foreground mb-2">Additional Notes (Auto)</label>
               <textarea
                 value={form.specialFeatures}
@@ -1204,6 +1222,17 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             
             <MCQuestion label="How fast were their scoring cycles?" name="teleopCycleSpeed" options={["Minimal Cycling", "Slow", "Average", "Very Fast"]} value={form.teleopCycleSpeed} onChange={handleChange} />
             <MCQuestion label="Did they classify artifacts correctly?" name="teleopArtifactClassification" options={["No Classification", "Rarely", "Mostly", "Always"]} value={form.teleopArtifactClassification} onChange={handleChange} />
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-2">How many balls did the Team score individually? (Teleop)</label>
+              <input
+                type="number"
+                min="0"
+                value={form.teleopBallsScored}
+                onChange={(e) => handleChange("teleopBallsScored", e.target.value)}
+                placeholder="e.g. 8"
+                className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
+              />
+            </div>
           </div>
 
           {/* Endgame */}
@@ -1316,6 +1345,28 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
                   </button>
                 ))}
               </div>
+            </div>
+            <div className="space-y-3">
+              <p className="text-sm font-body text-foreground font-medium">Does this team perform as they said they would in your Pit Scout?</p>
+              <div className="flex flex-wrap gap-3">
+                {["Yes", "No"].map((option) => (
+                  <button key={option} type="button" onClick={() => handleChange("pitScoutMatch", option)}
+                    className={`px-5 py-2.5 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
+                      form.pitScoutMatch === option
+                        ? option === "Yes" ? "bg-green-500/20 border-green-500 text-green-400" : "bg-destructive/20 border-destructive text-destructive"
+                        : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                    }`}>
+                    {option === "Yes" ? "✅ " : "❌ "}{option}
+                  </button>
+                ))}
+              </div>
+              <textarea
+                value={form.pitScoutMatchElaborate}
+                onChange={(e) => handleChange("pitScoutMatchElaborate", e.target.value)}
+                placeholder="e.g. Elaborate"
+                rows={2}
+                className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all resize-none"
+              />
             </div>
           </div>
 
