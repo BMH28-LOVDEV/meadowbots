@@ -21,6 +21,7 @@ interface FormData {
   autoLaunchLine: string;
   autoLeave: string;
   autoConsistency: string;
+  autoBallsScored: string;
   teleopIntakeMethod: string;
   teleopBallCapacity: string;
   teleopShootingAccuracy: string;
@@ -28,6 +29,7 @@ interface FormData {
   teleopOverflowManagement: string;
   teleopCycleSpeed: string;
   teleopArtifactClassification: string;
+  teleopBallsScored: string;
   endgameParking: string;
   endgameAllianceAssist: string;
   endgameParkFeatures: string;
@@ -39,6 +41,8 @@ interface FormData {
   allianceWon: string;
   specialFeatures: string;
   goodMatch: string;
+  pitScoutMatch: string;
+  pitScoutMatchElaborate: string;
 }
 
 interface ScoutingEntry {
@@ -84,12 +88,12 @@ const CARD_OPTIONS = ["Yellow Card", "Red Card"];
 
 const INITIAL_FORM: FormData = {
   teamNumber: "", teamName: "", matchNumber: "",
-  autoArtifactsScored: "", autoPatternAlignment: "", autoLaunchLine: "", autoLeave: "", autoConsistency: "",
+  autoArtifactsScored: "", autoPatternAlignment: "", autoLaunchLine: "", autoLeave: "", autoConsistency: "", autoBallsScored: "",
   teleopIntakeMethod: "", teleopBallCapacity: "", teleopShootingAccuracy: "", teleopGateInteraction: "",
-  teleopOverflowManagement: "", teleopCycleSpeed: "", teleopArtifactClassification: "",
+  teleopOverflowManagement: "", teleopCycleSpeed: "", teleopArtifactClassification: "", teleopBallsScored: "",
   endgameParking: "", endgameAllianceAssist: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
   penalties: [], cards: [], penaltyPointsGiven: "",
-  matchScore: "", allianceWon: "", specialFeatures: "", goodMatch: "",
+  matchScore: "", allianceWon: "", specialFeatures: "", goodMatch: "", pitScoutMatch: "", pitScoutMatchElaborate: "",
 };
 
 const scoreEntry = (entry: ScoutingEntry): number => {
