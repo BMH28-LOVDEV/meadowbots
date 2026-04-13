@@ -4,7 +4,7 @@ import LoginScreen from "@/components/LoginScreen";
 import ScoutingForm from "@/components/ScoutingForm";
 import MasterDashboard from "@/components/MasterDashboard";
 import LetsGoDashboard from "@/components/LetsGoDashboard";
-import AIChatBot from "@/components/AIChatBot";
+import AIChatBot, { type ChatMessage } from "@/components/AIChatBot";
 
 import type { User } from "@supabase/supabase-js";
 
@@ -12,6 +12,7 @@ const FloatingChat = ({ userName }: { userName: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isEnlarged, setIsEnlarged] = useState(false);
+  const [sharedMessages, setSharedMessages] = useState<ChatMessage[]>([]);
 
   const handleClose = () => {
     setIsClosing(true);
