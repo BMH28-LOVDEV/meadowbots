@@ -6,6 +6,7 @@ import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import { HamburgerTabs, type TabItem } from "@/components/HamburgerTabs";
 import AIChatBot from "@/components/AIChatBot";
+import fieldMapImage from "@/assets/field-map.png";
 
 interface ScoutingFormProps {
   scouterName: string;
@@ -214,12 +215,13 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
       endgame_park_features: pitForm.endgameParkFeatures || null,
       endgame_park_features_other: pitForm.endgameParkFeaturesOther || null,
       auto_start_position: pitForm.autoStartPosition || null,
+      auto_clear: pitForm.autoClear || null,
       auto_description: pitForm.autoDescription || null,
     } as any);
     setSubmitting(false);
     if (error) { toast.error("Failed to save. Please try again."); return; }
     toast.success("Pit Scout submitted!");
-    setPitForm({ teamNumber: "", teamName: "", strengths: "", weaknesses: "", autoArtifacts: "", autoScoringZone: "", autoStartPosition: "", autoDescription: "", teleopFocus: "", teleopScoringZone: "", endgameStrategy: "", endgameParking: "", endgameParkFeatures: "", endgameParkFeaturesOther: "" });
+    setPitForm({ teamNumber: "", teamName: "", strengths: "", weaknesses: "", autoArtifacts: "", autoScoringZone: "", autoStartPosition: "", autoClear: "", autoDescription: "", teleopFocus: "", teleopScoringZone: "", endgameStrategy: "", endgameParking: "", endgameParkFeatures: "", endgameParkFeaturesOther: "" });
   };
 
   const inputCls = "w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-accent focus:ring-1 focus:ring-accent text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all";
