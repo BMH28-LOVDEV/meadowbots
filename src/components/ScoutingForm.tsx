@@ -92,8 +92,8 @@ const INITIAL_FORM: FormData = {
 
 const scoreEntry = (entry: ScoutingEntry): number => {
   let score = 0;
-  const autoArtifacts: Record<string, number> = { "0": 0, "1-2": 5, "3-4": 10, "5+": 15 };
-  score += autoArtifacts[entry.autoArtifactsScored] || 0;
+  const autoNum = parseInt(entry.autoArtifactsScored) || 0;
+  score += Math.min(autoNum * 3, 15);
   const autoPattern: Record<string, number> = { "None": 0, "1 Pattern": 5, "2 Patterns": 10, "3+ Patterns": 15 };
   score += autoPattern[entry.autoPatternAlignment] || 0;
   if (entry.autoLaunchLine === "Yes") score += 5;
@@ -104,8 +104,6 @@ const scoreEntry = (entry: ScoutingEntry): number => {
   score += shootingAcc[entry.teleopShootingAccuracy] || 0;
   const gateInteraction: Record<string, number> = { "Opened Reliably": 10, "Sometimes": 5, "Tried But Failed": 1, "Did Not Attempt": 0 };
   score += gateInteraction[entry.teleopGateInteraction] || 0;
-  const overflow: Record<string, number> = { "Excellent": 8, "Good": 5, "Poor": 2, "Did Not Collect": 0 };
-  score += overflow[entry.teleopOverflowManagement] || 0;
   const cycleSpeed: Record<string, number> = { "Very Fast": 10, "Average": 6, "Slow": 3, "Minimal Cycling": 0 };
   score += cycleSpeed[entry.teleopCycleSpeed] || 0;
   const classification: Record<string, number> = { "Always": 8, "Mostly": 5, "Rarely": 2, "No Classification": 0 };
@@ -114,8 +112,6 @@ const scoreEntry = (entry: ScoutingEntry): number => {
   score += ballCap[entry.teleopBallCapacity] || 0;
   const parking: Record<string, number> = { "Yes – Full Park": 10, "Partial": 5, "No": 0 };
   score += parking[entry.endgameParking] || 0;
-  const assist: Record<string, number> = { "Yes": 8, "Attempted": 4, "No": 0 };
-  score += assist[entry.endgameAllianceAssist] || 0;
   const penalties = entry.penalties || [];
   const penaltyCount = penalties.filter((p) => p !== "None observed").length;
   score -= penaltyCount * 5;
@@ -612,11 +608,11 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
     if (!form.teleopBallCapacity) missingFields.push("Ball Capacity (Teleop)");
     if (!form.teleopShootingAccuracy) missingFields.push("Shooting Accuracy (Teleop)");
     if (!form.teleopGateInteraction) missingFields.push("Gate Interaction (Teleop)");
-    if (!form.teleopOverflowManagement) missingFields.push("Overflow Management (Teleop)");
+    
     if (!form.teleopCycleSpeed) missingFields.push("Cycle Speed (Teleop)");
     if (!form.teleopArtifactClassification) missingFields.push("Artifact Classification (Teleop)");
     if (!form.endgameParking) missingFields.push("Parking (Endgame)");
-    if (!form.endgameAllianceAssist) missingFields.push("Alliance Assist (Endgame)");
+    
     if (form.penalties.length === 0) missingFields.push("Penalties");
     if (!form.allianceWon) missingFields.push("Did the Alliance Win?");
     if (!form.goodMatch) missingFields.push("Good Match Assessment");
