@@ -290,15 +290,15 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
             {/* Real field image as background */}
             <img src={fieldMapImage} alt="FTC Field Map" className="absolute inset-0 w-full h-full object-cover" />
             
-            {/* Spike Mark Labels — 1 closest to goal, 3 closest to audience */}
-            {/* Blue side (left) */}
-            <div className="absolute text-[9px] font-display text-blue-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ left: '6%', top: '52%' }}>③</div>
-            <div className="absolute text-[9px] font-display text-blue-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ left: '6%', top: '68%' }}>②</div>
-            <div className="absolute text-[9px] font-display text-blue-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ left: '6%', top: '83%' }}>①</div>
-            {/* Red side (right) */}
-            <div className="absolute text-[9px] font-display text-red-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ right: '6%', top: '52%' }}>③</div>
-            <div className="absolute text-[9px] font-display text-red-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ right: '6%', top: '68%' }}>②</div>
-            <div className="absolute text-[9px] font-display text-red-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ right: '6%', top: '83%' }}>①</div>
+            {/* Spike Mark Labels — 1 closest to goal (bottom), 3 closest to audience (top) */}
+            {/* Red side (left) — labels to the right of the spike */}
+            <div className="absolute text-[9px] font-display text-red-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ left: '22%', top: '52%' }}>①</div>
+            <div className="absolute text-[9px] font-display text-red-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ left: '22%', top: '68%' }}>②</div>
+            <div className="absolute text-[9px] font-display text-red-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ left: '22%', top: '83%' }}>③</div>
+            {/* Blue side (right) — labels to the right of the spike */}
+            <div className="absolute text-[9px] font-display text-blue-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ right: '6%', top: '52%' }}>①</div>
+            <div className="absolute text-[9px] font-display text-blue-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ right: '6%', top: '68%' }}>②</div>
+            <div className="absolute text-[9px] font-display text-blue-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ right: '6%', top: '83%' }}>③</div>
 
             {/* Selectable 6x6 grid - precisely aligned to actual field tiles */}
             {/* Grid boundaries from image analysis: x and y lines at 4.4%, 16.6%, 33.2%, 49.9%, 66.6%, 83.2%, 95.5% */}
