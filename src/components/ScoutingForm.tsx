@@ -173,7 +173,98 @@ const getRankIcon = (rank: number) => {
   return `#${rank}`;
 };
 
-// ── Drive Data Scouting Form ──────────────────────────────────────────────────
+// ── Pit Scouting Form ─────────────────────────────────────────────────────────
+const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
+  const [pitForm, setPitForm] = useState({
+    teamNumber: "",
+    strengthsWeaknesses: "",
+    autoArtifacts: "",
+    scoringZone: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pitForm.teamNumber) {
+      toast.error("Please enter a team number.");
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.from("pit_scouting_entries" as any).insert({
+      scouter_name: scouterName,
+      team_number: pitForm.teamNumber,
+      strengths_weaknesses: pitForm.strengthsWeaknesses || null,
+      auto_artifacts_scored: pitForm.autoArtifacts || null,
+      scoring_zone: pitForm.scoringZone || null,
+    } as any);
+    setSubmitting(false);
+    if (error) { toast.error("Failed to save. Please try again."); return; }
+    toast.success("Pit Scout submitted!");
+    setPitForm({ teamNumber: "", strengthsWeaknesses: "", autoArtifacts: "", scoringZone: "" });
+  };
+
+  const inputCls = "w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-accent focus:ring-1 focus:ring-accent text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all";
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Team Number */}
+      <div className="glass rounded-xl p-6 border border-accent/20 space-y-4">
+        <SectionHeader title="TEAM INFO" icon="🤖" />
+        <div>
+          <label className="block text-sm text-muted-foreground font-body mb-1">Team Number *</label>
+          <input type="text" value={pitForm.teamNumber} onChange={(e) => setPitForm(p => ({ ...p, teamNumber: e.target.value }))} placeholder="e.g. 14841" className={inputCls} />
+        </div>
+      </div>
+
+      {/* Strengths & Weaknesses */}
+      <div className="glass rounded-xl p-6 border border-accent/20 space-y-4">
+        <SectionHeader title="STRENGTHS & WEAKNESSES" icon="💪" />
+        <div>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">What are your team's Strengths and Weaknesses?</label>
+          <textarea
+            value={pitForm.strengthsWeaknesses}
+            onChange={(e) => setPitForm(p => ({ ...p, strengthsWeaknesses: e.target.value }))}
+            placeholder="Describe your team's strengths and weaknesses..."
+            rows={4}
+            className={inputCls + " resize-none"}
+          />
+        </div>
+      </div>
+
+      {/* Auto Scoring */}
+      <div className="glass rounded-xl p-6 border border-accent/20 space-y-4">
+        <SectionHeader title="AUTONOMOUS" icon="⚡" />
+        <div>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">How many Artifacts does your team score during Auto? (Solo)</label>
+          <input type="text" value={pitForm.autoArtifacts} onChange={(e) => setPitForm(p => ({ ...p, autoArtifacts: e.target.value }))} placeholder="e.g. 3" className={"w-32 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-accent focus:ring-1 focus:ring-accent text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"} />
+        </div>
+        <div className="space-y-3">
+          <p className="text-sm font-body text-foreground font-medium">Where do you score from? (From Audience Perspective)</p>
+          <div className="flex flex-wrap gap-2">
+            {["Front Zone", "Back Zone"].map((option, i) => (
+              <button key={option} type="button" onClick={() => setPitForm(p => ({ ...p, scoringZone: option }))}
+                className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                  pitForm.scoringZone === option
+                    ? getOptionColor(i, 2)
+                    : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                }`}
+              >{option}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Submit */}
+      <button type="submit" disabled={submitting || !pitForm.teamNumber}
+        className="w-full py-4 rounded-xl bg-accent/20 border-2 border-accent/50 text-accent font-display font-bold text-lg tracking-widest hover:bg-accent/30 hover:border-accent transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+      >
+        {submitting ? "SUBMITTING..." : "🏗️ SUBMIT PIT SCOUT"}
+      </button>
+    </form>
+  );
+};
+
+
 const DD_PENALTY_OPTIONS = [
   "Clearing the Gate illegally",
   "Touching opposing robot in Endgame zone",
