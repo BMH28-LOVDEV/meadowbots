@@ -303,8 +303,8 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
             {/* Selectable 6x6 grid - precisely aligned to actual field tiles */}
             {/* Grid boundaries from image analysis: x and y lines at 4.4%, 16.6%, 33.2%, 49.9%, 66.6%, 83.2%, 95.5% */}
             {(() => {
-              const colEdges = [4.4, 16.6, 33.2, 49.9, 66.6, 83.2, 95.5];
-              const rowEdges = [4.4, 16.6, 33.2, 49.9, 66.6, 83.2, 95.5];
+              const colEdges = [0, 16.6, 33.2, 49.9, 66.6, 83.2, 100];
+              const rowEdges = [0, 16.6, 33.2, 49.9, 66.6, 83.2, 100];
               return Array.from({ length: 36 }, (_, i) => {
                 const row = Math.floor(i / 6);
                 const col = i % 6;
