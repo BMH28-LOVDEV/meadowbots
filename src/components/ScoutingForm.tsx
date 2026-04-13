@@ -111,7 +111,7 @@ const scoreEntry = (entry: ScoutingEntry): number => {
   score += shootingAcc[entry.teleopShootingAccuracy] || 0;
   const gateInteraction: Record<string, number> = { "Opened Reliably": 10, "Sometimes": 5, "Tried But Failed": 1, "Did Not Attempt": 0 };
   score += gateInteraction[entry.teleopGateInteraction] || 0;
-  const cycleSpeed: Record<string, number> = { "Very Fast": 10, "Average": 6, "Slow": 3, "Minimal Cycling": 0 };
+  const cycleSpeed: Record<string, number> = { "Very Fast": 10, "Fast": 7, "Slow": 3, "Very Slow": 0 };
   score += cycleSpeed[entry.teleopCycleSpeed] || 0;
   const classification: Record<string, number> = { "Always": 8, "Mostly": 5, "Rarely": 2, "No Classification": 0 };
   score += classification[entry.teleopArtifactClassification] || 0;
@@ -618,7 +618,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
     if (!form.teleopGateInteraction) missingFields.push("Gate Interaction (Teleop)");
     
     if (!form.teleopCycleSpeed) missingFields.push("Cycle Speed (Teleop)");
-    if (!form.teleopArtifactClassification) missingFields.push("Artifact Classification (Teleop)");
+    
     if (!form.endgameParking) missingFields.push("Parking (Endgame)");
     
     if (form.penalties.length === 0) missingFields.push("Penalties");
@@ -1252,8 +1252,25 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             <MCQuestion label="How accurate was their shooting?" name="teleopShootingAccuracy" options={["No Shooting", "Inaccurate", "Somewhat Accurate", "Very Accurate"]} value={form.teleopShootingAccuracy} onChange={handleChange} />
             <MCQuestion label="Did they interact with the Gate?" name="teleopGateInteraction" options={["Did Not Attempt", "Tried But Failed", "Sometimes", "Opened Reliably"]} value={form.teleopGateInteraction} onChange={handleChange} />
             
-            <MCQuestion label="How fast were their scoring cycles?" name="teleopCycleSpeed" options={["Minimal Cycling", "Slow", "Average", "Very Fast"]} value={form.teleopCycleSpeed} onChange={handleChange} />
-            <MCQuestion label="Did they classify artifacts correctly?" name="teleopArtifactClassification" options={["No Classification", "Rarely", "Mostly", "Always"]} value={form.teleopArtifactClassification} onChange={handleChange} />
+            <div className="space-y-3">
+              <p className="text-sm font-body text-foreground font-medium">How fast were their scoring cycles?</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: "Very Slow (10-12s)", value: "Very Slow", color: "bg-red-500/20 border-red-500 text-red-400" },
+                  { label: "Slow (8-10s)", value: "Slow", color: "bg-orange-500/20 border-orange-500 text-orange-400" },
+                  { label: "Fast (5-7s)", value: "Fast", color: "bg-yellow-500/20 border-yellow-500 text-yellow-400" },
+                  { label: "Very Fast (3-5s)", value: "Very Fast", color: "bg-green-500/20 border-green-500 text-green-400" },
+                ].map((option) => (
+                  <button key={option.value} type="button" onClick={() => handleChange("teleopCycleSpeed", option.value)}
+                    className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                      form.teleopCycleSpeed === option.value
+                        ? option.color
+                        : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                    }`}
+                  >{option.label}</button>
+                ))}
+              </div>
+            </div>
             <div>
               <label className="block text-sm font-body font-medium text-foreground mb-2">How many balls did the Team score individually? (Teleop)</label>
               <input
