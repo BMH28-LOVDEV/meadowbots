@@ -290,15 +290,23 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
             {/* Real field image as background */}
             <img src={fieldMapImage} alt="FTC Field Map" className="absolute inset-0 w-full h-full object-cover" />
             
-            {/* Spike Mark Labels — 1 closest to goal (top area), 3 closest to audience (bottom) */}
-            {/* Red side (left) — labels to the LEFT of the balls */}
-            <div className="absolute text-[9px] font-display text-red-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ left: '7%', top: '36%' }}>①</div>
-            <div className="absolute text-[9px] font-display text-red-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ left: '7%', top: '50%' }}>②</div>
-            <div className="absolute text-[9px] font-display text-red-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ left: '7%', top: '63%' }}>③</div>
-            {/* Blue side (right) — labels to the RIGHT of the balls */}
-            <div className="absolute text-[9px] font-display text-blue-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ right: '5%', top: '36%' }}>①</div>
-            <div className="absolute text-[9px] font-display text-blue-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ right: '5%', top: '50%' }}>②</div>
-            <div className="absolute text-[9px] font-display text-blue-400 font-bold bg-black/70 px-1 py-0.5 rounded z-20" style={{ right: '5%', top: '63%' }}>③</div>
+            {/* Spike Mark Labels */}
+            {[
+              { side: "left", label: "③", top: "36%", x: "6.5%", color: "text-destructive" },
+              { side: "left", label: "②", top: "50%", x: "6.5%", color: "text-destructive" },
+              { side: "left", label: "①", top: "63%", x: "6.5%", color: "text-destructive" },
+              { side: "right", label: "①", top: "36%", x: "6.5%", color: "text-primary" },
+              { side: "right", label: "②", top: "50%", x: "6.5%", color: "text-primary" },
+              { side: "right", label: "③", top: "63%", x: "6.5%", color: "text-primary" },
+            ].map(({ side, label, top, x, color }) => (
+              <div
+                key={`${side}-${label}-${top}`}
+                className={`absolute z-20 -translate-y-1/2 rounded bg-background/80 px-1 py-0.5 text-[9px] font-display font-bold leading-none ${color}`}
+                style={side === "left" ? { left: x, top } : { right: x, top }}
+              >
+                {label}
+              </div>
+            ))}
 
             {/* Selectable 6x6 grid - precisely aligned to actual field tiles */}
             {/* Grid boundaries from image analysis: x and y lines at 4.4%, 16.6%, 33.2%, 49.9%, 66.6%, 83.2%, 95.5% */}
