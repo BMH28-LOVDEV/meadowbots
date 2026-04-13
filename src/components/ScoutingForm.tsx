@@ -907,9 +907,39 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             </div>
           ) : (
             <>
-              <p className="text-sm text-muted-foreground font-body">
-                {teamSummaries.length} team{teamSummaries.length !== 1 ? "s" : ""} scouted • Ranked by composite score
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground font-body">
+                  {teamSummaries.length} team{teamSummaries.length !== 1 ? "s" : ""} scouted • Ranked by <span className="underline">composite score</span>
+                </p>
+                <button
+                  onClick={() => setShowCompositeInfo(true)}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="What is composite score?"
+                >
+                  <Info className="w-4 h-4" />
+                </button>
+              </div>
+
+              {showCompositeInfo && (
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => setShowCompositeInfo(false)}>
+                  <div className="bg-card border border-border rounded-xl p-6 max-w-md w-full shadow-xl" onClick={e => e.stopPropagation()}>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-heading font-bold text-foreground">Composite Score</h3>
+                      <button onClick={() => setShowCompositeInfo(false)} className="text-muted-foreground hover:text-foreground">
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                    <div className="text-sm text-muted-foreground font-body space-y-2">
+                      <p>The <strong className="text-foreground">composite score</strong> is a custom performance rating calculated from scouting data using a weighted formula:</p>
+                      <p><strong className="text-foreground">Auto (up to ~48 pts):</strong> Artifacts scored (up to 15), pattern alignment (15), launch line (5), leave (3), consistency (10).</p>
+                      <p><strong className="text-foreground">Teleop (up to ~46 pts):</strong> Shooting accuracy (10), gate interaction (10), cycle speed (10), artifact classification (8), ball capacity (8).</p>
+                      <p><strong className="text-foreground">Endgame:</strong> Parking (up to 10 pts).</p>
+                      <p><strong className="text-foreground">Penalties:</strong> Deducts 5 pts per penalty.</p>
+                      <p>Teams are ranked by their <strong className="text-foreground">average composite score</strong> across all matches.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {teamSummaries.map((team, index) => {
                 const rank = index + 1;
