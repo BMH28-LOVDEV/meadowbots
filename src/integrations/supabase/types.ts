@@ -62,6 +62,8 @@ export type Database = {
       pit_scouting_entries: {
         Row: {
           auto_artifacts_scored: string | null
+          auto_description: string | null
+          auto_start_position: string | null
           created_at: string
           endgame_park_features: string | null
           endgame_park_features_other: string | null
@@ -80,6 +82,8 @@ export type Database = {
         }
         Insert: {
           auto_artifacts_scored?: string | null
+          auto_description?: string | null
+          auto_start_position?: string | null
           created_at?: string
           endgame_park_features?: string | null
           endgame_park_features_other?: string | null
@@ -98,6 +102,8 @@ export type Database = {
         }
         Update: {
           auto_artifacts_scored?: string | null
+          auto_description?: string | null
+          auto_start_position?: string | null
           created_at?: string
           endgame_park_features?: string | null
           endgame_park_features_other?: string | null
