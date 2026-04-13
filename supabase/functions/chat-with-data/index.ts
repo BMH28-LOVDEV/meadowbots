@@ -31,9 +31,9 @@ serve(async (req) => {
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const [scoutingRes, assignmentsRes, driveTeamRes, profilesRes] = await Promise.all([
-      supabaseAdmin.from("scouting_entries").select("*").order("timestamp", { ascending: false }),
+      supabaseAdmin.from("scouting_entries").select("*").neq("team_number", "19792").order("timestamp", { ascending: false }),
       supabaseAdmin.from("team_assignments").select("*"),
-      supabaseAdmin.from("drive_team_matches").select("*").order("sort_order"),
+      supabaseAdmin.from("drive_team_matches").select("*").neq("team_number", "19792").order("sort_order"),
       supabaseAdmin.from("profiles").select("display_name, role, approval_status"),
     ]);
 
