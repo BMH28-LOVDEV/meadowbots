@@ -182,6 +182,8 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
     weaknesses: "",
     autoArtifacts: "",
     autoScoringZone: "",
+    autoStartPosition: "",
+    autoDescription: "",
     teleopFocus: "",
     teleopScoringZone: "",
     endgameStrategy: "",
