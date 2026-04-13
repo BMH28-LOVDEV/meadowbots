@@ -295,9 +295,9 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
               { side: "right-of", label: "①", top: "41.8%", pos: "23%", color: "text-destructive" },
               { side: "right-of", label: "②", top: "58.5%", pos: "23%", color: "text-destructive" },
               { side: "right-of", label: "③", top: "75.3%", pos: "23%", color: "text-destructive" },
-              { side: "left-of", label: "③", top: "41.8%", pos: "23%", color: "text-primary" },
-              { side: "left-of", label: "②", top: "58.5%", pos: "23%", color: "text-primary" },
-              { side: "left-of", label: "①", top: "75.3%", pos: "23%", color: "text-primary" },
+              { side: "left-of", label: "①", top: "41.8%", pos: "23%", color: "text-blue-600" },
+              { side: "left-of", label: "②", top: "58.5%", pos: "23%", color: "text-blue-600" },
+              { side: "left-of", label: "③", top: "75.3%", pos: "23%", color: "text-blue-600" },
             ].map(({ side, label, top, pos, color }) => (
               <div
                 key={`${side}-${label}-${top}-${color}`}
@@ -307,29 +307,6 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
                 {label}
               </div>
             ))}
-
-            {/* Front Shooting Zone dots — behind white tape meeting points */}
-            {[
-              { id: "front-center", top: "52%", left: "50%" },
-              { id: "front-left", top: "52%", left: "44%" },
-              { id: "front-right", top: "52%", left: "56%" },
-            ].map((dot) => {
-              const isSelected = pitForm.autoStartPosition === dot.id;
-              return (
-                <button
-                  key={dot.id}
-                  type="button"
-                  onClick={() => set("autoStartPosition", isSelected ? "" : dot.id)}
-                  className={`absolute z-20 w-3 h-3 rounded-full -translate-x-1/2 -translate-y-1/2 border-2 transition-all duration-200 ${
-                    isSelected
-                      ? "bg-primary border-primary shadow-[0_0_10px_hsl(var(--primary)/0.6)]"
-                      : "bg-foreground/30 border-foreground/50 hover:bg-primary/50 hover:border-primary"
-                  }`}
-                  style={{ top: dot.top, left: dot.left }}
-                  title={`Front Shooting Zone: ${dot.id}`}
-                />
-              );
-            })}
 
             {/* Selectable 6x6 grid - precisely aligned to actual field tiles */}
             {/* Grid boundaries from image analysis: x and y lines at 4.4%, 16.6%, 33.2%, 49.9%, 66.6%, 83.2%, 95.5% */}
