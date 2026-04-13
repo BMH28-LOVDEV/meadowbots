@@ -133,16 +133,32 @@ const GRADIENT_COLORS = [
   "bg-green-500/20 border-green-500 text-green-400",
 ];
 
+const GRADIENT_COLORS_BLUE = [
+  "bg-red-500/20 border-red-500 text-red-400",
+  "bg-orange-500/20 border-orange-500 text-orange-400",
+  "bg-sky-500/20 border-sky-500 text-sky-400",
+  "bg-green-500/20 border-green-500 text-green-400",
+];
+
 const getOptionColor = (index: number, total: number) => {
   if (total === 2) return index === 0 ? GRADIENT_COLORS[0] : GRADIENT_COLORS[3];
   if (total === 3) return [GRADIENT_COLORS[0], GRADIENT_COLORS[2], GRADIENT_COLORS[3]][index];
   return GRADIENT_COLORS[index] || GRADIENT_COLORS[3];
 };
 
-const MCQuestion = ({ label, name, options, value, onChange }: {
+const getOptionColorBlue = (index: number, total: number) => {
+  if (total === 2) return index === 0 ? GRADIENT_COLORS_BLUE[0] : GRADIENT_COLORS_BLUE[3];
+  if (total === 3) return [GRADIENT_COLORS_BLUE[0], GRADIENT_COLORS_BLUE[2], GRADIENT_COLORS_BLUE[3]][index];
+  return GRADIENT_COLORS_BLUE[index] || GRADIENT_COLORS_BLUE[3];
+};
+
+const MCQuestion = ({ label, name, options, value, onChange, colorScheme = "blue" }: {
   label: string; name: keyof FormData; options: string[]; value: string;
   onChange: (name: keyof FormData, value: string) => void;
-}) => (
+  colorScheme?: "blue" | "purple";
+}) => {
+  const colorFn = colorScheme === "blue" ? getOptionColorBlue : getOptionColor;
+  return (
   <div className="space-y-3">
     <p className="text-sm font-body text-foreground font-medium">{label}</p>
     <div className="flex flex-wrap gap-2">
@@ -150,14 +166,15 @@ const MCQuestion = ({ label, name, options, value, onChange }: {
         <button key={option} type="button" onClick={() => onChange(name, option)}
           className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
             value === option
-              ? getOptionColor(i, options.length)
+              ? colorFn(i, options.length)
               : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
           }`}
         >{option}</button>
       ))}
     </div>
   </div>
-);
+  );
+};
 
 const SectionHeader = ({ title, icon }: { title: string; icon: string }) => (
   <div className="flex items-center gap-3 mb-6 mt-2">
