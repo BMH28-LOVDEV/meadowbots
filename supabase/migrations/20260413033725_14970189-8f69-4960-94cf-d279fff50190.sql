@@ -1,0 +1,1 @@
+ALTER TABLE public.pit_scouting_entries ADD COLUMN auto_clear TEXT;

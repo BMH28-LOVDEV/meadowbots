@@ -62,6 +62,7 @@ export type Database = {
       pit_scouting_entries: {
         Row: {
           auto_artifacts_scored: string | null
+          auto_clear: string | null
           auto_description: string | null
           auto_start_position: string | null
           created_at: string
@@ -82,6 +83,7 @@ export type Database = {
         }
         Insert: {
           auto_artifacts_scored?: string | null
+          auto_clear?: string | null
           auto_description?: string | null
           auto_start_position?: string | null
           created_at?: string
@@ -102,6 +104,7 @@ export type Database = {
         }
         Update: {
           auto_artifacts_scored?: string | null
+          auto_clear?: string | null
           auto_description?: string | null
           auto_start_position?: string | null
           created_at?: string
