@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { Info, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { TEAM_MEMBERS, DRIVE_TEAM } from "@/lib/teamAuth";
@@ -165,6 +166,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
   const [entries, setEntries] = useState<ScoutingEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
+  const [showCompositeInfo, setShowCompositeInfo] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string } | null>(null);
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteError, setDeleteError] = useState("");

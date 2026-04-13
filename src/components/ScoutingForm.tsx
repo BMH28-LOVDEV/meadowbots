@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { Info, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCelebration } from "@/hooks/useCelebration";
@@ -496,6 +497,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
   const [entries, setEntries] = useState<ScoutingEntry[]>([]);
   const [allTeamNames, setAllTeamNames] = useState<Record<string, string>>({});
   const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
+  const [showCompositeInfo, setShowCompositeInfo] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
   const assignment = assignments[selectedTeamIdx] || null;
