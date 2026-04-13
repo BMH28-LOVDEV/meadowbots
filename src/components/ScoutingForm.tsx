@@ -652,7 +652,10 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
       penalty_points_given: form.penaltyPointsGiven ? parseInt(form.penaltyPointsGiven) : null,
       match_score: form.matchScore ? parseInt(form.matchScore) : null,
       alliance_won: form.allianceWon || null,
-      special_features: form.specialFeatures || null,
+      special_features: [
+        form.specialFeatures ? `[Auto Notes] ${form.specialFeatures}` : "",
+        form.endgameParkFeatures ? `[Park Feature] ${form.endgameParkFeatures === "Other" ? form.endgameParkFeaturesOther || "Other" : form.endgameParkFeatures}` : "",
+      ].filter(Boolean).join(" | ") || null,
       good_match: form.goodMatch || null,
     });
     setSubmitting(false);
