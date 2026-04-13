@@ -1114,11 +1114,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             <h2 className="font-display text-lg text-accent tracking-wider">🏗️ PIT SCOUTING</h2>
           </div>
 
-          <div className="glass rounded-xl p-8 border border-accent/30 text-center space-y-4">
-            <span className="text-4xl block">🚧</span>
-            <h3 className="font-display text-lg text-foreground tracking-wider">PIT SCOUT QUESTIONS COMING SOON</h3>
-            <p className="text-sm text-muted-foreground font-body">The pit scouting questions will be added here.</p>
-          </div>
+          <PitScoutForm scouterName={scouterName} />
         </div>
       )}
 
