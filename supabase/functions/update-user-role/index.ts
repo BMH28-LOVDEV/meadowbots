@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     // Create a client with the user's token to verify their identity
     const userClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
       { global: { headers: { Authorization: authHeader } } }
     );
 
