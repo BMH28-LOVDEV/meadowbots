@@ -183,6 +183,7 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
     autoArtifacts: "",
     autoScoringZone: "",
     autoStartPosition: "",
+    autoClear: "",
     autoDescription: "",
     teleopFocus: "",
     teleopScoringZone: "",
