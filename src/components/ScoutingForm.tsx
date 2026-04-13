@@ -111,7 +111,7 @@ const scoreEntry = (entry: ScoutingEntry): number => {
   score += shootingAcc[entry.teleopShootingAccuracy] || 0;
   const gateInteraction: Record<string, number> = { "Opened Reliably": 10, "Sometimes": 5, "Tried But Failed": 1, "Did Not Attempt": 0 };
   score += gateInteraction[entry.teleopGateInteraction] || 0;
-  const cycleSpeed: Record<string, number> = { "Very Fast": 10, "Average": 6, "Slow": 3, "Minimal Cycling": 0 };
+  const cycleSpeed: Record<string, number> = { "Very Fast": 10, "Fast": 7, "Slow": 3, "Very Slow": 0 };
   score += cycleSpeed[entry.teleopCycleSpeed] || 0;
   const classification: Record<string, number> = { "Always": 8, "Mostly": 5, "Rarely": 2, "No Classification": 0 };
   score += classification[entry.teleopArtifactClassification] || 0;
