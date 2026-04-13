@@ -177,42 +177,78 @@ const getRankIcon = (rank: number) => {
 const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
   const [pitForm, setPitForm] = useState({
     teamNumber: "",
-    strengthsWeaknesses: "",
+    teamName: "",
+    strengths: "",
+    weaknesses: "",
     autoArtifacts: "",
-    scoringZone: "",
+    autoScoringZone: "",
+    teleopFocus: "",
+    teleopScoringZone: "",
+    endgameStrategy: "",
+    endgameParking: "",
+    endgameParkFeatures: "",
+    endgameParkFeaturesOther: "",
   });
   const [submitting, setSubmitting] = useState(false);
+  const set = (field: string, value: string) => setPitForm(p => ({ ...p, [field]: value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pitForm.teamNumber) {
-      toast.error("Please enter a team number.");
-      return;
-    }
+    if (!pitForm.teamNumber) { toast.error("Please enter a team number."); return; }
     setSubmitting(true);
     const { error } = await supabase.from("pit_scouting_entries" as any).insert({
       scouter_name: scouterName,
       team_number: pitForm.teamNumber,
-      strengths_weaknesses: pitForm.strengthsWeaknesses || null,
+      team_name: pitForm.teamName || null,
+      strengths: pitForm.strengths || null,
+      weaknesses: pitForm.weaknesses || null,
       auto_artifacts_scored: pitForm.autoArtifacts || null,
-      scoring_zone: pitForm.scoringZone || null,
+      scoring_zone: pitForm.autoScoringZone || null,
+      teleop_focus: pitForm.teleopFocus || null,
+      teleop_scoring_zone: pitForm.teleopScoringZone || null,
+      endgame_strategy: pitForm.endgameStrategy || null,
+      endgame_parking: pitForm.endgameParking || null,
+      endgame_park_features: pitForm.endgameParkFeatures || null,
+      endgame_park_features_other: pitForm.endgameParkFeaturesOther || null,
     } as any);
     setSubmitting(false);
     if (error) { toast.error("Failed to save. Please try again."); return; }
     toast.success("Pit Scout submitted!");
-    setPitForm({ teamNumber: "", strengthsWeaknesses: "", autoArtifacts: "", scoringZone: "" });
+    setPitForm({ teamNumber: "", teamName: "", strengths: "", weaknesses: "", autoArtifacts: "", autoScoringZone: "", teleopFocus: "", teleopScoringZone: "", endgameStrategy: "", endgameParking: "", endgameParkFeatures: "", endgameParkFeaturesOther: "" });
   };
 
   const inputCls = "w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-accent focus:ring-1 focus:ring-accent text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all";
+  const shortInputCls = "w-32 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-accent focus:ring-1 focus:ring-accent text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all";
+
+  const ZoneButtons = ({ value, field }: { value: string; field: string }) => (
+    <div className="space-y-3">
+      <p className="text-sm font-body text-foreground font-medium">Where do you usually score from? (From Audience Perspective)</p>
+      <div className="flex flex-wrap gap-2">
+        {["Front Zone", "Back Zone"].map((option, i) => (
+          <button key={option} type="button" onClick={() => set(field, option)}
+            className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+              value === option ? getOptionColor(i, 2) : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+            }`}
+          >{option}</button>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Team Number */}
+      {/* Team Info */}
       <div className="glass rounded-xl p-6 border border-accent/20 space-y-4">
         <SectionHeader title="TEAM INFO" icon="🤖" />
-        <div>
-          <label className="block text-sm text-muted-foreground font-body mb-1">Team Number *</label>
-          <input type="text" value={pitForm.teamNumber} onChange={(e) => setPitForm(p => ({ ...p, teamNumber: e.target.value }))} placeholder="e.g. 14841" className={inputCls} />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm text-muted-foreground font-body mb-1">Team Number *</label>
+            <input type="text" value={pitForm.teamNumber} onChange={(e) => set("teamNumber", e.target.value)} placeholder="e.g. 14841" className={inputCls} />
+          </div>
+          <div>
+            <label className="block text-sm text-muted-foreground font-body mb-1">Team Name</label>
+            <input type="text" value={pitForm.teamName} onChange={(e) => set("teamName", e.target.value)} placeholder="e.g. MeadowBots" className={inputCls} />
+          </div>
         </div>
       </div>
 
@@ -220,37 +256,84 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
       <div className="glass rounded-xl p-6 border border-accent/20 space-y-4">
         <SectionHeader title="STRENGTHS & WEAKNESSES" icon="💪" />
         <div>
-          <label className="block text-sm font-body font-medium text-foreground mb-2">What are your team's Strengths and Weaknesses?</label>
-          <textarea
-            value={pitForm.strengthsWeaknesses}
-            onChange={(e) => setPitForm(p => ({ ...p, strengthsWeaknesses: e.target.value }))}
-            placeholder="Describe your team's strengths and weaknesses..."
-            rows={4}
-            className={inputCls + " resize-none"}
-          />
+          <label className="block text-sm font-body font-medium text-foreground mb-2">Strengths</label>
+          <textarea value={pitForm.strengths} onChange={(e) => set("strengths", e.target.value)}
+            placeholder="What does your team do well?" rows={3} className={inputCls + " resize-none"} />
+        </div>
+        <div>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">Weaknesses</label>
+          <textarea value={pitForm.weaknesses} onChange={(e) => set("weaknesses", e.target.value)}
+            placeholder="What does your team struggle with?" rows={3} className={inputCls + " resize-none"} />
         </div>
       </div>
 
-      {/* Auto Scoring */}
+      {/* Autonomous */}
       <div className="glass rounded-xl p-6 border border-accent/20 space-y-4">
         <SectionHeader title="AUTONOMOUS" icon="⚡" />
         <div>
           <label className="block text-sm font-body font-medium text-foreground mb-2">How many Artifacts does your team score during Auto? (Solo)</label>
-          <input type="text" value={pitForm.autoArtifacts} onChange={(e) => setPitForm(p => ({ ...p, autoArtifacts: e.target.value }))} placeholder="e.g. 3" className={"w-32 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-accent focus:ring-1 focus:ring-accent text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"} />
+          <input type="text" value={pitForm.autoArtifacts} onChange={(e) => set("autoArtifacts", e.target.value)} placeholder="e.g. 3" className={shortInputCls} />
         </div>
+        <ZoneButtons value={pitForm.autoScoringZone} field="autoScoringZone" />
+      </div>
+
+      {/* Teleop */}
+      <div className="glass rounded-xl p-6 border border-accent/20 space-y-4">
+        <SectionHeader title="TELE-OP" icon="🎮" />
+        <div>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">How do you perform during Teleop? What do you focus on?</label>
+          <textarea value={pitForm.teleopFocus} onChange={(e) => set("teleopFocus", e.target.value)}
+            placeholder="e.g. defense, cycling, motif..." rows={3} className={inputCls + " resize-none"} />
+        </div>
+        <ZoneButtons value={pitForm.teleopScoringZone} field="teleopScoringZone" />
+      </div>
+
+      {/* Endgame */}
+      <div className="glass rounded-xl p-6 border border-accent/20 space-y-5">
+        <SectionHeader title="ENDGAME" icon="🏁" />
         <div className="space-y-3">
-          <p className="text-sm font-body text-foreground font-medium">Where do you score from? (From Audience Perspective)</p>
+          <p className="text-sm font-body text-foreground font-medium">Does your team do Motif, or focus on lots of Cycling in Endgame?</p>
           <div className="flex flex-wrap gap-2">
-            {["Front Zone", "Back Zone"].map((option, i) => (
-              <button key={option} type="button" onClick={() => setPitForm(p => ({ ...p, scoringZone: option }))}
+            {["Motif", "Cycling"].map((option, i) => (
+              <button key={option} type="button" onClick={() => set("endgameStrategy", option)}
                 className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
-                  pitForm.scoringZone === option
-                    ? getOptionColor(i, 2)
-                    : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                  pitForm.endgameStrategy === option ? getOptionColor(i, 2) : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
                 }`}
               >{option}</button>
             ))}
           </div>
+        </div>
+
+        <div className="space-y-3">
+          <p className="text-sm font-body text-foreground font-medium">Do you park in the Base Zone?</p>
+          <div className="flex flex-wrap gap-2">
+            {["No", "Partial", "Yes – Full Park"].map((option, i) => (
+              <button key={option} type="button" onClick={() => set("endgameParking", option)}
+                className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                  pitForm.endgameParking === option ? getOptionColor(i, 3) : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                }`}
+              >{option}</button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">How do you park? Any Special Park Features?</label>
+          <div className="flex flex-wrap gap-2">
+            {["Climb", "Ramp", "Wheel Kickers", "Other"].map((opt) => (
+              <button key={opt} type="button" onClick={() => set("endgameParkFeatures", pitForm.endgameParkFeatures === opt ? "" : opt)}
+                className={`px-4 py-2.5 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
+                  pitForm.endgameParkFeatures === opt
+                    ? "bg-accent/20 border-accent text-accent"
+                    : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                }`}
+              >{opt}</button>
+            ))}
+          </div>
+          {pitForm.endgameParkFeatures === "Other" && (
+            <input type="text" value={pitForm.endgameParkFeaturesOther} onChange={(e) => set("endgameParkFeaturesOther", e.target.value)}
+              placeholder="Describe their park feature..." className={inputCls + " mt-3"} />
+          )}
         </div>
       </div>
 
