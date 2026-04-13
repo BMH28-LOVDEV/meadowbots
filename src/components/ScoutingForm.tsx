@@ -212,11 +212,13 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
       endgame_parking: pitForm.endgameParking || null,
       endgame_park_features: pitForm.endgameParkFeatures || null,
       endgame_park_features_other: pitForm.endgameParkFeaturesOther || null,
+      auto_start_position: pitForm.autoStartPosition || null,
+      auto_description: pitForm.autoDescription || null,
     } as any);
     setSubmitting(false);
     if (error) { toast.error("Failed to save. Please try again."); return; }
     toast.success("Pit Scout submitted!");
-    setPitForm({ teamNumber: "", teamName: "", strengths: "", weaknesses: "", autoArtifacts: "", autoScoringZone: "", teleopFocus: "", teleopScoringZone: "", endgameStrategy: "", endgameParking: "", endgameParkFeatures: "", endgameParkFeaturesOther: "" });
+    setPitForm({ teamNumber: "", teamName: "", strengths: "", weaknesses: "", autoArtifacts: "", autoScoringZone: "", autoStartPosition: "", autoDescription: "", teleopFocus: "", teleopScoringZone: "", endgameStrategy: "", endgameParking: "", endgameParkFeatures: "", endgameParkFeaturesOther: "" });
   };
 
   const inputCls = "w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-accent focus:ring-1 focus:ring-accent text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all";
