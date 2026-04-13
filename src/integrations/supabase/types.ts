@@ -63,29 +63,56 @@ export type Database = {
         Row: {
           auto_artifacts_scored: string | null
           created_at: string
+          endgame_park_features: string | null
+          endgame_park_features_other: string | null
+          endgame_parking: string | null
+          endgame_strategy: string | null
           id: string
           scoring_zone: string | null
           scouter_name: string
+          strengths: string | null
           strengths_weaknesses: string | null
+          team_name: string | null
           team_number: string
+          teleop_focus: string | null
+          teleop_scoring_zone: string | null
+          weaknesses: string | null
         }
         Insert: {
           auto_artifacts_scored?: string | null
           created_at?: string
+          endgame_park_features?: string | null
+          endgame_park_features_other?: string | null
+          endgame_parking?: string | null
+          endgame_strategy?: string | null
           id?: string
           scoring_zone?: string | null
           scouter_name: string
+          strengths?: string | null
           strengths_weaknesses?: string | null
+          team_name?: string | null
           team_number: string
+          teleop_focus?: string | null
+          teleop_scoring_zone?: string | null
+          weaknesses?: string | null
         }
         Update: {
           auto_artifacts_scored?: string | null
           created_at?: string
+          endgame_park_features?: string | null
+          endgame_park_features_other?: string | null
+          endgame_parking?: string | null
+          endgame_strategy?: string | null
           id?: string
           scoring_zone?: string | null
           scouter_name?: string
+          strengths?: string | null
           strengths_weaknesses?: string | null
+          team_name?: string | null
           team_number?: string
+          teleop_focus?: string | null
+          teleop_scoring_zone?: string | null
+          weaknesses?: string | null
         }
         Relationships: []
       }
