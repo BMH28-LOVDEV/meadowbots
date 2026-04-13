@@ -1187,6 +1187,17 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             <MCQuestion label="Did they leave at the end of Autonomous?" name="autoLeave" options={["No", "Yes"]} value={form.autoLeave} onChange={handleChange} />
             <MCQuestion label="How consistent was their Autonomous routine?" name="autoConsistency" options={["No Auto", "Inconsistent", "Mostly Consistent", "Very Consistent"]} value={form.autoConsistency} onChange={handleChange} />
             <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-2">How many balls did the Team score individually? (Auto)</label>
+              <input
+                type="number"
+                min="0"
+                value={form.autoBallsScored}
+                onChange={(e) => handleChange("autoBallsScored", e.target.value)}
+                placeholder="e.g. 4"
+                className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
+              />
+            </div>
+            <div>
               <label className="block text-sm font-body font-medium text-foreground mb-2">Additional Notes (Auto)</label>
               <textarea
                 value={form.specialFeatures}
@@ -1208,6 +1219,17 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             
             <MCQuestion label="How fast were their scoring cycles?" name="teleopCycleSpeed" options={["Minimal Cycling", "Slow", "Average", "Very Fast"]} value={form.teleopCycleSpeed} onChange={handleChange} />
             <MCQuestion label="Did they classify artifacts correctly?" name="teleopArtifactClassification" options={["No Classification", "Rarely", "Mostly", "Always"]} value={form.teleopArtifactClassification} onChange={handleChange} />
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-2">How many balls did the Team score individually? (Teleop)</label>
+              <input
+                type="number"
+                min="0"
+                value={form.teleopBallsScored}
+                onChange={(e) => handleChange("teleopBallsScored", e.target.value)}
+                placeholder="e.g. 8"
+                className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
+              />
+            </div>
           </div>
 
           {/* Endgame */}
