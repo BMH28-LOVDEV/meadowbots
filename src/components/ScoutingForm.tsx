@@ -125,6 +125,19 @@ const scoreEntry = (entry: ScoutingEntry): number => {
   return score;
 };
 
+const GRADIENT_COLORS = [
+  "bg-red-500/20 border-red-500 text-red-400",
+  "bg-orange-500/20 border-orange-500 text-orange-400",
+  "bg-yellow-500/20 border-yellow-500 text-yellow-400",
+  "bg-green-500/20 border-green-500 text-green-400",
+];
+
+const getOptionColor = (index: number, total: number) => {
+  if (total === 2) return index === 0 ? GRADIENT_COLORS[0] : GRADIENT_COLORS[3];
+  if (total === 3) return [GRADIENT_COLORS[0], GRADIENT_COLORS[2], GRADIENT_COLORS[3]][index];
+  return GRADIENT_COLORS[index] || GRADIENT_COLORS[3];
+};
+
 const MCQuestion = ({ label, name, options, value, onChange }: {
   label: string; name: keyof FormData; options: string[]; value: string;
   onChange: (name: keyof FormData, value: string) => void;
@@ -132,11 +145,11 @@ const MCQuestion = ({ label, name, options, value, onChange }: {
   <div className="space-y-3">
     <p className="text-sm font-body text-foreground font-medium">{label}</p>
     <div className="flex flex-wrap gap-2">
-      {options.map((option) => (
+      {options.map((option, i) => (
         <button key={option} type="button" onClick={() => onChange(name, option)}
           className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
             value === option
-              ? "bg-primary/20 border-primary text-primary glow-primary"
+              ? getOptionColor(i, options.length)
               : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
           }`}
         >{option}</button>
