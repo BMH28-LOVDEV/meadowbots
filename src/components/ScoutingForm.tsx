@@ -1343,6 +1343,28 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
                 ))}
               </div>
             </div>
+            <div className="space-y-3">
+              <p className="text-sm font-body text-foreground font-medium">Does this team perform as they said they would in your Pit Scout?</p>
+              <div className="flex flex-wrap gap-3">
+                {["Yes", "No"].map((option) => (
+                  <button key={option} type="button" onClick={() => handleChange("pitScoutMatch", option)}
+                    className={`px-5 py-2.5 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
+                      form.pitScoutMatch === option
+                        ? option === "Yes" ? "bg-green-500/20 border-green-500 text-green-400" : "bg-destructive/20 border-destructive text-destructive"
+                        : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                    }`}>
+                    {option === "Yes" ? "✅ " : "❌ "}{option}
+                  </button>
+                ))}
+              </div>
+              <textarea
+                value={form.pitScoutMatchElaborate}
+                onChange={(e) => handleChange("pitScoutMatchElaborate", e.target.value)}
+                placeholder="e.g. Elaborate"
+                rows={2}
+                className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all resize-none"
+              />
+            </div>
           </div>
 
           {/* Notes */}
