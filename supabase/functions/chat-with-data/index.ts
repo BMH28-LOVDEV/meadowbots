@@ -31,9 +31,9 @@ serve(async (req) => {
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const [scoutingRes, assignmentsRes, driveTeamRes, profilesRes] = await Promise.all([
-      supabaseAdmin.from("scouting_entries").select("*").order("timestamp", { ascending: false }),
+      supabaseAdmin.from("scouting_entries").select("*").neq("team_number", "19792").order("timestamp", { ascending: false }),
       supabaseAdmin.from("team_assignments").select("*"),
-      supabaseAdmin.from("drive_team_matches").select("*").order("sort_order"),
+      supabaseAdmin.from("drive_team_matches").select("*").neq("team_number", "19792").order("sort_order"),
       supabaseAdmin.from("profiles").select("display_name, role, approval_status"),
     ]);
 
@@ -58,7 +58,7 @@ ${JSON.stringify(driveTeamMatches, null, 1)}
 ${JSON.stringify(profiles, null, 1)}
 `;
 
-    const systemPrompt = `You are the MeadowBot Scout AI — the official AI assistant for FRC Team "The Mighty MeadowBots Blue". You ONLY answer questions based on the team's scouting data provided below. You do NOT make up information or use external knowledge about other teams.
+    const systemPrompt = `You are the MeadowBot Scout AI — the official AI assistant for FRC Team #14841 "The Mighty MeadowBots Blue". You ONLY answer questions based on the team's scouting data provided below. You do NOT make up information or use external knowledge about other teams. IMPORTANT: Team #19792 (Silver) is NO LONGER part of this app — do NOT reference, mention, or provide any data about team 19792 under any circumstances. If asked about 19792, say "Silver team data is no longer tracked in this app."
 
 Your capabilities:
 - Analyze scouting data (match performance, auto/teleop/endgame stats)
