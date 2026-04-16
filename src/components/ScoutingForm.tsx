@@ -781,7 +781,7 @@ const NotifyDriveTeamButton = ({ scouterName }: { scouterName: string }) => {
 
 const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) => {
   const { celebrating } = useCelebration();
-  const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata" | "scoutai" | "notify" | "rankings">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "scouting" | "livestream" | "drivedata" | "scoutai" | "notify">("dashboard");
   const [scoutingMode, setScoutingMode] = useState<null | "pit" | "match">(null);
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
@@ -1017,7 +1017,6 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         <HamburgerTabs
           tabs={[
             { id: "dashboard", label: "DASHBOARD", icon: "🏠" },
-            { id: "rankings", label: "RANKINGS", icon: "🏆", activeClass: "bg-amber-500/20 text-amber-400 border border-amber-500/40" },
             { id: "scouting", label: "SCOUTING FORM", icon: "📋", activeClass: "bg-accent/20 text-accent border border-accent/40" },
             { id: "notify", label: "NOTIFY DRIVE TEAM", icon: "📢", activeClass: "bg-blue-500/20 text-blue-400 border border-blue-500/40" },
             { id: "livestream", label: "LIVE STREAM", icon: "🔴", activeClass: "bg-red-500/20 text-red-400 border border-red-500/40" },
@@ -1115,24 +1114,6 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
                 </div>
               )}
 
-              {/* Top Rankings */}
-              {teamSummaries.length > 0 && (
-                <div className="glass rounded-xl p-5 border border-border/50">
-                  <h3 className="font-display text-sm tracking-wider text-foreground mb-4">🏆 TOP RANKINGS</h3>
-                  <div className="space-y-3">
-                    {teamSummaries.slice(0, 5).map((team, i) => (
-                      <div key={team.teamNumber} className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 border border-border/30">
-                        <span className="font-display text-sm w-8 text-center text-primary">{getRankIcon(i + 1)}</span>
-                        <div className="flex-1">
-                          <p className="font-display text-sm text-foreground">{allTeamNames[team.teamNumber] ? `${allTeamNames[team.teamNumber]} ` : ""}#{team.teamNumber}</p>
-                          <p className="text-xs text-muted-foreground font-body">{team.entries.length} match{team.entries.length !== 1 ? "es" : ""}</p>
-                        </div>
-                        <p className="font-display text-sm text-primary">{Math.round(team.avgScore)}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </>
           )}
 
