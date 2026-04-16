@@ -1167,8 +1167,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         </div>
       )}
 
-
-
+      {activeTab === "scouting" && scoutingMode === null && (
         <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col items-center justify-center" style={{ minHeight: "60vh" }}>
           <div className="glass rounded-2xl p-8 border border-primary/30 glow-primary text-center space-y-6 max-w-md w-full">
             <span className="text-5xl block">📋</span>
