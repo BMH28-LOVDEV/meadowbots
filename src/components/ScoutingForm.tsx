@@ -1204,6 +1204,11 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             <h2 className="font-display text-lg text-accent tracking-wider">🏗️ PIT SCOUTING</h2>
           </div>
 
+          <div className="rounded-xl border-2 border-destructive/60 bg-destructive/10 px-5 py-4">
+            <p className="font-display text-sm tracking-wider text-destructive">⚠️ NOTICE</p>
+            <p className="text-sm text-destructive/90 font-body mt-1">Team may and will most likely lie! Match Data is necessary to confirm what teams say.</p>
+          </div>
+
           <PitScoutForm scouterName={scouterName} />
         </div>
       )}
