@@ -43,6 +43,7 @@ interface FormData {
   allianceWon: string;
   specialFeatures: string;
   goodMatch: string;
+  defensiveStrategy: string;
   pitScoutMatch: string;
   pitScoutMatchElaborate: string;
 }
