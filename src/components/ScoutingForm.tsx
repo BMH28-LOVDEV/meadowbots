@@ -96,7 +96,7 @@ const INITIAL_FORM: FormData = {
   teleopOverflowManagement: "", teleopCycleSpeed: "", teleopArtifactClassification: "", teleopBallsScored: "",
   endgameParking: "", endgameAllianceAssist: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
   penalties: [], cards: [], penaltyPointsGiven: "",
-  matchScore: "", allianceWon: "", specialFeatures: "", goodMatch: "", pitScoutMatch: "", pitScoutMatchElaborate: "",
+  matchScore: "", allianceWon: "", specialFeatures: "", goodMatch: "", defensiveStrategy: "", pitScoutMatch: "", pitScoutMatchElaborate: "",
 };
 
 const scoreEntry = (entry: ScoutingEntry): number => {
