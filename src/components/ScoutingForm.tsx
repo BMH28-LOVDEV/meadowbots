@@ -958,6 +958,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         form.teleopBallsScored ? `[Teleop Balls] ${form.teleopBallsScored}` : "",
         form.endgameParkFeatures ? `[Park Feature] ${form.endgameParkFeatures === "Other" ? form.endgameParkFeaturesOther || "Other" : form.endgameParkFeatures}` : "",
         form.pitScoutMatch ? `[Pit Scout Match] ${form.pitScoutMatch}${form.pitScoutMatchElaborate ? `: ${form.pitScoutMatchElaborate}` : ""}` : "",
+        form.defensiveStrategy ? `[Defensive Strategy] ${form.defensiveStrategy}` : "",
       ].filter(Boolean).join(" | ") || null,
       good_match: form.goodMatch || null,
     });
