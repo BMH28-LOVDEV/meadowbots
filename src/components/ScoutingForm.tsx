@@ -43,6 +43,7 @@ interface FormData {
   allianceWon: string;
   specialFeatures: string;
   goodMatch: string;
+  defensiveStrategy: string;
   pitScoutMatch: string;
   pitScoutMatchElaborate: string;
 }
@@ -95,7 +96,7 @@ const INITIAL_FORM: FormData = {
   teleopOverflowManagement: "", teleopCycleSpeed: "", teleopArtifactClassification: "", teleopBallsScored: "",
   endgameParking: "", endgameAllianceAssist: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
   penalties: [], cards: [], penaltyPointsGiven: "",
-  matchScore: "", allianceWon: "", specialFeatures: "", goodMatch: "", pitScoutMatch: "", pitScoutMatchElaborate: "",
+  matchScore: "", allianceWon: "", specialFeatures: "", goodMatch: "", defensiveStrategy: "", pitScoutMatch: "", pitScoutMatchElaborate: "",
 };
 
 const scoreEntry = (entry: ScoutingEntry): number => {
@@ -957,6 +958,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         form.teleopBallsScored ? `[Teleop Balls] ${form.teleopBallsScored}` : "",
         form.endgameParkFeatures ? `[Park Feature] ${form.endgameParkFeatures === "Other" ? form.endgameParkFeaturesOther || "Other" : form.endgameParkFeatures}` : "",
         form.pitScoutMatch ? `[Pit Scout Match] ${form.pitScoutMatch}${form.pitScoutMatchElaborate ? `: ${form.pitScoutMatchElaborate}` : ""}` : "",
+        form.defensiveStrategy ? `[Defensive Strategy] ${form.defensiveStrategy}` : "",
       ].filter(Boolean).join(" | ") || null,
       good_match: form.goodMatch || null,
     });
@@ -1536,6 +1538,12 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
               <label className="block text-sm font-body text-foreground font-bold text-lg">Do you think this team will be a good match for us?</label>
               <textarea value={form.goodMatch} onChange={(e) => handleChange("goodMatch", e.target.value)} rows={3}
                 placeholder="Yes / No and why..."
+                className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all resize-none" />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-body text-foreground font-bold text-lg">Defensive Strategy - What defense can our team do to defend against this team?</label>
+              <textarea value={form.defensiveStrategy} onChange={(e) => handleChange("defensiveStrategy", e.target.value)} rows={3}
+                placeholder="e.g. hit them when they intake from the secret tunnel..."
                 className="w-full px-4 py-3 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all resize-none" />
             </div>
           </div>
