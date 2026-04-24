@@ -542,7 +542,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
                     <div key={team.teamNumber} className="px-5 py-3.5 flex items-center gap-4">
                       <span className="text-xl w-8 text-center">{getRankIcon(index + 1)}</span>
                       <div className="flex-1">
-                        <p className="font-display text-sm text-foreground tracking-wide">{teamNameMap[team.teamNumber] ? `${teamNameMap[team.teamNumber]} ` : ""}#{team.teamNumber}</p>
+                        <p className="font-display text-sm text-foreground tracking-wide">{formatTeamLabel(team.teamNumber)}</p>
                         <p className="text-xs text-muted-foreground font-body">{team.entries.length} match{team.entries.length !== 1 ? "es" : ""} scouted</p>
                       </div>
                       <p className="font-display text-lg text-primary text-glow">{Math.round(team.avgScore)} pts</p>
@@ -669,7 +669,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
                           return (
                             <div key={assignment.team_number} className="flex items-center gap-3 flex-wrap">
                               <p className="text-xs text-muted-foreground font-body min-w-[80px]">
-                                Team #{assignment.team_number}
+                                {formatTeamLabel(assignment.team_number, assignment.team_name)}
                               </p>
                               <div className="flex flex-wrap gap-1.5 flex-1">
                                 {matches.map((match) => {
@@ -777,7 +777,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-baseline gap-3">
-                            <span className="font-display text-lg text-foreground tracking-wider">{teamNameMap[team.teamNumber] ? `${teamNameMap[team.teamNumber]} ` : ""}#{team.teamNumber}</span>
+                            <span className="font-display text-lg text-foreground tracking-wider">{formatTeamLabel(team.teamNumber)}</span>
                             <span className="text-xs text-muted-foreground font-body">
                               {team.entries.length} match{team.entries.length !== 1 ? "es" : ""} scouted
                             </span>
@@ -943,7 +943,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
                             return (
                               <div key={a.team_number} className="flex items-center gap-3 flex-wrap p-2 rounded-lg bg-muted/30">
                                 <p className="font-display text-xs text-primary tracking-wide min-w-[90px]">
-                                  #{a.team_number}
+                                  {formatTeamLabel(a.team_number, a.team_name)}
                                 </p>
                                 <div className="flex flex-wrap gap-1.5 flex-1">
                                   {matches.map((match) => {
