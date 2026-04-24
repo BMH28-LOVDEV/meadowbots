@@ -114,3 +114,14 @@ export const DRIVE_TEAM = [
 ];
 
 export { TEAM_MEMBERS };
+
+// Title-case a team name entered by scouters (e.g. "meadowBOTS" -> "Meadowbots")
+export function titleCaseTeamName(name: string | null | undefined): string {
+  if (!name) return "";
+  return name
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
