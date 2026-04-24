@@ -149,6 +149,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
       const mapped: ScoutingEntry[] = (data || []).map((row) => ({
         id: row.id,
         teamNumber: row.team_number,
+        teamName: (row as any).team_name || "",
         matchNumber: row.match_number || "",
         scouterName: row.scouter_name,
         timestamp: row.timestamp,
@@ -194,7 +195,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
     ]);
     if (entriesData) {
       setDriveEntries(entriesData.map((row) => ({
-        id: row.id, teamNumber: row.team_number, matchNumber: row.match_number || "",
+        id: row.id, teamNumber: row.team_number, teamName: (row as any).team_name || "", matchNumber: row.match_number || "",
         scouterName: row.scouter_name, timestamp: row.timestamp,
         autoArtifactsScored: row.auto_artifacts_scored || "",
         autoPatternAlignment: row.auto_pattern_alignment || "",
