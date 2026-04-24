@@ -385,7 +385,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
             <p className="text-xs text-muted-foreground font-body">Team Rankings Dashboard</p>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-            <button onClick={() => { fetchEntries(); fetchAssignments(); fetchDriveData(); fetchDriveTeamMatches(); }} className="px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200 whitespace-nowrap">
+            <button onClick={() => { fetchEntries(); fetchAssignments(); fetchPitEntries(); }} className="px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200 whitespace-nowrap">
               ↻ REFRESH
             </button>
             <div className="hidden md:flex items-center gap-2">
