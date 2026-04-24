@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { Info, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { titleCaseTeamName } from "@/lib/teamAuth";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import { HamburgerTabs, type TabItem } from "@/components/HamburgerTabs";
@@ -849,13 +850,13 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
     }
 
     if (assignmentData && assignmentData.length > 0) {
-      setAssignments(assignmentData.map(a => ({ team_number: a.team_number, team_name: a.team_name, qual_matches: a.qual_matches || [] })));
-      setForm((prev) => ({ ...prev, teamNumber: assignmentData[0].team_number, teamName: assignmentData[0].team_name }));
+      setAssignments(assignmentData.map(a => ({ team_number: a.team_number, team_name: titleCaseTeamName(a.team_name), qual_matches: a.qual_matches || [] })));
+      setForm((prev) => ({ ...prev, teamNumber: assignmentData[0].team_number, teamName: titleCaseTeamName(assignmentData[0].team_name) }));
     }
 
     if (allAssignments) {
       const nameMap: Record<string, string> = {};
-      allAssignments.forEach(a => { if (a.team_name) nameMap[a.team_number] = a.team_name; });
+      allAssignments.forEach(a => { if (a.team_name) nameMap[a.team_number] = titleCaseTeamName(a.team_name); });
       setAllTeamNames(nameMap);
     }
 
