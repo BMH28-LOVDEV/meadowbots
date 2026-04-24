@@ -115,6 +115,10 @@ export const DRIVE_TEAM = [
 
 export { TEAM_MEMBERS };
 
+const KNOWN_TEAM_NAMES: Record<string, string> = {
+  "254": "The Cheesy Poofs",
+};
+
 // Title-case a team name entered by scouters (e.g. "meadowBOTS" -> "Meadowbots")
 export function titleCaseTeamName(name: string | null | undefined): string {
   if (!name) return "";
@@ -124,4 +128,8 @@ export function titleCaseTeamName(name: string | null | undefined): string {
     .filter(Boolean)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
+}
+
+export function resolveTeamName(teamNumber: string | null | undefined, teamName: string | null | undefined): string {
+  return titleCaseTeamName(teamName) || KNOWN_TEAM_NAMES[(teamNumber || "").trim()] || "";
 }

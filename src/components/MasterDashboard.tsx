@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Info, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { TEAM_MEMBERS, DRIVE_TEAM, titleCaseTeamName } from "@/lib/teamAuth";
+import { TEAM_MEMBERS, DRIVE_TEAM, resolveTeamName } from "@/lib/teamAuth";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import LockdownDashboard from "@/components/LockdownDashboard";
