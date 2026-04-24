@@ -19,6 +19,7 @@ interface MasterDashboardProps {
 interface ScoutingEntry {
   id: string;
   teamNumber: string;
+  teamName: string;
   matchNumber: string;
   scouterName: string;
   timestamp: string;
