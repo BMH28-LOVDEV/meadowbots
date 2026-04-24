@@ -135,12 +135,7 @@ const GRADIENT_COLORS = [
   "bg-green-500/20 border-green-500 text-green-400",
 ];
 
-const GRADIENT_COLORS_BLUE = [
-  "bg-red-500/20 border-red-500 text-red-400",
-  "bg-orange-500/20 border-orange-500 text-orange-400",
-  "bg-sky-500/20 border-sky-500 text-sky-400",
-  "bg-green-500/20 border-green-500 text-green-400",
-];
+const PURPLE_COLOR = "bg-purple-500/20 border-purple-500 text-purple-400";
 
 const getOptionColor = (index: number, total: number) => {
   if (total === 2) return index === 0 ? GRADIENT_COLORS[0] : GRADIENT_COLORS[3];
@@ -148,18 +143,15 @@ const getOptionColor = (index: number, total: number) => {
   return GRADIENT_COLORS[index] || GRADIENT_COLORS[3];
 };
 
-const getOptionColorBlue = (index: number, total: number) => {
-  if (total === 2) return index === 0 ? GRADIENT_COLORS_BLUE[0] : GRADIENT_COLORS_BLUE[3];
-  if (total === 3) return [GRADIENT_COLORS_BLUE[0], GRADIENT_COLORS_BLUE[2], GRADIENT_COLORS_BLUE[3]][index];
-  return GRADIENT_COLORS_BLUE[index] || GRADIENT_COLORS_BLUE[3];
-};
+// Both options are equally good — render in purple
+const getOptionColorBlue = () => PURPLE_COLOR;
 
 const MCQuestion = ({ label, name, options, value, onChange, colorScheme = "blue" }: {
   label: string; name: keyof FormData; options: string[]; value: string;
   onChange: (name: keyof FormData, value: string) => void;
   colorScheme?: "blue" | "purple";
 }) => {
-  const colorFn = colorScheme === "blue" ? getOptionColorBlue : getOptionColor;
+  const colorFn = colorScheme === "blue" ? () => PURPLE_COLOR : getOptionColor;
   return (
   <div className="space-y-3">
     <p className="text-sm font-body text-foreground font-medium">{label}</p>
@@ -194,26 +186,29 @@ const getRankIcon = (rank: number) => {
 };
 
 // ── Pit Scouting Form ─────────────────────────────────────────────────────────
+const PIT_FORM_STORAGE_KEY = "pitScoutForm:v1";
+const EMPTY_PIT_FORM = {
+  teamNumber: "", teamName: "", strengths: "", weaknesses: "",
+  autoArtifacts: "", autoScoringZone: "", autoStartPosition: "", autoClear: "", autoDescription: "",
+  teleopFocus: "", teleopScoringZone: "",
+  endgameStrategy: "", endgameParking: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
+};
+
 const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
-  const [pitForm, setPitForm] = useState({
-    teamNumber: "",
-    teamName: "",
-    strengths: "",
-    weaknesses: "",
-    autoArtifacts: "",
-    autoScoringZone: "",
-    autoStartPosition: "",
-    autoClear: "",
-    autoDescription: "",
-    teleopFocus: "",
-    teleopScoringZone: "",
-    endgameStrategy: "",
-    endgameParking: "",
-    endgameParkFeatures: "",
-    endgameParkFeaturesOther: "",
+  const [pitForm, setPitForm] = useState(() => {
+    try {
+      const saved = localStorage.getItem(PIT_FORM_STORAGE_KEY);
+      if (saved) return { ...EMPTY_PIT_FORM, ...JSON.parse(saved) };
+    } catch { /* ignore */ }
+    return EMPTY_PIT_FORM;
   });
   const [submitting, setSubmitting] = useState(false);
   const set = (field: string, value: string) => setPitForm(p => ({ ...p, [field]: value }));
+
+  // Persist on every change so leaving the page doesn't lose data
+  useEffect(() => {
+    try { localStorage.setItem(PIT_FORM_STORAGE_KEY, JSON.stringify(pitForm)); } catch { /* ignore */ }
+  }, [pitForm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,20 +235,22 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
     setSubmitting(false);
     if (error) { toast.error("Failed to save. Please try again."); return; }
     toast.success("Pit Scout submitted!");
-    setPitForm({ teamNumber: "", teamName: "", strengths: "", weaknesses: "", autoArtifacts: "", autoScoringZone: "", autoStartPosition: "", autoClear: "", autoDescription: "", teleopFocus: "", teleopScoringZone: "", endgameStrategy: "", endgameParking: "", endgameParkFeatures: "", endgameParkFeaturesOther: "" });
+    setPitForm(EMPTY_PIT_FORM);
+    try { localStorage.removeItem(PIT_FORM_STORAGE_KEY); } catch { /* ignore */ }
   };
 
   const inputCls = "w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-accent focus:ring-1 focus:ring-accent text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all";
   const shortInputCls = "w-32 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-accent focus:ring-1 focus:ring-accent text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all";
 
+  // Both Front Zone and Back Zone are equally good — render both purple
   const ZoneButtons = ({ value, field }: { value: string; field: string }) => (
     <div className="space-y-3">
       <p className="text-sm font-body text-foreground font-medium">Where do you usually score from? (From Audience Perspective)</p>
       <div className="flex flex-wrap gap-2">
-        {["Front Zone", "Back Zone"].map((option, i) => (
+        {["Front Zone", "Back Zone"].map((option) => (
           <button key={option} type="button" onClick={() => set(field, option)}
             className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
-              value === option ? getOptionColor(i, 2) : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+              value === option ? PURPLE_COLOR : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
             }`}
           >{option}</button>
         ))}
@@ -402,10 +399,10 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
         <div className="space-y-3">
           <p className="text-sm font-body text-foreground font-medium">Does your team do Motif, or focus on lots of Cycling in Endgame?</p>
           <div className="flex flex-wrap gap-2">
-            {["Motif", "Cycling"].map((option, i) => (
+            {["Motif", "Cycling"].map((option) => (
               <button key={option} type="button" onClick={() => set("endgameStrategy", option)}
                 className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
-                  pitForm.endgameStrategy === option ? getOptionColor(i, 2) : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                  pitForm.endgameStrategy === option ? PURPLE_COLOR : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
                 }`}
               >{option}</button>
             ))}
