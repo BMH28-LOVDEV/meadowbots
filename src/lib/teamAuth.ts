@@ -117,6 +117,9 @@ export { TEAM_MEMBERS };
 
 const KNOWN_TEAM_NAMES: Record<string, string> = {
   "254": "The Cheesy Poofs",
+  "14748": "#14748",
+  "1661": "#1661",
+  "67676": "#67676",
 };
 
 // Title-case a team name entered by scouters (e.g. "meadowBOTS" -> "Meadowbots")
