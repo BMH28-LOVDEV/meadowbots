@@ -335,11 +335,24 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
 
   const teamNameMap = useMemo(() => {
     const map: Record<string, string> = {};
-    // Prefer team_assignments names, fall back to scouter-entered names from scouting_entries
-    entries.forEach(e => { if (e.teamName && !map[e.teamNumber]) map[e.teamNumber] = titleCaseTeamName(e.teamName); });
-    assignments.forEach(a => { if (a.team_name) map[a.team_number] = titleCaseTeamName(a.team_name); });
+    // Fallback order: pit scouting → match scouting entries → assignments override both
+    pitEntries.forEach((p) => {
+      if (p?.team_number && p?.team_name && !map[p.team_number]) {
+        map[p.team_number] = titleCaseTeamName(p.team_name);
+      }
+    });
+    entries.forEach((e) => {
+      if (e.teamName && !map[e.teamNumber]) {
+        map[e.teamNumber] = titleCaseTeamName(e.teamName);
+      }
+    });
+    assignments.forEach((a) => {
+      if (a.team_name) {
+        map[a.team_number] = titleCaseTeamName(a.team_name);
+      }
+    });
     return map;
-  }, [assignments, entries]);
+  }, [assignments, entries, pitEntries]);
 
   // Only show scouts that have an assignment
   const assignedScouts = assignments.filter((a) => a.team_number);
