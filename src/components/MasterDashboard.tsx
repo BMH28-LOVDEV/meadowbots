@@ -1174,18 +1174,22 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
           <div className="glass rounded-xl p-4 border border-red-500/30">
             <div className="flex items-center gap-3 mb-1">
               <span className="inline-block w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <h2 className="font-display text-sm tracking-wider text-red-400">LIVE — FirstNevada</h2>
+              <h2 className="font-display text-sm tracking-wider text-red-400">LIVE — FIRST Tech Challenge</h2>
             </div>
-            <p className="text-xs text-muted-foreground font-body">Official FIRST Nevada Twitch stream</p>
+            <p className="text-xs text-muted-foreground font-body">Official @FIRSTTechChallenge YouTube live stream — auto-updates each day of the competition (April 29 – May 2).</p>
           </div>
           <div className="glass rounded-xl overflow-hidden border border-border/50" style={{ aspectRatio: "16/9" }}>
             <iframe
-              src="https://player.twitch.tv/?channel=FIRSTNevada&parent=meadowbots.lovable.app&parent=id-preview--507347b5-b304-47c7-a618-7ba9a3c5c371.lovable.app&parent=507347b5-b304-47c7-a618-7ba9a3c5c371.lovableproject.com&parent=localhost"
+              src="https://www.youtube.com/embed/live_stream?channel=UCgY9LFW7CV5w8a3qjuM_FNg&autoplay=1"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
               className="w-full h-full"
-              title="FIRSTNevadaSouth Live Stream"
+              title="FIRST Tech Challenge Live Stream"
             />
           </div>
+          <a href="https://www.youtube.com/@FIRSTTechChallenge/live" target="_blank" rel="noopener noreferrer" className="inline-block text-xs text-red-400 hover:text-red-300 font-body underline">
+            Open on YouTube →
+          </a>
         </div>
       )}
 
