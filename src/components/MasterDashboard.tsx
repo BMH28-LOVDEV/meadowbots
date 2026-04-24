@@ -353,6 +353,11 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
     return map;
   }, [assignments, entries, pitEntries]);
 
+  const formatTeamLabel = (teamNumber: string, teamName?: string | null) => {
+    const resolvedName = resolveTeamName(teamNumber, teamName || teamNameMap[teamNumber]);
+    return resolvedName ? `${resolvedName} #${teamNumber}` : `#${teamNumber}`;
+  };
+
   // Only show scouts that have an assignment
   const assignedScouts = assignments.filter((a) => a.team_number);
   const uniqueAssignedScoutNames = [...new Set(assignedScouts.map(a => a.scout_name))];
