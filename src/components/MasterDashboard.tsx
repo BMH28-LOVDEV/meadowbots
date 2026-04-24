@@ -312,6 +312,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
     fetchDriveData();
     fetchDriveTeamMatches();
     fetchPendingUsers();
+    fetchPitEntries();
   }, []);
 
   // Subscribe to active scouts presence channel
