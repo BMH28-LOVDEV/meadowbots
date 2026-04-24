@@ -128,19 +128,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
     const { data, error } = await supabase.from("pit_scouting_entries" as any).select("*").order("created_at", { ascending: false });
     if (!error && data) setPitEntries(data as any[]);
   };
-  const [driveEntries, setDriveEntries] = useState<ScoutingEntry[]>([]);
-  const [driveProfiles, setDriveProfiles] = useState<{ display_name: string; username: string; role: string; user_id: string }[]>([]);
-  const [pendingUsers, setPendingUsers] = useState<{ id: string; user_id: string; display_name: string; username: string; role: string; approval_status: string; created_at: string }[]>([]);
-  const [approvedUsers, setApprovedUsers] = useState<{ id: string; user_id: string; display_name: string; username: string; role: string; approval_status: string; created_at: string }[]>([]);
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
-  const [upgradeTarget, setUpgradeTarget] = useState<{ userId: string; displayName: string } | null>(null);
-  const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
-  const [assignmentsLoading, setAssignmentsLoading] = useState(false);
-
-  // Drive team match schedules (from DB)
-  const [blueMatches, setBlueMatches] = useState<{ id: string; match_label: string; sort_order: number }[]>([]);
-  const [driveMatchInput, setDriveMatchInput] = useState<Record<string, string>>({ blue: "" });
-  const [savingDriveMatch, setSavingDriveMatch] = useState(false);
 
   const fetchEntries = async () => {
     setLoading(true);
