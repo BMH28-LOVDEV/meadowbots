@@ -95,7 +95,7 @@ interface TeamSummary {
 
 
 
-const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScouter }: MasterDashboardProps) => {
+const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboardProps) => {
   const isBen = username === "Benjamin Hale";
   const isJude = username === "Jude Trujillo";
   const { celebrating, triggerCelebration } = useCelebration();
