@@ -404,11 +404,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
                   🗑 CLEAR ALL
                 </button>
               )}
-              {onViewAsBlueDriver && (
-                <button onClick={onViewAsBlueDriver} className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-blue-500/40 text-blue-400 hover:border-blue-400 hover:text-blue-300 transition-all duration-200 whitespace-nowrap">
-                  🔷 DRIVER DATA
-                </button>
-              )}
               {onViewAsScouter && (
                 <button onClick={onViewAsScouter} className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-primary/40 text-primary hover:border-primary hover:text-primary transition-all duration-200 whitespace-nowrap">
                   📋 SCOUT FORM
