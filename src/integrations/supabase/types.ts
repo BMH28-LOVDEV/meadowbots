@@ -176,6 +176,7 @@ export type Database = {
           penalty_points_given: number | null
           scouter_name: string
           special_features: string | null
+          team_name: string | null
           team_number: string
           teleop_artifact_classification: string | null
           teleop_ball_capacity: string | null
@@ -203,6 +204,7 @@ export type Database = {
           penalty_points_given?: number | null
           scouter_name: string
           special_features?: string | null
+          team_name?: string | null
           team_number: string
           teleop_artifact_classification?: string | null
           teleop_ball_capacity?: string | null
@@ -230,6 +232,7 @@ export type Database = {
           penalty_points_given?: number | null
           scouter_name?: string
           special_features?: string | null
+          team_name?: string | null
           team_number?: string
           teleop_artifact_classification?: string | null
           teleop_ball_capacity?: string | null
