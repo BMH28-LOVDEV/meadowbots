@@ -146,12 +146,12 @@ const getOptionColor = (index: number, total: number) => {
 // Both options are equally good — render in purple
 const getOptionColorBlue = () => PURPLE_COLOR;
 
-const MCQuestion = ({ label, name, options, value, onChange, colorScheme = "blue" }: {
+const MCQuestion = ({ label, name, options, value, onChange, colorScheme = "gradient" }: {
   label: string; name: keyof FormData; options: string[]; value: string;
   onChange: (name: keyof FormData, value: string) => void;
-  colorScheme?: "blue" | "purple";
+  colorScheme?: "gradient" | "purple";
 }) => {
-  const colorFn = colorScheme === "blue" ? () => PURPLE_COLOR : getOptionColor;
+  const colorFn = colorScheme === "purple" ? () => PURPLE_COLOR : getOptionColor;
   return (
   <div className="space-y-3">
     <p className="text-sm font-body text-foreground font-medium">{label}</p>
