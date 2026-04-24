@@ -1,0 +1,1 @@
+ALTER TABLE public.scouting_entries ADD COLUMN IF NOT EXISTS team_name text;
