@@ -117,15 +117,15 @@ export { TEAM_MEMBERS };
 
 const KNOWN_TEAM_NAMES: Record<string, string> = {
   "254": "The Cheesy Poofs",
-  "14748": "#14748",
-  "1661": "#1661",
-  "67676": "#67676",
 };
 
 // Title-case a team name entered by scouters (e.g. "meadowBOTS" -> "Meadowbots")
 export function titleCaseTeamName(name: string | null | undefined): string {
   if (!name) return "";
-  return name
+  const trimmed = name.trim();
+  if (!trimmed || /^#?\d+$/.test(trimmed)) return "";
+
+  return trimmed
     .toLowerCase()
     .split(/\s+/)
     .filter(Boolean)
