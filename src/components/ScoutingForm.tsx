@@ -1272,24 +1272,6 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         </div>
       )}
 
-      {/* ══ DRIVE DATA TAB ══ */}
-      {activeTab === "drivedata" && (
-        <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-          {isBlueDriver ? (
-            <DriveDataForm scouterName={scouterName} teamSummaries={teamSummaries} loadingData={loadingData} />
-          ) : (
-            <div className="flex flex-col items-center justify-center py-20 space-y-5 text-center">
-              <span className="text-6xl">🔒</span>
-              <div>
-                <h2 className="font-display text-xl tracking-wider text-foreground">RESTRICTED ACCESS</h2>
-                <p className="text-muted-foreground font-body text-sm mt-2 max-w-xs mx-auto">
-                  Only allowed for Authorized Drive Team Data.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
 
 
