@@ -120,7 +120,14 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
   const [pendingPassword, setPendingPassword] = useState("");
   const [pendingError, setPendingError] = useState("");
 
-  const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments" | "bluedrivedata" | "livestream" | "approvals" | "scoutai">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments" | "bluedrivedata" | "livestream" | "approvals" | "scoutai" | "pitdata">("dashboard");
+  const [pitEntries, setPitEntries] = useState<any[]>([]);
+  const [expandedPit, setExpandedPit] = useState<string | null>(null);
+
+  const fetchPitEntries = async () => {
+    const { data, error } = await supabase.from("pit_scouting_entries" as any).select("*").order("created_at", { ascending: false });
+    if (!error && data) setPitEntries(data as any[]);
+  };
   const [driveEntries, setDriveEntries] = useState<ScoutingEntry[]>([]);
   const [driveProfiles, setDriveProfiles] = useState<{ display_name: string; username: string; role: string; user_id: string }[]>([]);
   const [pendingUsers, setPendingUsers] = useState<{ id: string; user_id: string; display_name: string; username: string; role: string; approval_status: string; created_at: string }[]>([]);
@@ -305,6 +312,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
     fetchDriveData();
     fetchDriveTeamMatches();
     fetchPendingUsers();
+    fetchPitEntries();
   }, []);
 
   // Subscribe to active scouts presence channel
@@ -494,6 +502,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             { id: "bluedrivedata", label: "BLUE DATA", icon: "🔷", activeClass: "bg-blue-500/20 text-blue-400 border border-blue-500/40" },
             { id: "livestream", label: "LIVE STREAM", icon: "🔴", activeClass: "bg-red-500/20 text-red-400 border border-red-500/40" },
             { id: "approvals", label: "APPROVALS", icon: "👤", activeClass: "bg-amber-500/20 text-amber-400 border border-amber-500/40", badge: pendingUsers.filter(u => u.approval_status === "pending").length, onClick: () => fetchPendingUsers() },
+            { id: "pitdata", label: "PIT DATA", icon: "🔧", activeClass: "bg-purple-500/20 text-purple-400 border border-purple-500/40", onClick: () => fetchPitEntries() },
             { id: "scoutai", label: "SCOUT AI", icon: "🤖", activeClass: "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" },
           ]}
           activeTab={activeTab}
@@ -1135,6 +1144,90 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
         </div>
       )}
 
+      {activeTab === "pitdata" && (
+        <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
+          <div className="glass rounded-xl p-6 border border-purple-500/30">
+            <h2 className="font-display text-lg tracking-wider text-purple-400 mb-1">PIT SCOUTING DATA</h2>
+            <p className="text-xs text-muted-foreground font-body">{pitEntries.length} pit scout {pitEntries.length === 1 ? "entry" : "entries"}</p>
+          </div>
+
+          {pitEntries.length === 0 ? (
+            <div className="glass rounded-xl p-8 border border-border/50 text-center">
+              <p className="text-sm text-muted-foreground font-body">No pit scouting data yet.</p>
+            </div>
+          ) : (
+            pitEntries.map((p) => {
+              const isOpen = expandedPit === p.id;
+              const displayName = p.team_name ? titleCaseTeamName(p.team_name) : "—";
+              return (
+                <div key={p.id} className="glass rounded-xl border border-border/50 overflow-hidden">
+                  <button
+                    onClick={() => setExpandedPit(isOpen ? null : p.id)}
+                    className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors text-left"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-display text-base text-foreground">
+                        <span className="text-purple-400">#{p.team_number}</span> {displayName}
+                      </p>
+                      <p className="text-xs text-muted-foreground font-body mt-0.5">
+                        Scouted by {p.scouter_name} • {new Date(p.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                    <span className={`text-muted-foreground transition-transform ${isOpen ? "rotate-180" : ""}`}>▼</span>
+                  </button>
+
+                  {isOpen && (
+                    <div className="border-t border-border/50 p-4 space-y-4 bg-background/30">
+                      <div>
+                        <h4 className="text-xs font-display tracking-wider text-purple-400 mb-2">AUTONOMOUS</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-body">
+                          <DataCell label="Artifacts Scored" value={p.auto_artifacts_scored} />
+                          <DataCell label="Scoring Zone" value={p.scoring_zone} />
+                          <DataCell label="Start Position" value={p.auto_start_position} />
+                          <DataCell label="Clears Auto?" value={p.auto_clear} />
+                        </div>
+                        {p.auto_description && (
+                          <p className="mt-2 text-xs text-muted-foreground font-body bg-background/50 rounded px-2 py-1.5">
+                            <span className="text-foreground">Description: </span>{p.auto_description}
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <h4 className="text-xs font-display tracking-wider text-purple-400 mb-2">TELEOP</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-body">
+                          <DataCell label="Focus" value={p.teleop_focus} />
+                          <DataCell label="Scoring Zone" value={p.teleop_scoring_zone} />
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="text-xs font-display tracking-wider text-purple-400 mb-2">ENDGAME</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-body">
+                          <DataCell label="Strategy" value={p.endgame_strategy} />
+                          <DataCell label="Parking" value={p.endgame_parking} />
+                          <DataCell label="Park Features" value={p.endgame_park_features} />
+                          {p.endgame_park_features_other && <DataCell label="Other Features" value={p.endgame_park_features_other} />}
+                        </div>
+                      </div>
+
+                      {(p.strengths || p.weaknesses) && (
+                        <div>
+                          <h4 className="text-xs font-display tracking-wider text-purple-400 mb-2">STRENGTHS / WEAKNESSES</h4>
+                          <div className="space-y-2 text-xs font-body">
+                            {p.strengths && <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-green-400">Strengths: </span><span className="text-foreground">{p.strengths}</span></div>}
+                            {p.weaknesses && <div className="bg-background/50 rounded px-2 py-1.5"><span className="text-red-400">Weaknesses: </span><span className="text-foreground">{p.weaknesses}</span></div>}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
 
       {/* ── BLUE DRIVE TEAM DATA TAB ── */}
       {activeTab === "bluedrivedata" && (
