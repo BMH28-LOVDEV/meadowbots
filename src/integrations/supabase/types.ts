@@ -35,30 +35,6 @@ export type Database = {
         }
         Relationships: []
       }
-      drive_team_matches: {
-        Row: {
-          created_at: string
-          id: string
-          match_label: string
-          sort_order: number
-          team_number: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          match_label: string
-          sort_order?: number
-          team_number: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          match_label?: string
-          sort_order?: number
-          team_number?: string
-        }
-        Relationships: []
-      }
       pit_scouting_entries: {
         Row: {
           auto_artifacts_scored: string | null

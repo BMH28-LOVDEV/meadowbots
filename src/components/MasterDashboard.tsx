@@ -12,7 +12,7 @@ import AIChatBot from "@/components/AIChatBot";
 interface MasterDashboardProps {
   onLogout: () => void;
   username: string;
-  onViewAsBlueDriver?: () => void;
+  
   onViewAsScouter?: () => void;
 }
 
@@ -95,7 +95,7 @@ interface TeamSummary {
 
 
 
-const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScouter }: MasterDashboardProps) => {
+const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboardProps) => {
   const isBen = username === "Benjamin Hale";
   const isJude = username === "Jude Trujillo";
   const { celebrating, triggerCelebration } = useCelebration();
@@ -128,19 +128,12 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
     const { data, error } = await supabase.from("pit_scouting_entries" as any).select("*").order("created_at", { ascending: false });
     if (!error && data) setPitEntries(data as any[]);
   };
-  const [driveEntries, setDriveEntries] = useState<ScoutingEntry[]>([]);
-  const [driveProfiles, setDriveProfiles] = useState<{ display_name: string; username: string; role: string; user_id: string }[]>([]);
-  const [pendingUsers, setPendingUsers] = useState<{ id: string; user_id: string; display_name: string; username: string; role: string; approval_status: string; created_at: string }[]>([]);
-  const [approvedUsers, setApprovedUsers] = useState<{ id: string; user_id: string; display_name: string; username: string; role: string; approval_status: string; created_at: string }[]>([]);
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
-  const [upgradeTarget, setUpgradeTarget] = useState<{ userId: string; displayName: string } | null>(null);
   const [assignments, setAssignments] = useState<TeamAssignment[]>([]);
   const [assignmentsLoading, setAssignmentsLoading] = useState(false);
-
-  // Drive team match schedules (from DB)
-  const [blueMatches, setBlueMatches] = useState<{ id: string; match_label: string; sort_order: number }[]>([]);
-  const [driveMatchInput, setDriveMatchInput] = useState<Record<string, string>>({ blue: "" });
-  const [savingDriveMatch, setSavingDriveMatch] = useState(false);
+  const [pendingUsers, setPendingUsers] = useState<{ id: string; user_id: string; display_name: string; username: string; role: string; approval_status: string; created_at: string }[]>([]);
+  const [approvedUsers, setApprovedUsers] = useState<{ id: string; user_id: string; display_name: string; username: string; role: string; approval_status: string; created_at: string }[]>([]);
+  const [upgradeTarget, setUpgradeTarget] = useState<{ userId: string; displayName: string; currentRole?: string } | null>(null);
 
   const fetchEntries = async () => {
     setLoading(true);
@@ -195,66 +188,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
     setAssignmentsLoading(false);
   };
 
-  const fetchDriveData = async () => {
-    const [{ data: entriesData }, { data: profilesData }] = await Promise.all([
-      supabase.from("scouting_entries").select("*").in("scouter_name", ["Zoë Khansevahn", "Zoe GK", "Chantelle Wong", "Naila Nauman"]).order("timestamp", { ascending: false }),
-      supabase.from("profiles").select("display_name, username, role, user_id").order("display_name"),
-    ]);
-    if (entriesData) {
-      setDriveEntries(entriesData.map((row) => ({
-        id: row.id, teamNumber: row.team_number, teamName: (row as any).team_name || "", matchNumber: row.match_number || "",
-        scouterName: row.scouter_name, timestamp: row.timestamp,
-        autoArtifactsScored: row.auto_artifacts_scored || "",
-        autoPatternAlignment: row.auto_pattern_alignment || "",
-        autoLaunchLine: row.auto_launch_line || "",
-        autoLeave: row.auto_leave || "",
-        autoConsistency: row.auto_consistency || "",
-        teleopIntakeMethod: row.teleop_intake_method || "",
-        teleopBallCapacity: row.teleop_ball_capacity || "",
-        teleopShootingAccuracy: row.teleop_shooting_accuracy || "",
-        teleopGateInteraction: row.teleop_gate_interaction || "",
-        teleopOverflowManagement: row.teleop_overflow_management || "",
-        teleopCycleSpeed: row.teleop_cycle_speed || "",
-        teleopArtifactClassification: row.teleop_artifact_classification || "",
-        endgameParking: row.endgame_parking || "",
-        endgameAllianceAssist: row.endgame_alliance_assist || "",
-        penalties: row.penalties || [],
-        specialFeatures: row.special_features || "",
-        goodMatch: row.good_match || "",
-        matchScore: (row as any).match_score ?? null,
-        allianceWon: (row as any).alliance_won || "",
-        penaltyPointsGiven: (row as any).penalty_points_given ?? null,
-      })));
-    }
-    if (profilesData) setDriveProfiles(profilesData as any);
-  };
-
-  const fetchDriveTeamMatches = async () => {
-    const { data } = await (supabase as any).from("drive_team_matches").select("id, team_number, match_label, sort_order").order("sort_order", { ascending: true });
-    if (data) {
-      setBlueMatches(data.filter((r: any) => r.team_number === "14841").map((r: any) => ({ id: r.id, match_label: r.match_label, sort_order: r.sort_order })));
-    }
-  };
-
-  const addDriveTeamMatch = async (teamNumber: string) => {
-    const raw = (driveMatchInput.blue || "").trim().toUpperCase();
-    if (!raw) return;
-    const existing = blueMatches;
-    if (existing.some(m => m.match_label === raw)) {
-      setDriveMatchInput(prev => ({ ...prev, blue: "" }));
-      return;
-    }
-    setSavingDriveMatch(true);
-    await (supabase as any).from("drive_team_matches").insert({ team_number: teamNumber, match_label: raw, sort_order: existing.length });
-    await fetchDriveTeamMatches();
-    setDriveMatchInput(prev => ({ ...prev, blue: "" }));
-    setSavingDriveMatch(false);
-  };
-
-  const removeDriveTeamMatch = async (id: string) => {
-    await (supabase as any).from("drive_team_matches").delete().eq("id", id);
-    await fetchDriveTeamMatches();
-  };
 
   const handleRoleUpdate = async (userId: string, newRole: string) => {
     setUpdatingRole(userId);
@@ -272,7 +205,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
     );
     const result = await response.json();
     if (!response.ok) { toast.error(result.error || "Failed to update role."); }
-    else { toast.success(`Role updated to ${newRole}!`); await fetchDriveData(); }
+    else { toast.success(`Role updated to ${newRole}!`); await fetchPendingUsers(); }
     setUpdatingRole(null);
   };
 
@@ -309,8 +242,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
   useEffect(() => {
     fetchEntries();
     fetchAssignments();
-    fetchDriveData();
-    fetchDriveTeamMatches();
     fetchPendingUsers();
     fetchPitEntries();
   }, []);
@@ -454,7 +385,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             <p className="text-xs text-muted-foreground font-body">Team Rankings Dashboard</p>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-            <button onClick={() => { fetchEntries(); fetchAssignments(); fetchDriveData(); fetchDriveTeamMatches(); }} className="px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200 whitespace-nowrap">
+            <button onClick={() => { fetchEntries(); fetchAssignments(); fetchPitEntries(); }} className="px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200 whitespace-nowrap">
               ↻ REFRESH
             </button>
             <div className="hidden md:flex items-center gap-2">
@@ -471,11 +402,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
               {isBen && (
                 <button onClick={() => { setShowClearAll(true); setClearAllPassword(""); setClearAllError(""); }} className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-destructive/40 text-destructive/70 hover:border-destructive hover:text-destructive transition-all duration-200">
                   🗑 CLEAR ALL
-                </button>
-              )}
-              {onViewAsBlueDriver && (
-                <button onClick={onViewAsBlueDriver} className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-blue-500/40 text-blue-400 hover:border-blue-400 hover:text-blue-300 transition-all duration-200 whitespace-nowrap">
-                  🔷 DRIVER DATA
                 </button>
               )}
               {onViewAsScouter && (
@@ -499,7 +425,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             { id: "rankings", label: "RANKINGS", icon: "🏆" },
             { id: "progress", label: "SCOUT PROGRESS", icon: "📊" },
             { id: "assignments", label: "ASSIGNMENTS", icon: "📋" },
-            { id: "bluedrivedata", label: "BLUE DATA", icon: "🔷", activeClass: "bg-blue-500/20 text-blue-400 border border-blue-500/40" },
+            
             { id: "livestream", label: "LIVE STREAM", icon: "🔴", activeClass: "bg-red-500/20 text-red-400 border border-red-500/40" },
             { id: "approvals", label: "APPROVALS", icon: "👤", activeClass: "bg-amber-500/20 text-amber-400 border border-amber-500/40", badge: pendingUsers.filter(u => u.approval_status === "pending").length, onClick: () => fetchPendingUsers() },
             { id: "pitdata", label: "PIT DATA", icon: "🔧", activeClass: "bg-purple-500/20 text-purple-400 border border-purple-500/40", onClick: () => fetchPitEntries() },
@@ -511,9 +437,8 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
             ...(isBen ? [{ id: "letsgo", label: "LET'S GO!", icon: "🎉", className: "text-green-400 hover:text-green-300", onClick: () => triggerCelebration() }] : []),
             ...(isBen ? [{ id: "lockdown", label: "LOCKDOWN", icon: "🔴", className: "text-destructive hover:text-destructive", onClick: () => setShowLockdown(true) }] : []),
             ...(isBen ? [{ id: "clearall", label: "CLEAR ALL", icon: "🗑", className: "text-destructive/70 hover:text-destructive", onClick: () => { setShowClearAll(true); setClearAllPassword(""); setClearAllError(""); } }] : []),
-            ...(onViewAsBlueDriver ? [{ id: "blueform", label: "DRIVER DATA", icon: "🔷", className: "text-blue-400 hover:text-blue-300", onClick: onViewAsBlueDriver }] : []),
             ...(onViewAsScouter ? [{ id: "scoutform", label: "SCOUT FORM", icon: "📋", className: "text-primary hover:text-primary", onClick: onViewAsScouter }] : []),
-            { id: "refresh", label: "REFRESH", icon: "↻", onClick: () => { fetchEntries(); fetchAssignments(); fetchDriveData(); fetchDriveTeamMatches(); } },
+            { id: "refresh", label: "REFRESH", icon: "↻", onClick: () => { fetchEntries(); fetchAssignments(); fetchPitEntries(); } },
           ]}
         />
       </header>
@@ -1229,137 +1154,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
         </div>
       )}
 
-      {/* ── BLUE DRIVE TEAM DATA TAB ── */}
-      {activeTab === "bluedrivedata" && (
-        <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
-          {/* Header */}
-          <div className="glass rounded-xl p-6 border border-blue-500/40" style={{ boxShadow: "0 0 20px hsl(220 100% 60% / 0.15)" }}>
-            <div className="flex items-center gap-4">
-              <span className="text-4xl">🔷</span>
-              <div>
-                <h2 className="font-display text-xl tracking-wider text-blue-400">BLUE DATA</h2>
-                <p className="text-xs text-muted-foreground font-body mt-1">Chantelle Wong</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Qual Match Schedule Manager */}
-          <div className="glass rounded-xl overflow-hidden border border-blue-500/20">
-            <div className="px-5 py-4 border-b border-blue-500/20 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.08), rgba(37,99,235,0.04))" }}>
-              <span className="text-lg">📅</span>
-              <h3 className="font-display text-sm tracking-wider text-blue-400">QUAL MATCH SCHEDULE</h3>
-              <span className="ml-auto text-xs text-blue-400/60 font-body">{blueMatches.length} matches added</span>
-            </div>
-            <div className="px-5 py-4 space-y-4">
-              {/* Add match input */}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={driveMatchInput.blue}
-                  onChange={(e) => setDriveMatchInput(prev => ({ ...prev, blue: e.target.value }))}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addDriveTeamMatch("14841"); } }}
-                  placeholder="Type Q5 then Enter to add…"
-                  className="flex-1 px-3 py-2 rounded-lg bg-muted border border-blue-500/30 focus:border-blue-400 focus:ring-1 focus:ring-blue-400 text-foreground placeholder:text-muted-foreground/40 font-body text-sm outline-none transition-all"
-                />
-                <button
-                  onClick={() => addDriveTeamMatch("14841")}
-                  disabled={savingDriveMatch || !driveMatchInput.blue.trim()}
-                  className="px-4 py-2 rounded-lg text-xs font-display tracking-wider bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-40 transition-all"
-                >
-                  ADD
-                </button>
-              </div>
-              {/* Match chips */}
-              {blueMatches.length === 0 ? (
-                <p className="text-sm text-muted-foreground font-body text-center py-2">No matches added yet. Add them once the schedule is released.</p>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {blueMatches.map((m) => {
-                    const done = driveEntries.some(e => ["Chantelle Wong", "Zoë Khansevahn", "Zoe GK"].includes(e.scouterName) && e.teamNumber === "14841" && e.matchNumber.toUpperCase() === m.match_label);
-                    return (
-                      <div key={m.id} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-body font-semibold border transition-all ${
-                        done ? "bg-green-500/20 border-green-500 text-green-400" : "bg-blue-500/10 border-blue-500/40 text-blue-300"
-                      }`}>
-                        {done ? "✓ " : ""}{m.match_label}
-                        <button onClick={() => removeDriveTeamMatch(m.id)} className="ml-1 text-xs opacity-50 hover:opacity-100 transition-opacity">×</button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-              {blueMatches.length > 0 && (
-                <p className="text-xs text-muted-foreground font-body">
-                  ✓ = Chantelle submitted data · {blueMatches.filter(m => driveEntries.some(e => ["Chantelle Wong", "Zoë Khansevahn", "Zoe GK"].includes(e.scouterName) && e.teamNumber === "14841" && e.matchNumber.toUpperCase() === m.match_label)).length}/{blueMatches.length} complete
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Ranked Match Entries */}
-          <div className="glass rounded-xl overflow-hidden border border-blue-500/20">
-            <div className="px-5 py-4 border-b border-blue-500/20 flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(59,130,246,0.08), rgba(37,99,235,0.04))" }}>
-              <span className="text-lg">🏆</span>
-              <h3 className="font-display text-sm tracking-wider text-blue-400">BEST QUAL MATCHES — RANKED</h3>
-              <span className="ml-auto text-xs text-blue-400/60 font-body">
-                {driveEntries.filter(e => ["Chantelle Wong", "Zoë Khansevahn", "Zoe GK"].includes(e.scouterName) && e.teamNumber === "14841").length} ENTRIES
-              </span>
-            </div>
-            {driveEntries.filter(e => ["Chantelle Wong", "Zoë Khansevahn", "Zoe GK"].includes(e.scouterName) && e.teamNumber === "14841").length === 0 ? (
-              <div className="px-5 py-10 text-center text-sm text-muted-foreground font-body">No Blue Drive Data submitted for Team #14841 yet.</div>
-            ) : (
-              <div className="divide-y divide-border/30">
-                {[...driveEntries.filter(e => ["Chantelle Wong", "Zoë Khansevahn", "Zoe GK"].includes(e.scouterName) && e.teamNumber === "14841")]
-                  .sort((a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0))
-                  .map((entry, idx) => (
-                  <div key={entry.id} className="px-5 py-4 space-y-3">
-                    <div className="flex items-start justify-between gap-3 flex-wrap">
-                      <div className="flex items-center gap-3">
-                        <span className="font-display text-lg w-8 text-center text-blue-400">
-                          {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`}
-                        </span>
-                        <div>
-                          <p className="font-display text-sm text-foreground tracking-wide">
-                            Match {entry.matchNumber || "N/A"}
-                            {entry.matchScore != null && <span className="ml-2 text-blue-400">· Score: {entry.matchScore}</span>}
-                            {entry.allianceWon && (
-                              <span className={`ml-2 text-xs ${entry.allianceWon === "Yes – Won" ? "text-green-400" : entry.allianceWon === "No – Lost" ? "text-destructive" : "text-muted-foreground"}`}>
-                                {entry.allianceWon === "Yes – Won" ? "🏆 Won" : entry.allianceWon === "No – Lost" ? "❌ Lost" : "🤝 Tie"}
-                              </span>
-                            )}
-                          </p>
-                          <p className="text-xs text-muted-foreground font-body mt-0.5">
-                            🔵 <span className="text-blue-400">{entry.scouterName}</span> · {new Date(entry.timestamp).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => { setDeleteTarget({ id: entry.id }); setDeletePassword(""); setDeleteError(""); }}
-                        className="px-3 py-1 rounded-lg text-xs font-display tracking-wider bg-destructive text-destructive-foreground hover:bg-destructive/80 transition-all shrink-0"
-                      >DELETE</button>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-body">
-                      {entry.autoArtifactsScored && <DataCell label="Auto Artifacts" value={entry.autoArtifactsScored} />}
-                      {entry.teleopArtifactClassification && <DataCell label="Teleop Artifacts" value={entry.teleopArtifactClassification} />}
-                      {entry.teleopCycleSpeed && <DataCell label="Cycles" value={entry.teleopCycleSpeed} />}
-                      {entry.teleopBallCapacity && <DataCell label="Cycle Time" value={entry.teleopBallCapacity} />}
-                      {entry.endgameParking && <DataCell label="Park" value={entry.endgameParking} />}
-                      {entry.penaltyPointsGiven != null && <DataCell label="Penalty Pts Received" value={String(entry.penaltyPointsGiven)} />}
-                    </div>
-                    {(entry.penalties || []).filter(p => p !== "None observed").length > 0 && (
-                      <div>
-                        <span className="text-xs text-muted-foreground font-body">Penalties we received: </span>
-                        {entry.penalties.filter(p => p !== "None observed").map((p, i) => (
-                          <span key={i} className="inline-block text-xs px-2 py-0.5 rounded mr-1 mt-1 bg-destructive/20 text-destructive">{p}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* ── LIVESTREAM TAB content is rendered inside main scroll area ── */}
       {activeTab === "livestream" && (

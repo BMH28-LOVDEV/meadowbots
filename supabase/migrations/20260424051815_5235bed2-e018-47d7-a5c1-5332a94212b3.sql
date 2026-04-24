@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS public.drive_team_matches CASCADE;

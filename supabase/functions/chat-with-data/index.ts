@@ -30,16 +30,14 @@ serve(async (req) => {
     // Fetch all app data to give AI full context
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-    const [scoutingRes, assignmentsRes, driveTeamRes, profilesRes] = await Promise.all([
+    const [scoutingRes, assignmentsRes, profilesRes] = await Promise.all([
       supabaseAdmin.from("scouting_entries").select("*").neq("team_number", "19792").order("timestamp", { ascending: false }),
       supabaseAdmin.from("team_assignments").select("*"),
-      supabaseAdmin.from("drive_team_matches").select("*").neq("team_number", "19792").order("sort_order"),
       supabaseAdmin.from("profiles").select("display_name, role, approval_status"),
     ]);
 
     const scoutingData = scoutingRes.data || [];
     const assignments = assignmentsRes.data || [];
-    const driveTeamMatches = driveTeamRes.data || [];
     const profiles = profilesRes.data || [];
 
     const dataContext = `
@@ -50,9 +48,6 @@ ${JSON.stringify(scoutingData, null, 1)}
 
 ### Team Assignments (${assignments.length} total)
 ${JSON.stringify(assignments, null, 1)}
-
-### Drive Team Matches (${driveTeamMatches.length} total)
-${JSON.stringify(driveTeamMatches, null, 1)}
 
 ### Team Members (${profiles.length} total)
 ${JSON.stringify(profiles, null, 1)}
