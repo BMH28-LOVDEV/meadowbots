@@ -437,9 +437,8 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
             ...(isBen ? [{ id: "letsgo", label: "LET'S GO!", icon: "🎉", className: "text-green-400 hover:text-green-300", onClick: () => triggerCelebration() }] : []),
             ...(isBen ? [{ id: "lockdown", label: "LOCKDOWN", icon: "🔴", className: "text-destructive hover:text-destructive", onClick: () => setShowLockdown(true) }] : []),
             ...(isBen ? [{ id: "clearall", label: "CLEAR ALL", icon: "🗑", className: "text-destructive/70 hover:text-destructive", onClick: () => { setShowClearAll(true); setClearAllPassword(""); setClearAllError(""); } }] : []),
-            ...(onViewAsBlueDriver ? [{ id: "blueform", label: "DRIVER DATA", icon: "🔷", className: "text-blue-400 hover:text-blue-300", onClick: onViewAsBlueDriver }] : []),
             ...(onViewAsScouter ? [{ id: "scoutform", label: "SCOUT FORM", icon: "📋", className: "text-primary hover:text-primary", onClick: onViewAsScouter }] : []),
-            { id: "refresh", label: "REFRESH", icon: "↻", onClick: () => { fetchEntries(); fetchAssignments(); fetchDriveData(); fetchDriveTeamMatches(); } },
+            { id: "refresh", label: "REFRESH", icon: "↻", onClick: () => { fetchEntries(); fetchAssignments(); fetchPitEntries(); } },
           ]}
         />
       </header>
