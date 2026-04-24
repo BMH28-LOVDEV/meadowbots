@@ -188,66 +188,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
     setAssignmentsLoading(false);
   };
 
-  const fetchDriveData = async () => {
-    const [{ data: entriesData }, { data: profilesData }] = await Promise.all([
-      supabase.from("scouting_entries").select("*").in("scouter_name", ["Zoë Khansevahn", "Zoe GK", "Chantelle Wong", "Naila Nauman"]).order("timestamp", { ascending: false }),
-      supabase.from("profiles").select("display_name, username, role, user_id").order("display_name"),
-    ]);
-    if (entriesData) {
-      setDriveEntries(entriesData.map((row) => ({
-        id: row.id, teamNumber: row.team_number, teamName: (row as any).team_name || "", matchNumber: row.match_number || "",
-        scouterName: row.scouter_name, timestamp: row.timestamp,
-        autoArtifactsScored: row.auto_artifacts_scored || "",
-        autoPatternAlignment: row.auto_pattern_alignment || "",
-        autoLaunchLine: row.auto_launch_line || "",
-        autoLeave: row.auto_leave || "",
-        autoConsistency: row.auto_consistency || "",
-        teleopIntakeMethod: row.teleop_intake_method || "",
-        teleopBallCapacity: row.teleop_ball_capacity || "",
-        teleopShootingAccuracy: row.teleop_shooting_accuracy || "",
-        teleopGateInteraction: row.teleop_gate_interaction || "",
-        teleopOverflowManagement: row.teleop_overflow_management || "",
-        teleopCycleSpeed: row.teleop_cycle_speed || "",
-        teleopArtifactClassification: row.teleop_artifact_classification || "",
-        endgameParking: row.endgame_parking || "",
-        endgameAllianceAssist: row.endgame_alliance_assist || "",
-        penalties: row.penalties || [],
-        specialFeatures: row.special_features || "",
-        goodMatch: row.good_match || "",
-        matchScore: (row as any).match_score ?? null,
-        allianceWon: (row as any).alliance_won || "",
-        penaltyPointsGiven: (row as any).penalty_points_given ?? null,
-      })));
-    }
-    if (profilesData) setDriveProfiles(profilesData as any);
-  };
-
-  const fetchDriveTeamMatches = async () => {
-    const { data } = await (supabase as any).from("drive_team_matches").select("id, team_number, match_label, sort_order").order("sort_order", { ascending: true });
-    if (data) {
-      setBlueMatches(data.filter((r: any) => r.team_number === "14841").map((r: any) => ({ id: r.id, match_label: r.match_label, sort_order: r.sort_order })));
-    }
-  };
-
-  const addDriveTeamMatch = async (teamNumber: string) => {
-    const raw = (driveMatchInput.blue || "").trim().toUpperCase();
-    if (!raw) return;
-    const existing = blueMatches;
-    if (existing.some(m => m.match_label === raw)) {
-      setDriveMatchInput(prev => ({ ...prev, blue: "" }));
-      return;
-    }
-    setSavingDriveMatch(true);
-    await (supabase as any).from("drive_team_matches").insert({ team_number: teamNumber, match_label: raw, sort_order: existing.length });
-    await fetchDriveTeamMatches();
-    setDriveMatchInput(prev => ({ ...prev, blue: "" }));
-    setSavingDriveMatch(false);
-  };
-
-  const removeDriveTeamMatch = async (id: string) => {
-    await (supabase as any).from("drive_team_matches").delete().eq("id", id);
-    await fetchDriveTeamMatches();
-  };
 
   const handleRoleUpdate = async (userId: string, newRole: string) => {
     setUpdatingRole(userId);
