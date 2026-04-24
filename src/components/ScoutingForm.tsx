@@ -194,6 +194,8 @@ const EMPTY_PIT_FORM = {
   endgameStrategy: "", endgameParking: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
 };
 
+const sanitizeTeamNumber = (value: string) => value.replace(/[^0-9]/g, "");
+
 const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
   const [pitForm, setPitForm] = useState(() => {
     try {
@@ -205,6 +207,19 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
   const [submitting, setSubmitting] = useState(false);
   const set = (field: string, value: string) => setPitForm(p => ({ ...p, [field]: value }));
 
+  useEffect(() => {
+    const normalizedTeamNumber = sanitizeTeamNumber(pitForm.teamNumber);
+    if (normalizedTeamNumber !== pitForm.teamNumber) {
+      setPitForm((prev) => ({ ...prev, teamNumber: normalizedTeamNumber }));
+      return;
+    }
+
+    const resolvedName = resolveTeamName(normalizedTeamNumber, pitForm.teamName);
+    if (resolvedName && resolvedName !== pitForm.teamName) {
+      setPitForm((prev) => ({ ...prev, teamName: resolvedName }));
+    }
+  }, [pitForm.teamName, pitForm.teamNumber]);
+
   // Persist on every change so leaving the page doesn't lose data
   useEffect(() => {
     try { localStorage.setItem(PIT_FORM_STORAGE_KEY, JSON.stringify(pitForm)); } catch { /* ignore */ }
@@ -214,10 +229,11 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
     e.preventDefault();
     if (!pitForm.teamNumber) { toast.error("Please enter a team number."); return; }
     setSubmitting(true);
+    const resolvedTeamName = resolveTeamName(pitForm.teamNumber, pitForm.teamName);
     const { error } = await supabase.from("pit_scouting_entries" as any).insert({
       scouter_name: scouterName,
       team_number: pitForm.teamNumber,
-      team_name: pitForm.teamName || null,
+      team_name: resolvedTeamName || null,
       strengths: pitForm.strengths || null,
       weaknesses: pitForm.weaknesses || null,
       auto_artifacts_scored: pitForm.autoArtifacts || null,
@@ -587,7 +603,25 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
   }, [entries]);
 
   const handleChange = (name: keyof FormData, value: string) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => {
+      if (name === "teamNumber") {
+        const teamNumber = sanitizeTeamNumber(value);
+        return {
+          ...prev,
+          teamNumber,
+          teamName: resolveTeamName(teamNumber, prev.teamName),
+        };
+      }
+
+      if (name === "teamName") {
+        return {
+          ...prev,
+          teamName: resolveTeamName(prev.teamNumber, value),
+        };
+      }
+
+      return { ...prev, [name]: value };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -787,7 +821,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
                       >
                         <div className="flex items-center justify-between mb-1.5">
                           <p className="font-display text-sm text-primary tracking-wider">
-                            Team #{a.team_number}
+                            {resolveTeamName(a.team_number, a.team_name) ? `${resolveTeamName(a.team_number, a.team_name)} ` : ""}#{a.team_number}
                           </p>
                           {teamCompleted && <span className="text-xs text-green-400 font-display">✓ DONE</span>}
                         </div>
@@ -945,7 +979,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
                             : "bg-muted border-border text-muted-foreground hover:border-primary/40"
                       }`}
                     >
-                      {allDone ? "✓ " : ""}#{a.team_number}
+                      {allDone ? "✓ " : ""}{resolveTeamName(a.team_number, a.team_name) ? `${resolveTeamName(a.team_number, a.team_name)} ` : ""}#{a.team_number}
                     </button>
                   );
                 })}
