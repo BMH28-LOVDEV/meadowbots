@@ -12,7 +12,7 @@ import AIChatBot from "@/components/AIChatBot";
 interface MasterDashboardProps {
   onLogout: () => void;
   username: string;
-  onViewAsBlueDriver?: () => void;
+  
   onViewAsScouter?: () => void;
 }
 
