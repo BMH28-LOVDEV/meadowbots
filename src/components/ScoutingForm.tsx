@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { Info, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { titleCaseTeamName } from "@/lib/teamAuth";
+import { resolveTeamName } from "@/lib/teamAuth";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import { HamburgerTabs, type TabItem } from "@/components/HamburgerTabs";
@@ -537,20 +537,22 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         allianceWon: row.alliance_won || "",
         timestamp: row.timestamp || "",
       })));
-      // Backfill names from scouter-entered team_name
       rawEntries.forEach((row: any) => {
-        if (row.team_name && !nameMap[row.team_number]) nameMap[row.team_number] = titleCaseTeamName(row.team_name);
+        const resolved = resolveTeamName(row.team_number, row.team_name);
+        if (resolved && !nameMap[row.team_number]) nameMap[row.team_number] = resolved;
       });
     }
 
     if (assignmentData && assignmentData.length > 0) {
-      setAssignments(assignmentData.map(a => ({ team_number: a.team_number, team_name: titleCaseTeamName(a.team_name), qual_matches: a.qual_matches || [] })));
-      setForm((prev) => ({ ...prev, teamNumber: assignmentData[0].team_number, teamName: titleCaseTeamName(assignmentData[0].team_name) }));
+      setAssignments(assignmentData.map(a => ({ team_number: a.team_number, team_name: resolveTeamName(a.team_number, a.team_name), qual_matches: a.qual_matches || [] })));
+      setForm((prev) => ({ ...prev, teamNumber: assignmentData[0].team_number, teamName: resolveTeamName(assignmentData[0].team_number, assignmentData[0].team_name) }));
     }
 
     if (allAssignments) {
-      // Assignments override entry-level names
-      allAssignments.forEach(a => { if (a.team_name) nameMap[a.team_number] = titleCaseTeamName(a.team_name); });
+      allAssignments.forEach(a => {
+        const resolved = resolveTeamName(a.team_number, a.team_name);
+        if (resolved) nameMap[a.team_number] = resolved;
+      });
     }
     setAllTeamNames(nameMap);
 
@@ -647,7 +649,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
       penalty_points_given: form.penaltyPointsGiven ? parseInt(form.penaltyPointsGiven) : null,
       match_score: form.matchScore ? parseInt(form.matchScore) : null,
       alliance_won: form.allianceWon || null,
-      team_name: form.teamName ? titleCaseTeamName(form.teamName) : null,
+      team_name: resolveTeamName(form.teamNumber, form.teamName) || null,
       special_features: [
         form.specialFeatures ? `[Auto Notes] ${form.specialFeatures}` : "",
         form.autoBallsScored ? `[Auto Balls] ${form.autoBallsScored}` : "",

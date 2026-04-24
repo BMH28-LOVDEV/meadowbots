@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Info, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { TEAM_MEMBERS, DRIVE_TEAM, titleCaseTeamName } from "@/lib/teamAuth";
+import { TEAM_MEMBERS, DRIVE_TEAM, resolveTeamName } from "@/lib/teamAuth";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import LockdownDashboard from "@/components/LockdownDashboard";
@@ -335,21 +335,19 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
 
   const teamNameMap = useMemo(() => {
     const map: Record<string, string> = {};
-    // Fallback order: pit scouting → match scouting entries → assignments override both
     pitEntries.forEach((p) => {
-      if (p?.team_number && p?.team_name && !map[p.team_number]) {
-        map[p.team_number] = titleCaseTeamName(p.team_name);
+      if (p?.team_number) {
+        const resolved = resolveTeamName(p.team_number, p.team_name);
+        if (resolved && !map[p.team_number]) map[p.team_number] = resolved;
       }
     });
     entries.forEach((e) => {
-      if (e.teamName && !map[e.teamNumber]) {
-        map[e.teamNumber] = titleCaseTeamName(e.teamName);
-      }
+      const resolved = resolveTeamName(e.teamNumber, e.teamName);
+      if (resolved && !map[e.teamNumber]) map[e.teamNumber] = resolved;
     });
     assignments.forEach((a) => {
-      if (a.team_name) {
-        map[a.team_number] = titleCaseTeamName(a.team_name);
-      }
+      const resolved = resolveTeamName(a.team_number, a.team_name);
+      if (resolved) map[a.team_number] = resolved;
     });
     return map;
   }, [assignments, entries, pitEntries]);
@@ -1096,7 +1094,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
           ) : (
             pitEntries.map((p) => {
               const isOpen = expandedPit === p.id;
-              const displayName = p.team_name ? titleCaseTeamName(p.team_name) : "—";
+              const displayName = resolveTeamName(p.team_number, p.team_name) || "—";
               return (
                 <div key={p.id} className="glass rounded-xl border border-border/50 overflow-hidden">
                   <button
