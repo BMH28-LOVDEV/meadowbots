@@ -242,8 +242,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
   useEffect(() => {
     fetchEntries();
     fetchAssignments();
-    fetchDriveData();
-    fetchDriveTeamMatches();
     fetchPendingUsers();
     fetchPitEntries();
   }, []);
