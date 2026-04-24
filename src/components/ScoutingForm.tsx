@@ -687,13 +687,10 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
               Logged In As: <span className="text-foreground">{scouterName}</span>
             </p>
             <p className="text-xs font-body" style={{ color:
-              userRole === "bluedriver" ? "hsl(220 100% 70%)" :
               userRole === "driveteam" ? "hsl(220 80% 65%)" :
               "hsl(var(--muted-foreground))"
             }}>
-              {userRole === "bluedriver" ? "Blue Drive Data Collector" :
-               userRole === "driveteam" ? "Drive Team" :
-               "Scouter"}
+              {userRole === "driveteam" ? "Drive Team" : "Scouter"}
             </p>
           </div>
           <div className="flex items-center gap-3">
