@@ -129,6 +129,11 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
     if (!error && data) setPitEntries(data as any[]);
   };
   const [updatingRole, setUpdatingRole] = useState<string | null>(null);
+  const [assignments, setAssignments] = useState<{ id: string; team_number: string; team_name: string; scout_name: string; qual_matches: string[] }[]>([]);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(false);
+  const [pendingUsers, setPendingUsers] = useState<{ id: string; user_id: string; display_name: string; username: string; role: string; approval_status: string; created_at: string }[]>([]);
+  const [approvedUsers, setApprovedUsers] = useState<{ id: string; user_id: string; display_name: string; username: string; role: string; approval_status: string; created_at: string }[]>([]);
+  const [upgradeTarget, setUpgradeTarget] = useState<{ userId: string; displayName: string; currentRole: string } | null>(null);
 
   const fetchEntries = async () => {
     setLoading(true);
