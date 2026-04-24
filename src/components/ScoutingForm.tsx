@@ -755,6 +755,8 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
       supabase.from("team_assignments").select("team_number, team_name"),
     ]);
 
+    const nameMap: Record<string, string> = {};
+
     if (rawEntries) {
       setEntries(rawEntries.map((row) => ({
         id: row.id, teamNumber: row.team_number, matchNumber: row.match_number || "",
@@ -780,6 +782,10 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         allianceWon: row.alliance_won || "",
         timestamp: row.timestamp || "",
       })));
+      // Backfill names from scouter-entered team_name
+      rawEntries.forEach((row: any) => {
+        if (row.team_name && !nameMap[row.team_number]) nameMap[row.team_number] = titleCaseTeamName(row.team_name);
+      });
     }
 
     if (assignmentData && assignmentData.length > 0) {
@@ -788,10 +794,10 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
     }
 
     if (allAssignments) {
-      const nameMap: Record<string, string> = {};
+      // Assignments override entry-level names
       allAssignments.forEach(a => { if (a.team_name) nameMap[a.team_number] = titleCaseTeamName(a.team_name); });
-      setAllTeamNames(nameMap);
     }
+    setAllTeamNames(nameMap);
 
     setLoadingData(false);
   };
