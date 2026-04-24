@@ -1530,16 +1530,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         </div>
       )}
 
-      {/* ── NOTIFY DRIVE TEAM TAB ── */}
-      {activeTab === "notify" && (
-        <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
-          <div className="glass rounded-xl p-6 border border-blue-500/30">
-            <h2 className="font-display text-lg tracking-wider text-blue-400 mb-1">NOTIFY DRIVE TEAM</h2>
-            <p className="text-xs text-muted-foreground font-body">Send a quick message to all drive team members</p>
-          </div>
-          <NotifyDriveTeamButton scouterName={scouterName} />
-        </div>
-      )}
+
 
       {/* ── SCOUT AI TAB ── */}
       {activeTab === "scoutai" && (
