@@ -838,9 +838,13 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
                             </p>
                           )}
                         </div>
-                        <div className="text-right">
-                          <p className="font-display text-xl text-primary text-glow">{Math.round(team.avgScore)}</p>
-                          <p className="text-xs text-muted-foreground font-body">pts avg</p>
+                        <div
+                          className="text-right cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={(e) => { e.stopPropagation(); setShowCompositeInfo(true); }}
+                          title="What is composite score?"
+                        >
+                          <p className="font-display text-xl text-primary text-glow underline decoration-dotted underline-offset-4">{Math.round(team.avgScore)}</p>
+                          <p className="text-[10px] text-muted-foreground font-body">pts avg ⓘ</p>
                         </div>
                         <span className={`text-muted-foreground transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}>▼</span>
                       </button>
