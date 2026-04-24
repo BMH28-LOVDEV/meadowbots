@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { Info, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { TEAM_MEMBERS, DRIVE_TEAM } from "@/lib/teamAuth";
+import { TEAM_MEMBERS, DRIVE_TEAM, titleCaseTeamName } from "@/lib/teamAuth";
 import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import LockdownDashboard from "@/components/LockdownDashboard";
@@ -458,7 +458,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsBlueDriver, onViewAsScout
 
   const teamNameMap = useMemo(() => {
     const map: Record<string, string> = {};
-    assignments.forEach(a => { if (a.team_name) map[a.team_number] = a.team_name; });
+    assignments.forEach(a => { if (a.team_name) map[a.team_number] = titleCaseTeamName(a.team_name); });
     return map;
   }, [assignments]);
 
