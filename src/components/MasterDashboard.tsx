@@ -205,7 +205,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
     );
     const result = await response.json();
     if (!response.ok) { toast.error(result.error || "Failed to update role."); }
-    else { toast.success(`Role updated to ${newRole}!`); await fetchDriveData(); }
+    else { toast.success(`Role updated to ${newRole}!`); await fetchPendingUsers(); }
     setUpdatingRole(null);
   };
 
