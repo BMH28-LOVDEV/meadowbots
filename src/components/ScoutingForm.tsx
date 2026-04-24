@@ -485,7 +485,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
 
   const assignment = assignments[selectedTeamIdx] || null;
 
-  const isBlueDriver = userRole === "bluedriver";
+  
 
   // Presence tracking
   useEffect(() => {
