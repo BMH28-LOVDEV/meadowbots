@@ -135,12 +135,7 @@ const GRADIENT_COLORS = [
   "bg-green-500/20 border-green-500 text-green-400",
 ];
 
-const GRADIENT_COLORS_BLUE = [
-  "bg-red-500/20 border-red-500 text-red-400",
-  "bg-orange-500/20 border-orange-500 text-orange-400",
-  "bg-sky-500/20 border-sky-500 text-sky-400",
-  "bg-green-500/20 border-green-500 text-green-400",
-];
+const PURPLE_COLOR = "bg-purple-500/20 border-purple-500 text-purple-400";
 
 const getOptionColor = (index: number, total: number) => {
   if (total === 2) return index === 0 ? GRADIENT_COLORS[0] : GRADIENT_COLORS[3];
@@ -148,18 +143,15 @@ const getOptionColor = (index: number, total: number) => {
   return GRADIENT_COLORS[index] || GRADIENT_COLORS[3];
 };
 
-const getOptionColorBlue = (index: number, total: number) => {
-  if (total === 2) return index === 0 ? GRADIENT_COLORS_BLUE[0] : GRADIENT_COLORS_BLUE[3];
-  if (total === 3) return [GRADIENT_COLORS_BLUE[0], GRADIENT_COLORS_BLUE[2], GRADIENT_COLORS_BLUE[3]][index];
-  return GRADIENT_COLORS_BLUE[index] || GRADIENT_COLORS_BLUE[3];
-};
+// Both options are equally good — render in purple
+const getOptionColorBlue = () => PURPLE_COLOR;
 
 const MCQuestion = ({ label, name, options, value, onChange, colorScheme = "blue" }: {
   label: string; name: keyof FormData; options: string[]; value: string;
   onChange: (name: keyof FormData, value: string) => void;
   colorScheme?: "blue" | "purple";
 }) => {
-  const colorFn = colorScheme === "blue" ? getOptionColorBlue : getOptionColor;
+  const colorFn = colorScheme === "blue" ? () => PURPLE_COLOR : getOptionColor;
   return (
   <div className="space-y-3">
     <p className="text-sm font-body text-foreground font-medium">{label}</p>
