@@ -89,7 +89,7 @@ const Index = () => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [viewAsBlueDriver, setViewAsBlueDriver] = useState(false);
+  
   const [viewAsScouter, setViewAsScouter] = useState(false);
   
 
