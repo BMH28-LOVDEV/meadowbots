@@ -245,6 +245,7 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
       teleop_focus: pitForm.teleopFocus || null,
       teleop_scoring_zone: pitForm.teleopScoringZone || null,
       endgame_strategy: pitForm.endgameStrategy || null,
+      endgame_cycling_details: pitForm.endgameStrategy === "Cycling" ? (pitForm.endgameCyclingDetails || null) : null,
       endgame_parking: pitForm.endgameParking || null,
       endgame_park_features: pitForm.endgameParkFeatures || null,
       endgame_park_features_other: pitForm.endgameParkFeaturesOther || null,
