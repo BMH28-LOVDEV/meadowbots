@@ -189,9 +189,13 @@ const getRankIcon = (rank: number) => {
 const PIT_FORM_STORAGE_KEY = "pitScoutForm:v1";
 const EMPTY_PIT_FORM = {
   teamNumber: "", teamName: "", strengths: "", weaknesses: "",
+  robotArchetype: "",
   autoArtifacts: "", autoScoringZone: "", autoStartPosition: "", autoClear: "", autoDescription: "",
-  teleopFocus: "", teleopScoringZone: "",
+  teleopFocus: "", teleopFocusCategory: "", teleopDefenseType: "", teleopScoringZone: "",
   endgameStrategy: "", endgameParking: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
+  cycleOrPark: "",
+  overallConsistency: "", defenseCapability: "",
+  photoPermission: "", brochureAvailable: "",
 };
 
 const sanitizeTeamNumber = (value: string) => value.replace(/[^0-9]/g, "");
