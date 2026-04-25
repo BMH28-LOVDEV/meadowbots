@@ -983,6 +983,12 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             </div>
           </div>
 
+          {/* Franklin Division */}
+          <FranklinDivisionPanel
+            matchEntries={entries.map((e) => ({ team_number: e.teamNumber }))}
+            pitEntries={pitEntries}
+          />
+
         </div>
       )}
 
