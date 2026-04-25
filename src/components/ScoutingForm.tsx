@@ -192,7 +192,7 @@ const EMPTY_PIT_FORM = {
   robotArchetype: "",
   autoArtifacts: "", autoScoringZone: "", autoStartPosition: "", autoClear: "", autoDescription: "",
   teleopFocus: "", teleopFocusCategory: "", teleopDefenseType: "", teleopScoringZone: "",
-  endgameStrategy: "", endgameParking: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
+  endgameStrategy: "", endgameCyclingDetails: "", endgameParking: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
   cycleOrPark: "",
   overallConsistency: "", defenseCapability: "",
   photoPermission: "", brochureAvailable: "",
@@ -245,6 +245,7 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
       teleop_focus: pitForm.teleopFocus || null,
       teleop_scoring_zone: pitForm.teleopScoringZone || null,
       endgame_strategy: pitForm.endgameStrategy || null,
+      endgame_cycling_details: pitForm.endgameStrategy === "Cycling" ? (pitForm.endgameCyclingDetails || null) : null,
       endgame_parking: pitForm.endgameParking || null,
       endgame_park_features: pitForm.endgameParkFeatures || null,
       endgame_park_features_other: pitForm.endgameParkFeaturesOther || null,
@@ -460,6 +461,11 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
               >{option}</button>
             ))}
           </div>
+          {pitForm.endgameStrategy === "Cycling" && (
+            <textarea value={pitForm.endgameCyclingDetails} onChange={(e) => set("endgameCyclingDetails", e.target.value)}
+              placeholder="Does your cycling make up for the amount of points of a Partial or Even Full Park? More points than that?"
+              rows={3} className={inputCls + " resize-none mt-2"} />
+          )}
         </div>
 
         <div className="space-y-3">
