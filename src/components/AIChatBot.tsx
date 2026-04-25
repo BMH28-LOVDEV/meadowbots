@@ -193,7 +193,7 @@ const AIChatBot = ({ onBack, userName, mini, backLabel, hideHeader, externalMess
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="h-full min-h-[60vh] flex flex-col bg-background border border-border/50 rounded-xl overflow-hidden">
       {!hideHeader && (
         <div className="border-b border-border bg-card/80 backdrop-blur-sm px-4 py-3 flex items-center gap-3">
           <button
