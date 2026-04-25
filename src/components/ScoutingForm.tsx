@@ -192,7 +192,7 @@ const EMPTY_PIT_FORM = {
   robotArchetype: "",
   autoArtifacts: "", autoScoringZone: "", autoStartPosition: "", autoClear: "", autoDescription: "",
   teleopFocus: "", teleopFocusCategory: "", teleopDefenseType: "", teleopScoringZone: "",
-  endgameStrategy: "", endgameParking: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
+  endgameStrategy: "", endgameCyclingDetails: "", endgameParking: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
   cycleOrPark: "",
   overallConsistency: "", defenseCapability: "",
   photoPermission: "", brochureAvailable: "",
