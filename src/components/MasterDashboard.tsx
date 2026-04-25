@@ -1396,6 +1396,7 @@ const MasterDashboard = ({ onLogout, username, accountUsername, onViewAsScouter 
             onBack={() => setActiveTab("dashboard")}
             userName={username}
             backLabel="← Dashboard"
+            hideHeader
           />
         </div>
       )}
