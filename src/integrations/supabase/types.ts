@@ -45,6 +45,7 @@ export type Database = {
           created_at: string
           cycle_or_park: string | null
           defense_capability: string | null
+          endgame_cycling_details: string | null
           endgame_park_features: string | null
           endgame_park_features_other: string | null
           endgame_parking: string | null
@@ -73,6 +74,7 @@ export type Database = {
           created_at?: string
           cycle_or_park?: string | null
           defense_capability?: string | null
+          endgame_cycling_details?: string | null
           endgame_park_features?: string | null
           endgame_park_features_other?: string | null
           endgame_parking?: string | null
@@ -101,6 +103,7 @@ export type Database = {
           created_at?: string
           cycle_or_park?: string | null
           defense_capability?: string | null
+          endgame_cycling_details?: string | null
           endgame_park_features?: string | null
           endgame_park_features_other?: string | null
           endgame_parking?: string | null
