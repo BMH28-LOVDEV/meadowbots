@@ -10,13 +10,14 @@ interface AIChatBotProps {
   userName: string;
   mini?: boolean;
   backLabel?: string;
+  hideHeader?: boolean;
   externalMessages?: Msg[];
   onExternalMessagesChange?: (msgs: Msg[]) => void;
 }
 
 export type { Msg as ChatMessage };
 
-const AIChatBot = ({ onBack, userName, mini, backLabel, externalMessages, onExternalMessagesChange }: AIChatBotProps) => {
+const AIChatBot = ({ onBack, userName, mini, backLabel, hideHeader, externalMessages, onExternalMessagesChange }: AIChatBotProps) => {
   const [internalMessages, setInternalMessages] = useState<Msg[]>([]);
   const messages = externalMessages ?? internalMessages;
   const setMessages = onExternalMessagesChange ?? setInternalMessages;
@@ -193,6 +194,26 @@ const AIChatBot = ({ onBack, userName, mini, backLabel, externalMessages, onExte
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {!hideHeader && (
+        <div className="border-b border-border bg-card/80 backdrop-blur-sm px-4 py-3 flex items-center gap-3">
+          <button
+            onClick={onBack}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors font-display tracking-wider"
+          >
+            {backLabel || "← BACK"}
+          </button>
+          <div className="flex-1 text-center">
+            <h1 className="text-lg font-display font-bold text-primary tracking-wider">
+              🤖 MEADOWBOT AI
+            </h1>
+            <p className="text-xs text-muted-foreground font-body">
+              Ask me anything about our scouting data
+            </p>
+          </div>
+          <div className="w-16" />
+        </div>
+      )}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
         {messages.length === 0 && (
