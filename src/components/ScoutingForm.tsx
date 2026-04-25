@@ -461,6 +461,11 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
               >{option}</button>
             ))}
           </div>
+          {pitForm.endgameStrategy === "Cycling" && (
+            <textarea value={pitForm.endgameCyclingDetails} onChange={(e) => set("endgameCyclingDetails", e.target.value)}
+              placeholder="Does your cycling make up for the amount of points of a Partial or Even Full Park? More points than that?"
+              rows={3} className={inputCls + " resize-none mt-2"} />
+          )}
         </div>
 
         <div className="space-y-3">
