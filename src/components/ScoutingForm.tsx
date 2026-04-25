@@ -612,11 +612,13 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
 
   const fetchData = async () => {
     setLoadingData(true);
-    const [{ data: rawEntries }, { data: assignmentData }, { data: allAssignments }] = await Promise.all([
+    const [{ data: rawEntries }, { data: assignmentData }, { data: allAssignments }, { data: rawPit }] = await Promise.all([
       supabase.from("scouting_entries").select("*").order("timestamp", { ascending: true }),
       supabase.from("team_assignments").select("team_number, team_name, qual_matches").eq("scout_name", scouterName),
       supabase.from("team_assignments").select("team_number, team_name"),
+      supabase.from("pit_scouting_entries" as any).select("team_number"),
     ]);
+    setPitEntries(((rawPit as any[]) || []).map((r) => ({ team_number: r.team_number })));
 
     const nameMap: Record<string, string> = {};
 
