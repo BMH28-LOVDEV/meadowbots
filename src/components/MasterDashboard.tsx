@@ -1361,7 +1361,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
             </p>
             <div className="space-y-2">
               {[
-                { role: "bluedriver", label: "🔵 Driver Data", desc: "Can submit drive data entries" },
                 { role: "master", label: "👑 Master", desc: "Full admin access" },
               ].map(({ role, label, desc }) => (
                 <button
