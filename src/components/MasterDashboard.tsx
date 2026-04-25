@@ -445,7 +445,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
             { id: "progress", label: "SCOUT PROGRESS", icon: "📊" },
             { id: "assignments", label: "ASSIGNMENTS", icon: "📋" },
             { id: "livestream", label: "LIVE STREAM", icon: "🔴", activeClass: "bg-red-500/20 text-red-400 border border-red-500/40" },
-            { id: "approvals", label: "APPROVALS", icon: "👤", activeClass: "bg-amber-500/20 text-amber-400 border border-amber-500/40", badge: pendingUsers.filter(u => u.approval_status === "pending").length, onClick: () => fetchPendingUsers() },
+            ...(isBen ? [{ id: "approvals", label: "APPROVALS", icon: "👤", activeClass: "bg-amber-500/20 text-amber-400 border border-amber-500/40", badge: pendingUsers.filter(u => u.approval_status === "pending").length, onClick: () => fetchPendingUsers() }] : []),
             { id: "scoutai", label: "SCOUT AI", icon: "🤖", activeClass: "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" },
           ]}
           activeTab={activeTab}
@@ -1203,7 +1203,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
       )}
 
       {/* ── APPROVALS TAB ── */}
-      {activeTab === "approvals" && (
+      {activeTab === "approvals" && isBen && (
         <div className="space-y-4">
           <div className="glass rounded-xl p-4 border border-amber-500/30">
             <h2 className="font-display text-sm tracking-wider text-amber-400 mb-1">ACCOUNT APPROVALS</h2>
