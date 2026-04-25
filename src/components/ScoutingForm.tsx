@@ -614,10 +614,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
       }
 
       if (name === "teamName") {
-        return {
-          ...prev,
-          teamName: resolveTeamName(prev.teamNumber, value),
-        };
+        return { ...prev, teamName: value };
       }
 
       return { ...prev, [name]: value };
