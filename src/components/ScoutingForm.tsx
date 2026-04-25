@@ -493,6 +493,56 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
               placeholder="Describe their park feature..." className={inputCls + " mt-3"} />
           )}
         </div>
+
+        <div className="space-y-3">
+          <p className="text-sm font-body text-foreground font-medium">Do you Cycle a lot or Park during Endgame?</p>
+          <div className="flex flex-wrap gap-2">
+            {["Yes", "No"].map((option) => (
+              <button key={option} type="button" onClick={() => set("cycleOrPark", option)}
+                className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                  pitForm.cycleOrPark === option ? PURPLE_COLOR : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                }`}
+              >{option}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Overall Performance */}
+      <div className="glass rounded-xl p-6 border border-accent/20 space-y-4">
+        <SectionHeader title="OVERALL PERFORMANCE" icon="📊" />
+        <div>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">How consistent would you say your robot is during matches?</label>
+          <textarea value={pitForm.overallConsistency} onChange={(e) => set("overallConsistency", e.target.value)}
+            placeholder="Describe your robot's consistency..." rows={3} className={inputCls + " resize-none"} />
+        </div>
+        <div>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">What kind of defense can your robot handle?</label>
+          <textarea value={pitForm.defenseCapability} onChange={(e) => set("defenseCapability", e.target.value)}
+            placeholder="Describe defenses your robot can handle..." rows={3} className={inputCls + " resize-none"} />
+        </div>
+      </div>
+
+      {/* Conclusion */}
+      <div className="glass rounded-xl p-6 border border-accent/20 space-y-4">
+        <SectionHeader title="CONCLUSION" icon="📝" />
+        <div>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">Is it OK if we take a photo of your robot?</label>
+          <div className="flex flex-wrap gap-2">
+            {["Yes", "No"].map((option) => (
+              <button key={option} type="button" onClick={() => set("photoPermission", option)}
+                className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                  pitForm.photoPermission === option ? PURPLE_COLOR : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                }`}
+              >{option}</button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">Do you have a team brochure or portfolio that we can take a picture of or get a copy of?</label>
+          <textarea value={pitForm.brochureAvailable} onChange={(e) => set("brochureAvailable", e.target.value)}
+            placeholder="e.g. Yes, we have a brochure / No / We can email a copy..." rows={3} className={inputCls + " resize-none"} />
+        </div>
       </div>
 
       {/* Submit */}
