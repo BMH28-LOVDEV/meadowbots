@@ -1203,7 +1203,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
       )}
 
       {/* ── APPROVALS TAB ── */}
-      {activeTab === "approvals" && (
+      {activeTab === "approvals" && isBen && (
         <div className="space-y-4">
           <div className="glass rounded-xl p-4 border border-amber-500/30">
             <h2 className="font-display text-sm tracking-wider text-amber-400 mb-1">ACCOUNT APPROVALS</h2>
