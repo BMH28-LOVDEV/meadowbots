@@ -41,18 +41,25 @@ export type Database = {
           auto_clear: string | null
           auto_description: string | null
           auto_start_position: string | null
+          brochure_available: string | null
           created_at: string
+          cycle_or_park: string | null
+          defense_capability: string | null
           endgame_park_features: string | null
           endgame_park_features_other: string | null
           endgame_parking: string | null
           endgame_strategy: string | null
           id: string
+          overall_consistency: string | null
+          photo_permission: string | null
+          robot_archetype: string | null
           scoring_zone: string | null
           scouter_name: string
           strengths: string | null
           strengths_weaknesses: string | null
           team_name: string | null
           team_number: string
+          teleop_defense_type: string | null
           teleop_focus: string | null
           teleop_scoring_zone: string | null
           weaknesses: string | null
@@ -62,18 +69,25 @@ export type Database = {
           auto_clear?: string | null
           auto_description?: string | null
           auto_start_position?: string | null
+          brochure_available?: string | null
           created_at?: string
+          cycle_or_park?: string | null
+          defense_capability?: string | null
           endgame_park_features?: string | null
           endgame_park_features_other?: string | null
           endgame_parking?: string | null
           endgame_strategy?: string | null
           id?: string
+          overall_consistency?: string | null
+          photo_permission?: string | null
+          robot_archetype?: string | null
           scoring_zone?: string | null
           scouter_name: string
           strengths?: string | null
           strengths_weaknesses?: string | null
           team_name?: string | null
           team_number: string
+          teleop_defense_type?: string | null
           teleop_focus?: string | null
           teleop_scoring_zone?: string | null
           weaknesses?: string | null
@@ -83,18 +97,25 @@ export type Database = {
           auto_clear?: string | null
           auto_description?: string | null
           auto_start_position?: string | null
+          brochure_available?: string | null
           created_at?: string
+          cycle_or_park?: string | null
+          defense_capability?: string | null
           endgame_park_features?: string | null
           endgame_park_features_other?: string | null
           endgame_parking?: string | null
           endgame_strategy?: string | null
           id?: string
+          overall_consistency?: string | null
+          photo_permission?: string | null
+          robot_archetype?: string | null
           scoring_zone?: string | null
           scouter_name?: string
           strengths?: string | null
           strengths_weaknesses?: string | null
           team_name?: string | null
           team_number?: string
+          teleop_defense_type?: string | null
           teleop_focus?: string | null
           teleop_scoring_zone?: string | null
           weaknesses?: string | null

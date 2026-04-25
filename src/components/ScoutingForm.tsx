@@ -189,9 +189,13 @@ const getRankIcon = (rank: number) => {
 const PIT_FORM_STORAGE_KEY = "pitScoutForm:v1";
 const EMPTY_PIT_FORM = {
   teamNumber: "", teamName: "", strengths: "", weaknesses: "",
+  robotArchetype: "",
   autoArtifacts: "", autoScoringZone: "", autoStartPosition: "", autoClear: "", autoDescription: "",
-  teleopFocus: "", teleopScoringZone: "",
+  teleopFocus: "", teleopFocusCategory: "", teleopDefenseType: "", teleopScoringZone: "",
   endgameStrategy: "", endgameParking: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
+  cycleOrPark: "",
+  overallConsistency: "", defenseCapability: "",
+  photoPermission: "", brochureAvailable: "",
 };
 
 const sanitizeTeamNumber = (value: string) => value.replace(/[^0-9]/g, "");
@@ -247,6 +251,13 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
       auto_start_position: pitForm.autoStartPosition || null,
       auto_clear: pitForm.autoClear || null,
       auto_description: pitForm.autoDescription || null,
+      robot_archetype: pitForm.robotArchetype || null,
+      teleop_defense_type: pitForm.teleopFocusCategory === "Defense" ? (pitForm.teleopDefenseType || null) : null,
+      cycle_or_park: pitForm.cycleOrPark || null,
+      overall_consistency: pitForm.overallConsistency || null,
+      defense_capability: pitForm.defenseCapability || null,
+      photo_permission: pitForm.photoPermission || null,
+      brochure_available: pitForm.brochureAvailable || null,
     } as any);
     setSubmitting(false);
     if (error) { toast.error("Failed to save. Please try again."); return; }
@@ -289,9 +300,19 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
             <input type="text" value={pitForm.teamName} onChange={(e) => set("teamName", e.target.value)} placeholder="e.g. MeadowBots" className={inputCls} />
           </div>
         </div>
+        <div>
+          <p className="text-sm font-body font-medium text-foreground mb-2">Robot Archetype</p>
+          <div className="flex flex-wrap gap-2">
+            {["Turret", "Catapult", "Spindexer", "Fixed Launcher"].map((option) => (
+              <button key={option} type="button" onClick={() => set("robotArchetype", option)}
+                className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                  pitForm.robotArchetype === option ? PURPLE_COLOR : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                }`}
+              >{option}</button>
+            ))}
+          </div>
+        </div>
       </div>
-
-      {/* Strengths & Weaknesses */}
       <div className="glass rounded-xl p-6 border border-accent/20 space-y-4">
         <SectionHeader title="STRENGTHS & WEAKNESSES" icon="💪" />
         <div>
@@ -402,9 +423,25 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
       <div className="glass rounded-xl p-6 border border-accent/20 space-y-4">
         <SectionHeader title="TELE-OP" icon="🎮" />
         <div>
-          <label className="block text-sm font-body font-medium text-foreground mb-2">How do you perform during Teleop? What do you focus on?</label>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">How do you perform during Teleop?</label>
           <textarea value={pitForm.teleopFocus} onChange={(e) => set("teleopFocus", e.target.value)}
-            placeholder="e.g. defense, cycling, motif..." rows={3} className={inputCls + " resize-none"} />
+            placeholder="Describe how your robot performs in Teleop..." rows={3} className={inputCls + " resize-none"} />
+        </div>
+        <div className="space-y-3">
+          <p className="text-sm font-body text-foreground font-medium">What do you focus on?</p>
+          <div className="flex flex-wrap gap-2">
+            {["Cycle", "Motif", "Defense"].map((option) => (
+              <button key={option} type="button" onClick={() => set("teleopFocusCategory", option)}
+                className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                  pitForm.teleopFocusCategory === option ? PURPLE_COLOR : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                }`}
+              >{option}</button>
+            ))}
+          </div>
+          {pitForm.teleopFocusCategory === "Defense" && (
+            <textarea value={pitForm.teleopDefenseType} onChange={(e) => set("teleopDefenseType", e.target.value)}
+              placeholder="What kind of defense?" rows={2} className={inputCls + " resize-none mt-2"} />
+          )}
         </div>
         <ZoneButtons value={pitForm.teleopScoringZone} field="teleopScoringZone" />
       </div>
@@ -455,6 +492,56 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
             <input type="text" value={pitForm.endgameParkFeaturesOther} onChange={(e) => set("endgameParkFeaturesOther", e.target.value)}
               placeholder="Describe their park feature..." className={inputCls + " mt-3"} />
           )}
+        </div>
+
+        <div className="space-y-3">
+          <p className="text-sm font-body text-foreground font-medium">Do you Cycle a lot or Park during Endgame?</p>
+          <div className="flex flex-wrap gap-2">
+            {["Yes", "No"].map((option) => (
+              <button key={option} type="button" onClick={() => set("cycleOrPark", option)}
+                className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                  pitForm.cycleOrPark === option ? PURPLE_COLOR : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                }`}
+              >{option}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Overall Performance */}
+      <div className="glass rounded-xl p-6 border border-accent/20 space-y-4">
+        <SectionHeader title="OVERALL PERFORMANCE" icon="📊" />
+        <div>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">How consistent would you say your robot is during matches?</label>
+          <textarea value={pitForm.overallConsistency} onChange={(e) => set("overallConsistency", e.target.value)}
+            placeholder="Describe your robot's consistency..." rows={3} className={inputCls + " resize-none"} />
+        </div>
+        <div>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">What kind of defense can your robot handle?</label>
+          <textarea value={pitForm.defenseCapability} onChange={(e) => set("defenseCapability", e.target.value)}
+            placeholder="Describe defenses your robot can handle..." rows={3} className={inputCls + " resize-none"} />
+        </div>
+      </div>
+
+      {/* Conclusion */}
+      <div className="glass rounded-xl p-6 border border-accent/20 space-y-4">
+        <SectionHeader title="CONCLUSION" icon="📝" />
+        <div>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">Is it OK if we take a photo of your robot?</label>
+          <div className="flex flex-wrap gap-2">
+            {["Yes", "No"].map((option) => (
+              <button key={option} type="button" onClick={() => set("photoPermission", option)}
+                className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                  pitForm.photoPermission === option ? PURPLE_COLOR : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                }`}
+              >{option}</button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">Do you have a team brochure or portfolio that we can take a picture of or get a copy of?</label>
+          <textarea value={pitForm.brochureAvailable} onChange={(e) => set("brochureAvailable", e.target.value)}
+            placeholder="e.g. Yes, we have a brochure / No / We can email a copy..." rows={3} className={inputCls + " resize-none"} />
         </div>
       </div>
 
