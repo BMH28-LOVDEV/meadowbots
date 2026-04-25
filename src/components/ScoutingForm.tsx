@@ -423,9 +423,25 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
       <div className="glass rounded-xl p-6 border border-accent/20 space-y-4">
         <SectionHeader title="TELE-OP" icon="🎮" />
         <div>
-          <label className="block text-sm font-body font-medium text-foreground mb-2">How do you perform during Teleop? What do you focus on?</label>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">How do you perform during Teleop?</label>
           <textarea value={pitForm.teleopFocus} onChange={(e) => set("teleopFocus", e.target.value)}
-            placeholder="e.g. defense, cycling, motif..." rows={3} className={inputCls + " resize-none"} />
+            placeholder="Describe how your robot performs in Teleop..." rows={3} className={inputCls + " resize-none"} />
+        </div>
+        <div className="space-y-3">
+          <p className="text-sm font-body text-foreground font-medium">What do you focus on?</p>
+          <div className="flex flex-wrap gap-2">
+            {["Cycle", "Motif", "Defense"].map((option) => (
+              <button key={option} type="button" onClick={() => set("teleopFocusCategory", option)}
+                className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                  pitForm.teleopFocusCategory === option ? PURPLE_COLOR : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                }`}
+              >{option}</button>
+            ))}
+          </div>
+          {pitForm.teleopFocusCategory === "Defense" && (
+            <textarea value={pitForm.teleopDefenseType} onChange={(e) => set("teleopDefenseType", e.target.value)}
+              placeholder="What kind of defense?" rows={2} className={inputCls + " resize-none mt-2"} />
+          )}
         </div>
         <ZoneButtons value={pitForm.teleopScoringZone} field="teleopScoringZone" />
       </div>
