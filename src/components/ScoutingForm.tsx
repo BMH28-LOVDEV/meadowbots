@@ -7,6 +7,7 @@ import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import { HamburgerTabs, type TabItem } from "@/components/HamburgerTabs";
 import AIChatBot from "@/components/AIChatBot";
+import FranklinDivisionPanel from "@/components/FranklinDivisionPanel";
 import fieldMapImage from "@/assets/field-map.png";
 
 interface ScoutingFormProps {
@@ -584,6 +585,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
   const [assignments, setAssignments] = useState<{ team_number: string; team_name: string; qual_matches: string[] }[]>([]);
   const [selectedTeamIdx, setSelectedTeamIdx] = useState(0);
   const [entries, setEntries] = useState<ScoutingEntry[]>([]);
+  const [pitEntries, setPitEntries] = useState<{ team_number: string }[]>([]);
   const [allTeamNames, setAllTeamNames] = useState<Record<string, string>>({});
   const [expandedTeam, setExpandedTeam] = useState<string | null>(null);
   const [showCompositeInfo, setShowCompositeInfo] = useState(false);
@@ -610,11 +612,13 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
 
   const fetchData = async () => {
     setLoadingData(true);
-    const [{ data: rawEntries }, { data: assignmentData }, { data: allAssignments }] = await Promise.all([
+    const [{ data: rawEntries }, { data: assignmentData }, { data: allAssignments }, { data: rawPit }] = await Promise.all([
       supabase.from("scouting_entries").select("*").order("timestamp", { ascending: true }),
       supabase.from("team_assignments").select("team_number, team_name, qual_matches").eq("scout_name", scouterName),
       supabase.from("team_assignments").select("team_number, team_name"),
+      supabase.from("pit_scouting_entries" as any).select("team_number"),
     ]);
+    setPitEntries(((rawPit as any[]) || []).map((r) => ({ team_number: r.team_number })));
 
     const nameMap: Record<string, string> = {};
 
@@ -978,6 +982,12 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
               ))}
             </div>
           </div>
+
+          {/* Franklin Division */}
+          <FranklinDivisionPanel
+            matchEntries={entries.map((e) => ({ team_number: e.teamNumber }))}
+            pitEntries={pitEntries}
+          />
 
         </div>
       )}

@@ -8,6 +8,7 @@ import CelebrationOverlay from "@/components/CelebrationOverlay";
 import LockdownDashboard from "@/components/LockdownDashboard";
 import { HamburgerTabs, type TabItem, type ActionItem } from "@/components/HamburgerTabs";
 import AIChatBot from "@/components/AIChatBot";
+import FranklinDivisionPanel from "@/components/FranklinDivisionPanel";
 
 interface MasterDashboardProps {
   onLogout: () => void;
@@ -602,6 +603,11 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
               </div>
             </div>
 
+            {/* Franklin Division */}
+            <FranklinDivisionPanel
+              matchEntries={entries.map((e) => ({ team_number: e.teamNumber }))}
+              pitEntries={pitEntries}
+            />
 
 
             {/* Quick nav */}
@@ -1355,7 +1361,6 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
             </p>
             <div className="space-y-2">
               {[
-                { role: "bluedriver", label: "🔵 Driver Data", desc: "Can submit drive data entries" },
                 { role: "master", label: "👑 Master", desc: "Full admin access" },
               ].map(({ role, label, desc }) => (
                 <button
