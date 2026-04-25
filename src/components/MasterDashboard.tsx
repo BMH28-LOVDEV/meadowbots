@@ -603,6 +603,11 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
               </div>
             </div>
 
+            {/* Franklin Division */}
+            <FranklinDivisionPanel
+              matchEntries={entries.map((e) => ({ team_number: e.teamNumber }))}
+              pitEntries={pitEntries}
+            />
 
 
             {/* Quick nav */}
