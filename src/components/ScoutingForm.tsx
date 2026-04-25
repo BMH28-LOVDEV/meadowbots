@@ -281,20 +281,8 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
             }`}
           >{option}</button>
         ))}
-        </div>
-        <div>
-          <p className="text-sm font-body font-medium text-foreground mb-2">Robot Archetype</p>
-          <div className="flex flex-wrap gap-2">
-            {["Turret", "Catapult", "Spindexer", "Fixed Launcher"].map((option) => (
-              <button key={option} type="button" onClick={() => set("robotArchetype", option)}
-                className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
-                  pitForm.robotArchetype === option ? PURPLE_COLOR : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
-                }`}
-              >{option}</button>
-            ))}
-          </div>
-        </div>
       </div>
+    </div>
   );
 
   return (
