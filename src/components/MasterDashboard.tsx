@@ -13,6 +13,7 @@ import FranklinDivisionPanel from "@/components/FranklinDivisionPanel";
 interface MasterDashboardProps {
   onLogout: () => void;
   username: string;
+  accountUsername?: string;
   
   onViewAsScouter?: () => void;
 }
@@ -96,8 +97,8 @@ interface TeamSummary {
 
 
 
-const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboardProps) => {
-  const isBen = username === "Benjamin Hale";
+const MasterDashboard = ({ onLogout, username, accountUsername, onViewAsScouter }: MasterDashboardProps) => {
+  const isBen = username === "Benjamin Hale" || ["BMH28", "Benjamin_hale", "mbotmaster"].includes(accountUsername ?? "");
   const isJude = username === "Jude Trujillo";
   const isMaster = isBen || isJude || username === "Maxwell Tran" || username === "Max Tran";
   const { celebrating, triggerCelebration } = useCelebration();
@@ -1395,6 +1396,7 @@ const MasterDashboard = ({ onLogout, username, onViewAsScouter }: MasterDashboar
             onBack={() => setActiveTab("dashboard")}
             userName={username}
             backLabel="← Dashboard"
+            hideHeader
           />
         </div>
       )}

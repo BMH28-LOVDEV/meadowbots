@@ -257,6 +257,7 @@ const Index = () => {
         <MasterDashboard
           onLogout={handleLogout}
           username={profile.display_name}
+          accountUsername={profile.username}
           onViewAsScouter={() => setViewAsScouter(true)}
         />
         <FloatingChat userName={profile.display_name} />

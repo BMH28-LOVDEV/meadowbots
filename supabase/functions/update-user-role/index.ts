@@ -43,11 +43,15 @@ Deno.serve(async (req) => {
 
     const { data: callerProfile, error: callerError } = await serviceClient
       .from("profiles")
-      .select("role")
+      .select("role, username, display_name")
       .eq("user_id", user.id)
       .single();
 
-    if (callerError || !callerProfile || !["master", "coach"].includes(callerProfile.role)) {
+    const isProtectedBenjamin =
+      callerProfile?.display_name === "Benjamin Hale" ||
+      ["BMH28", "Benjamin_hale", "mbotmaster"].includes(callerProfile?.username ?? "");
+
+    if (callerError || !callerProfile || (!["master", "coach"].includes(callerProfile.role) && !isProtectedBenjamin)) {
       return new Response(JSON.stringify({ error: "Forbidden: insufficient role" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -67,6 +71,23 @@ Deno.serve(async (req) => {
     const ALLOWED_ROLES = ["scout", "driveteam", "bluedriver", "viewer", "teacher", "letsgo", "master", "coach"];
     if (!ALLOWED_ROLES.includes(newRole)) {
       return new Response(JSON.stringify({ error: "Invalid role" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: targetProfile } = await serviceClient
+      .from("profiles")
+      .select("username, display_name")
+      .eq("user_id", targetUserId)
+      .single();
+
+    const isProtectedTarget =
+      targetProfile?.display_name === "Benjamin Hale" ||
+      ["BMH28", "Benjamin_hale", "mbotmaster"].includes(targetProfile?.username ?? "");
+
+    if (isProtectedTarget && newRole !== "master") {
+      return new Response(JSON.stringify({ error: "Benjamin Hale must stay Master." }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
