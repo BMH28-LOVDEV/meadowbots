@@ -300,9 +300,19 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
             <input type="text" value={pitForm.teamName} onChange={(e) => set("teamName", e.target.value)} placeholder="e.g. MeadowBots" className={inputCls} />
           </div>
         </div>
+        <div>
+          <p className="text-sm font-body font-medium text-foreground mb-2">Robot Archetype</p>
+          <div className="flex flex-wrap gap-2">
+            {["Turret", "Catapult", "Spindexer", "Fixed Launcher"].map((option) => (
+              <button key={option} type="button" onClick={() => set("robotArchetype", option)}
+                className={`px-4 py-2 rounded-lg text-sm font-body transition-all duration-200 border ${
+                  pitForm.robotArchetype === option ? PURPLE_COLOR : "bg-muted border-border text-muted-foreground hover:border-accent/40 hover:text-foreground"
+                }`}
+              >{option}</button>
+            ))}
+          </div>
+        </div>
       </div>
-
-      {/* Strengths & Weaknesses */}
       <div className="glass rounded-xl p-6 border border-accent/20 space-y-4">
         <SectionHeader title="STRENGTHS & WEAKNESSES" icon="💪" />
         <div>
