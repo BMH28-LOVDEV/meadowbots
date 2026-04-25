@@ -251,6 +251,13 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
       auto_start_position: pitForm.autoStartPosition || null,
       auto_clear: pitForm.autoClear || null,
       auto_description: pitForm.autoDescription || null,
+      robot_archetype: pitForm.robotArchetype || null,
+      teleop_defense_type: pitForm.teleopFocusCategory === "Defense" ? (pitForm.teleopDefenseType || null) : null,
+      cycle_or_park: pitForm.cycleOrPark || null,
+      overall_consistency: pitForm.overallConsistency || null,
+      defense_capability: pitForm.defenseCapability || null,
+      photo_permission: pitForm.photoPermission || null,
+      brochure_available: pitForm.brochureAvailable || null,
     } as any);
     setSubmitting(false);
     if (error) { toast.error("Failed to save. Please try again."); return; }
