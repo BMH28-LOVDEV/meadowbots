@@ -7,6 +7,7 @@ import { useCelebration } from "@/hooks/useCelebration";
 import CelebrationOverlay from "@/components/CelebrationOverlay";
 import { HamburgerTabs, type TabItem } from "@/components/HamburgerTabs";
 import AIChatBot from "@/components/AIChatBot";
+import FranklinDivisionPanel from "@/components/FranklinDivisionPanel";
 import fieldMapImage from "@/assets/field-map.png";
 
 interface ScoutingFormProps {
