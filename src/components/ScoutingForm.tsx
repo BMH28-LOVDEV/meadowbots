@@ -28,6 +28,7 @@ interface FormData {
   autoBallsScored: string;
   autoCycles: string;
   autoFullClassifier: string;
+  autoFullClassifierElaborate: string;
   teleopIntakeMethod: string;
   teleopBallCapacity: string;
   teleopShootingAccuracy: string;
@@ -38,6 +39,7 @@ interface FormData {
   teleopBallsScored: string;
   teleopCycles: string;
   teleopFullClassifier: string;
+  teleopFullClassifierElaborate: string;
   endgameParking: string;
   endgameAllianceAssist: string;
   endgameFullRamp: string;
@@ -99,9 +101,9 @@ const CARD_OPTIONS = ["Yellow Card", "Red Card"];
 
 const INITIAL_FORM: FormData = {
   teamNumber: "", teamName: "", matchNumber: "",
-  autoArtifactsScored: "", autoPatternAlignment: "", autoLaunchLine: "", autoLeave: "", autoConsistency: "", autoBallsScored: "", autoCycles: "", autoFullClassifier: "",
+  autoArtifactsScored: "", autoPatternAlignment: "", autoLaunchLine: "", autoLeave: "", autoConsistency: "", autoBallsScored: "", autoCycles: "", autoFullClassifier: "", autoFullClassifierElaborate: "",
   teleopIntakeMethod: "", teleopBallCapacity: "", teleopShootingAccuracy: "", teleopGateInteraction: "",
-  teleopOverflowManagement: "", teleopCycleSpeed: "", teleopArtifactClassification: "", teleopBallsScored: "", teleopCycles: "", teleopFullClassifier: "",
+  teleopOverflowManagement: "", teleopCycleSpeed: "", teleopArtifactClassification: "", teleopBallsScored: "", teleopCycles: "", teleopFullClassifier: "", teleopFullClassifierElaborate: "",
   endgameParking: "", endgameAllianceAssist: "", endgameFullRamp: "", endgameFullMotif: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
   penalties: [], cards: [], penaltyPointsGiven: "",
   matchScore: "", allianceWon: "", specialFeatures: "", goodMatch: "", defensiveStrategy: "", pitScoutMatch: "", pitScoutMatchElaborate: "",
@@ -785,10 +787,10 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         form.specialFeatures ? `[Auto Notes] ${form.specialFeatures}` : "",
         form.autoBallsScored ? `[Auto Balls] ${form.autoBallsScored}` : "",
         form.autoCycles ? `[Auto Cycles] ${form.autoCycles}` : "",
-        form.autoFullClassifier ? `[Auto Full Classifier] ${form.autoFullClassifier}` : "",
+        form.autoFullClassifier ? `[Auto Full Classifier] ${form.autoFullClassifier}${form.autoFullClassifier === "N/A" && form.autoFullClassifierElaborate ? `: ${form.autoFullClassifierElaborate}` : ""}` : "",
         form.teleopBallsScored ? `[Teleop Balls] ${form.teleopBallsScored}` : "",
         form.teleopCycles ? `[Teleop Cycles] ${form.teleopCycles}` : "",
-        form.teleopFullClassifier ? `[Teleop Full Classifier] ${form.teleopFullClassifier}` : "",
+        form.teleopFullClassifier ? `[Teleop Full Classifier] ${form.teleopFullClassifier}${form.teleopFullClassifier === "N/A" && form.teleopFullClassifierElaborate ? `: ${form.teleopFullClassifierElaborate}` : ""}` : "",
         form.endgameFullRamp ? `[Endgame Full Ramp] ${form.endgameFullRamp}` : "",
         form.endgameFullMotif ? `[Endgame Full Motif] ${form.endgameFullMotif}` : "",
         form.endgameParkFeatures ? `[Park Feature] ${form.endgameParkFeatures === "Other" ? form.endgameParkFeaturesOther || "Other" : form.endgameParkFeatures}` : "",
@@ -1186,14 +1188,35 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             </div>
             <div>
               <label className="block text-sm font-body font-medium text-foreground mb-2">Full Classifier <span className="text-muted-foreground font-normal">(How many times did this team have a full classifier ramp?)</span></label>
-              <input
-                type="number"
-                min="0"
-                value={form.autoFullClassifier}
-                onChange={(e) => handleChange("autoFullClassifier", e.target.value)}
-                placeholder="e.g. 1"
-                className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  value={form.autoFullClassifier === "N/A" ? "" : form.autoFullClassifier}
+                  onChange={(e) => handleChange("autoFullClassifier", e.target.value)}
+                  disabled={form.autoFullClassifier === "N/A"}
+                  placeholder="e.g. 1"
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all disabled:opacity-50"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleChange("autoFullClassifier", form.autoFullClassifier === "N/A" ? "" : "N/A")}
+                  className={`px-4 py-2.5 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
+                    form.autoFullClassifier === "N/A"
+                      ? "bg-primary/20 border-primary text-primary glow-primary"
+                      : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                  }`}
+                >N/A</button>
+              </div>
+              {form.autoFullClassifier === "N/A" && (
+                <textarea
+                  value={form.autoFullClassifierElaborate}
+                  onChange={(e) => handleChange("autoFullClassifierElaborate", e.target.value)}
+                  placeholder="Elaborate. e.g. this team intakes from the gate right after they shoot."
+                  rows={2}
+                  className="w-full mt-3 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all resize-none"
+                />
+              )}
             </div>
             <div>
               <label className="block text-sm font-body font-medium text-foreground mb-2">Additional Notes (Auto)</label>
@@ -1258,14 +1281,35 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             </div>
             <div>
               <label className="block text-sm font-body font-medium text-foreground mb-2">Full Classifier <span className="text-muted-foreground font-normal">(How many times did this team have a full classifier ramp?)</span></label>
-              <input
-                type="number"
-                min="0"
-                value={form.teleopFullClassifier}
-                onChange={(e) => handleChange("teleopFullClassifier", e.target.value)}
-                placeholder="e.g. 2"
-                className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  value={form.teleopFullClassifier === "N/A" ? "" : form.teleopFullClassifier}
+                  onChange={(e) => handleChange("teleopFullClassifier", e.target.value)}
+                  disabled={form.teleopFullClassifier === "N/A"}
+                  placeholder="e.g. 2"
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all disabled:opacity-50"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleChange("teleopFullClassifier", form.teleopFullClassifier === "N/A" ? "" : "N/A")}
+                  className={`px-4 py-2.5 rounded-lg text-sm font-body font-semibold transition-all duration-200 border ${
+                    form.teleopFullClassifier === "N/A"
+                      ? "bg-primary/20 border-primary text-primary glow-primary"
+                      : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                  }`}
+                >N/A</button>
+              </div>
+              {form.teleopFullClassifier === "N/A" && (
+                <textarea
+                  value={form.teleopFullClassifierElaborate}
+                  onChange={(e) => handleChange("teleopFullClassifierElaborate", e.target.value)}
+                  placeholder="Elaborate. e.g. this team intakes from the gate right after they shoot."
+                  rows={2}
+                  className="w-full mt-3 px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all resize-none"
+                />
+              )}
             </div>
           </div>
 
