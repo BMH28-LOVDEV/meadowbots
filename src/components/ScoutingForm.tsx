@@ -26,6 +26,7 @@ interface FormData {
   autoLeave: string;
   autoConsistency: string;
   autoBallsScored: string;
+  autoCycles: string;
   teleopIntakeMethod: string;
   teleopBallCapacity: string;
   teleopShootingAccuracy: string;
@@ -34,6 +35,7 @@ interface FormData {
   teleopCycleSpeed: string;
   teleopArtifactClassification: string;
   teleopBallsScored: string;
+  teleopCycles: string;
   endgameParking: string;
   endgameAllianceAssist: string;
   endgameParkFeatures: string;
@@ -93,9 +95,9 @@ const CARD_OPTIONS = ["Yellow Card", "Red Card"];
 
 const INITIAL_FORM: FormData = {
   teamNumber: "", teamName: "", matchNumber: "",
-  autoArtifactsScored: "", autoPatternAlignment: "", autoLaunchLine: "", autoLeave: "", autoConsistency: "", autoBallsScored: "",
+  autoArtifactsScored: "", autoPatternAlignment: "", autoLaunchLine: "", autoLeave: "", autoConsistency: "", autoBallsScored: "", autoCycles: "",
   teleopIntakeMethod: "", teleopBallCapacity: "", teleopShootingAccuracy: "", teleopGateInteraction: "",
-  teleopOverflowManagement: "", teleopCycleSpeed: "", teleopArtifactClassification: "", teleopBallsScored: "",
+  teleopOverflowManagement: "", teleopCycleSpeed: "", teleopArtifactClassification: "", teleopBallsScored: "", teleopCycles: "",
   endgameParking: "", endgameAllianceAssist: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
   penalties: [], cards: [], penaltyPointsGiven: "",
   matchScore: "", allianceWon: "", specialFeatures: "", goodMatch: "", defensiveStrategy: "", pitScoutMatch: "", pitScoutMatchElaborate: "",
@@ -778,7 +780,9 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
       special_features: [
         form.specialFeatures ? `[Auto Notes] ${form.specialFeatures}` : "",
         form.autoBallsScored ? `[Auto Balls] ${form.autoBallsScored}` : "",
+        form.autoCycles ? `[Auto Cycles] ${form.autoCycles}` : "",
         form.teleopBallsScored ? `[Teleop Balls] ${form.teleopBallsScored}` : "",
+        form.teleopCycles ? `[Teleop Cycles] ${form.teleopCycles}` : "",
         form.endgameParkFeatures ? `[Park Feature] ${form.endgameParkFeatures === "Other" ? form.endgameParkFeaturesOther || "Other" : form.endgameParkFeatures}` : "",
         form.pitScoutMatch ? `[Pit Scout Match] ${form.pitScoutMatch}${form.pitScoutMatchElaborate ? `: ${form.pitScoutMatchElaborate}` : ""}` : "",
         form.defensiveStrategy ? `[Defensive Strategy] ${form.defensiveStrategy}` : "",
@@ -1162,6 +1166,17 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
               />
             </div>
             <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-2">Auto Cycles <span className="text-muted-foreground font-normal">(Times Robot Collected 3 and Shot Those 3 That It Collected)</span></label>
+              <input
+                type="number"
+                min="0"
+                value={form.autoCycles}
+                onChange={(e) => handleChange("autoCycles", e.target.value)}
+                placeholder="e.g. 1"
+                className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
+              />
+            </div>
+            <div>
               <label className="block text-sm font-body font-medium text-foreground mb-2">Additional Notes (Auto)</label>
               <textarea
                 value={form.specialFeatures}
@@ -1208,6 +1223,17 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
                 value={form.teleopBallsScored}
                 onChange={(e) => handleChange("teleopBallsScored", e.target.value)}
                 placeholder="e.g. 8"
+                className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-body font-medium text-foreground mb-2">Teleop Cycles <span className="text-muted-foreground font-normal">(Times Robot Collected 3 and Shot Those 3 That It Collected)</span></label>
+              <input
+                type="number"
+                min="0"
+                value={form.teleopCycles}
+                onChange={(e) => handleChange("teleopCycles", e.target.value)}
+                placeholder="e.g. 4"
                 className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all"
               />
             </div>
