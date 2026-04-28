@@ -40,6 +40,8 @@ interface FormData {
   teleopFullClassifier: string;
   endgameParking: string;
   endgameAllianceAssist: string;
+  endgameFullRamp: string;
+  endgameFullMotif: string;
   endgameParkFeatures: string;
   endgameParkFeaturesOther: string;
   penalties: string[];
@@ -100,7 +102,7 @@ const INITIAL_FORM: FormData = {
   autoArtifactsScored: "", autoPatternAlignment: "", autoLaunchLine: "", autoLeave: "", autoConsistency: "", autoBallsScored: "", autoCycles: "", autoFullClassifier: "",
   teleopIntakeMethod: "", teleopBallCapacity: "", teleopShootingAccuracy: "", teleopGateInteraction: "",
   teleopOverflowManagement: "", teleopCycleSpeed: "", teleopArtifactClassification: "", teleopBallsScored: "", teleopCycles: "", teleopFullClassifier: "",
-  endgameParking: "", endgameAllianceAssist: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
+  endgameParking: "", endgameAllianceAssist: "", endgameFullRamp: "", endgameFullMotif: "", endgameParkFeatures: "", endgameParkFeaturesOther: "",
   penalties: [], cards: [], penaltyPointsGiven: "",
   matchScore: "", allianceWon: "", specialFeatures: "", goodMatch: "", defensiveStrategy: "", pitScoutMatch: "", pitScoutMatchElaborate: "",
 };
@@ -787,6 +789,8 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         form.teleopBallsScored ? `[Teleop Balls] ${form.teleopBallsScored}` : "",
         form.teleopCycles ? `[Teleop Cycles] ${form.teleopCycles}` : "",
         form.teleopFullClassifier ? `[Teleop Full Classifier] ${form.teleopFullClassifier}` : "",
+        form.endgameFullRamp ? `[Endgame Full Ramp] ${form.endgameFullRamp}` : "",
+        form.endgameFullMotif ? `[Endgame Full Motif] ${form.endgameFullMotif}` : "",
         form.endgameParkFeatures ? `[Park Feature] ${form.endgameParkFeatures === "Other" ? form.endgameParkFeaturesOther || "Other" : form.endgameParkFeatures}` : "",
         form.pitScoutMatch ? `[Pit Scout Match] ${form.pitScoutMatch}${form.pitScoutMatchElaborate ? `: ${form.pitScoutMatchElaborate}` : ""}` : "",
         form.defensiveStrategy ? `[Defensive Strategy] ${form.defensiveStrategy}` : "",
@@ -1269,6 +1273,8 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           <div className="glass rounded-xl p-6 border-glow space-y-5">
             <SectionHeader title="ENDGAME" icon="🏁" />
             <MCQuestion label="Did they park in the Base Zone?" name="endgameParking" options={["No", "Partial", "Yes – Full Park"]} value={form.endgameParking} onChange={handleChange} />
+            <MCQuestion label="Did this team get a Full Ramp in Endgame?" name="endgameFullRamp" options={["No", "Yes"]} value={form.endgameFullRamp} onChange={handleChange} />
+            <MCQuestion label="Did this team get a Full Motif?" name="endgameFullMotif" options={["No", "Yes"]} value={form.endgameFullMotif} onChange={handleChange} />
             <div>
               <label className="block text-sm font-body font-medium text-foreground mb-2">Does This Team Have Any Special Park Features?</label>
               <div className="flex flex-wrap gap-2">
