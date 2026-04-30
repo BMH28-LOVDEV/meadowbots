@@ -901,9 +901,35 @@ const MasterDashboard = ({ onLogout, username, accountUsername, onViewAsScouter 
         {/* ── ASSIGNMENTS TAB ── */}
         {activeTab === "assignments" && (
           <div className="space-y-4">
+            {/* Slider */}
+            <div className="glass rounded-xl p-1.5 border border-border/50 flex gap-1">
+              <button
+                onClick={() => setAssignmentView("match")}
+                className={`flex-1 px-4 py-2.5 rounded-lg text-xs font-display tracking-wider transition-all ${
+                  assignmentView === "match"
+                    ? "bg-primary/20 text-primary border border-primary/40 glow-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                🎯 MATCH SCOUTING
+              </button>
+              <button
+                onClick={() => setAssignmentView("pit")}
+                className={`flex-1 px-4 py-2.5 rounded-lg text-xs font-display tracking-wider transition-all ${
+                  assignmentView === "pit"
+                    ? "bg-accent/20 text-accent border border-accent/40"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                🏗️ PIT SCOUTING
+              </button>
+            </div>
+
             <div className="glass rounded-xl p-4 border border-primary/20">
               <p className="text-sm text-muted-foreground font-body">
-                📋 Each scout is assigned <span className="text-foreground font-bold">3 teams</span> with <span className="text-foreground font-bold">3 qual matches</span> each. Progress updates live as scouts submit.
+                {assignmentView === "match"
+                  ? <>📋 Each scout is assigned <span className="text-foreground font-bold">3 teams</span> with <span className="text-foreground font-bold">3 qual matches</span> each. Progress updates live as scouts submit.</>
+                  : <>🏗️ Pit scout assignments. Each chip turns <span className="text-glow-success font-bold">green</span> once that team's pit scout entry is submitted.</>}
               </p>
             </div>
 
@@ -912,7 +938,7 @@ const MasterDashboard = ({ onLogout, username, accountUsername, onViewAsScouter 
                 <p className="text-4xl mb-4 animate-pulse">📡</p>
                 <p className="text-muted-foreground font-body">Loading assignments...</p>
               </div>
-            ) : (
+            ) : assignmentView === "match" ? (
               <div className="space-y-3">
                 {[...TEAM_MEMBERS].filter((m) => !DRIVE_TEAM.includes(m)).sort().map((scoutName) => {
                   const scoutAssignments = assignments.filter(a => a.scout_name === scoutName);
@@ -954,7 +980,9 @@ const MasterDashboard = ({ onLogout, username, accountUsername, onViewAsScouter 
                                   {formatTeamLabel(a.team_number, a.team_name)}
                                 </p>
                                 <div className="flex flex-wrap gap-1.5 flex-1">
-                                  {matches.map((match) => {
+                                  {matches.length === 0 ? (
+                                    <p className="text-[10px] text-muted-foreground/60 font-body italic">No qual matches yet</p>
+                                  ) : matches.map((match) => {
                                     const done = isMatchDone(a, match);
                                     return (
                                       <span
@@ -975,6 +1003,46 @@ const MasterDashboard = ({ onLogout, username, accountUsername, onViewAsScouter 
                           })}
                         </div>
                       )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* PIT VIEW */
+              <div className="space-y-3">
+                {[...TEAM_MEMBERS].sort().filter(scoutName => assignments.some(a => a.scout_name === scoutName)).map((scoutName) => {
+                  const scoutAssignments = assignments.filter(a => a.scout_name === scoutName);
+                  const total = scoutAssignments.length;
+                  const done = scoutAssignments.filter(a => pitEntries.some(p => p.team_number === a.team_number && p.scouter_name === scoutName)).length;
+                  const allDone = total > 0 && done === total;
+
+                  return (
+                    <div key={scoutName} className={`glass rounded-xl p-4 transition-all duration-200 ${allDone ? "border border-green-500/30 bg-green-500/5" : "border border-accent/30"}`}>
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div>
+                          <p className="font-display text-sm text-foreground tracking-wide">{scoutName}</p>
+                          <p className={`text-xs font-body mt-0.5 ${allDone ? "text-green-400" : "text-accent"}`}>
+                            {allDone ? "✓ All pits scouted" : `${done}/${total} pits scouted`}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {scoutAssignments.map((a) => {
+                          const isDone = pitEntries.some(p => p.team_number === a.team_number && p.scouter_name === scoutName);
+                          return (
+                            <span
+                              key={a.team_number}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-body font-semibold border transition-all ${
+                                isDone
+                                  ? "bg-glow-success/20 border-glow-success text-glow-success"
+                                  : "bg-destructive/20 border-destructive text-destructive"
+                              }`}
+                            >
+                              {isDone ? "✓ " : ""}{formatTeamLabel(a.team_number, a.team_name)}
+                            </span>
+                          );
+                        })}
+                      </div>
                     </div>
                   );
                 })}
