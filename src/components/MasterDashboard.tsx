@@ -14,7 +14,7 @@ interface MasterDashboardProps {
   onLogout: () => void;
   username: string;
   accountUsername?: string;
-  
+  userRole?: string;
   onViewAsScouter?: () => void;
 }
 
