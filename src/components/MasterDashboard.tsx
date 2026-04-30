@@ -1385,7 +1385,7 @@ const MasterDashboard = ({ onLogout, username, accountUsername, userRole, onView
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {scoutAssignments.map((a) => {
-                          const isDone = pitEntries.some(p => p.team_number === a.team_number && p.scouter_name === scoutName);
+                          const isDone = isPitDone(a, scoutName);
                           return (
                             <span
                               key={a.team_number}
