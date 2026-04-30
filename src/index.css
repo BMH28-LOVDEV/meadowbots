@@ -57,8 +57,9 @@
   }
 
   html {
-    height: 100%;
-    overflow-y: scroll;
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     /* Ensure vertical panning isn't blocked by any descendant gesture handler */
     touch-action: pan-y;
@@ -66,19 +67,18 @@
 
   body {
     @apply bg-background text-foreground font-body antialiased;
-    min-height: 100%;
+    min-height: 100dvh;
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: auto !important;
+    overflow-x: hidden;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
     /* Avoid iOS Safari "rubber-band" stealing scroll on long pages */
     overscroll-behavior-y: auto;
-  }
-
-  /* On iOS Safari, sticky elements + heavy backdrop-filter on many children
-     causes the scroll to feel frozen. Promote the scrolling root to its
-     own compositing layer so touch scrolling stays smooth. */
-  #root {
-    transform: translateZ(0);
   }
 
   h1, h2, h3, h4, h5, h6 {
