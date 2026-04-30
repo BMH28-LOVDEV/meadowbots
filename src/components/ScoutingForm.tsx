@@ -20,6 +20,7 @@ interface FormData {
   teamNumber: string;
   teamName: string;
   matchNumber: string;
+  scoutedAlliance: string;
   autoArtifactsScored: string;
   autoPatternAlignment: string;
   autoLaunchLine: string;
