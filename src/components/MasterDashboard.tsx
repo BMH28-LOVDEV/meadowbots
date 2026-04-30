@@ -682,8 +682,8 @@ const MasterDashboard = ({ onLogout, username, accountUsername, userRole, onView
                   quals = DEFAULT_QUALS.map(q => {
                     const num = q.replace(/\D/g, "");
                     const done = entries.some(e =>
-                      String(e.match_number).replace(/\D/g, "") === num &&
-                      g.members.some(m => (e.scouter_name || "").toLowerCase().includes(m.toLowerCase()))
+                      String((e as any).matchNumber ?? (e as any).match_number ?? "").replace(/\D/g, "") === num &&
+                      g.members.some(m => ((e as any).scouterName ?? (e as any).scouter_name ?? "").toLowerCase().includes(m.toLowerCase()))
                     );
                     return { match: q, done };
                   });
