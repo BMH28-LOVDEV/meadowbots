@@ -26,7 +26,10 @@ const Drawer = ({
   onOpenChange,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) => {
-  React.useEffect(() => unlockPageScroll, []);
+  React.useEffect(() => {
+    unlockPageScroll();
+    return unlockPageScroll;
+  }, []);
 
   return (
     <DrawerPrimitive.Root
