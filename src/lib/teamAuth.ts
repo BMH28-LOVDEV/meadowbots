@@ -33,6 +33,22 @@ const ALIASES: Record<string, string> = {
   "will hu": "William Hu",
   "alexander": "Alex Gianelloni",
   "alexander gianelloni": "Alex Gianelloni",
+  // Common misspellings / alternate spellings observed in submissions
+  "kayleb hague": "Kayleb Hauge",
+  "kayleb": "Kayleb Hauge",
+  "hague": "Kayleb Hauge",
+  "hauge": "Kayleb Hauge",
+  "claraaa tsang": "Clara Tsang",
+  "claraaa": "Clara Tsang",
+  "jason new": "Jason Xie",
+  "jasonnew": "Jason Xie",
+  "jason": "Jason Xie",
+  "travis": "Travis Quinn",
+  "travis q": "Travis Quinn",
+  "zoe": "Zoe GK",
+  "zoe k": "Zoe GK",
+  "zoe g": "Zoe GK",
+  "zoe gk": "Zoe GK",
 };
 
 function normalize(str: string): string {
