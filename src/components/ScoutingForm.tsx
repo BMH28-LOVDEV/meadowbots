@@ -1175,8 +1175,28 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
                     placeholder="e.g. Q5"
                     className="w-full px-4 py-2.5 rounded-lg bg-muted border border-border focus:border-primary focus:ring-1 focus:ring-primary text-foreground placeholder:text-muted-foreground/50 font-body outline-none transition-all" />
                 )}
+            </div>
+            <div>
+              <label className="block text-sm text-muted-foreground font-body mb-2">What alliance is the team you are scouting on? *</label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: "red", label: "🔴 Red Alliance", activeCls: "bg-red-500/20 border-red-500 text-red-400 glow-primary" },
+                  { value: "blue", label: "🔵 Blue Alliance", activeCls: "bg-blue-500/20 border-blue-500 text-blue-400 glow-primary" },
+                ].map((opt) => {
+                  const isSelected = form.scoutedAlliance === opt.value;
+                  return (
+                    <button key={opt.value} type="button"
+                      onClick={() => handleChange("scoutedAlliance", opt.value)}
+                      className={`px-4 py-2.5 rounded-lg text-sm font-body font-semibold border transition-all duration-200 ${
+                        isSelected ? opt.activeCls : "bg-muted border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                      }`}>
+                      {opt.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
+          </div>
           </div>
 
           {/* Autonomous */}
