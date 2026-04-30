@@ -129,6 +129,70 @@ const MasterDashboard = ({ onLogout, username, accountUsername, userRole, onView
   const [pitEntries, setPitEntries] = useState<any[]>([]);
   const [expandedPit, setExpandedPit] = useState<string | null>(null);
 
+  const refreshDashboard = async () => {
+    setLoading(true);
+    setAssignmentsLoading(true);
+
+    const [entriesResult, assignmentsResult, pitResult] = await Promise.all([
+      supabase.from("scouting_entries").select("*").order("timestamp", { ascending: true }),
+      supabase.from("team_assignments").select("*"),
+      supabase.from("pit_scouting_entries" as any).select("*").order("created_at", { ascending: false }),
+    ]);
+
+    if (entriesResult.error) {
+      toast.error("Failed to refresh match data.");
+      console.error(entriesResult.error);
+    } else {
+      const mapped: ScoutingEntry[] = (entriesResult.data || []).map((row) => ({
+        id: row.id,
+        teamNumber: row.team_number,
+        teamName: (row as any).team_name || "",
+        matchNumber: row.match_number || "",
+        scouterName: row.scouter_name,
+        timestamp: row.timestamp,
+        autoArtifactsScored: row.auto_artifacts_scored || "",
+        autoPatternAlignment: row.auto_pattern_alignment || "",
+        autoLaunchLine: row.auto_launch_line || "",
+        autoLeave: row.auto_leave || "",
+        autoConsistency: row.auto_consistency || "",
+        teleopIntakeMethod: row.teleop_intake_method || "",
+        teleopBallCapacity: row.teleop_ball_capacity || "",
+        teleopShootingAccuracy: row.teleop_shooting_accuracy || "",
+        teleopGateInteraction: row.teleop_gate_interaction || "",
+        teleopOverflowManagement: row.teleop_overflow_management || "",
+        teleopCycleSpeed: row.teleop_cycle_speed || "",
+        teleopArtifactClassification: row.teleop_artifact_classification || "",
+        endgameParking: row.endgame_parking || "",
+        endgameAllianceAssist: row.endgame_alliance_assist || "",
+        penalties: row.penalties || [],
+        specialFeatures: row.special_features || "",
+        goodMatch: row.good_match || "",
+        matchScore: (row as any).match_score ?? null,
+        allianceWon: (row as any).alliance_won || "",
+        penaltyPointsGiven: (row as any).penalty_points_given ?? null,
+      }));
+      setEntries(mapped);
+    }
+
+    if (assignmentsResult.error) {
+      toast.error("Failed to refresh assignments.");
+      console.error(assignmentsResult.error);
+    } else {
+      setAssignments((assignmentsResult.data || []) as TeamAssignment[]);
+    }
+
+    if (pitResult.error) {
+      toast.error("Failed to refresh pit data.");
+      console.error(pitResult.error);
+    } else {
+      setPitEntries((pitResult.data as any[]) || []);
+    }
+
+    setAssignmentsLoading(false);
+    setLoading(false);
+    toast.success("Refreshed.");
+  };
+
   const fetchPitEntries = async () => {
     const { data, error } = await supabase.from("pit_scouting_entries" as any).select("*").order("created_at", { ascending: false });
     if (!error && data) setPitEntries(data as any[]);
@@ -406,7 +470,7 @@ const MasterDashboard = ({ onLogout, username, accountUsername, userRole, onView
             <p className="text-xs text-muted-foreground font-body">Team Rankings Dashboard</p>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-            <button onClick={() => { fetchEntries(); fetchAssignments(); fetchPitEntries(); }} className="px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200 whitespace-nowrap">
+            <button onClick={refreshDashboard} className="px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200 whitespace-nowrap">
               ↻ REFRESH
             </button>
             <div className="hidden md:flex items-center gap-2">
@@ -458,7 +522,7 @@ const MasterDashboard = ({ onLogout, username, accountUsername, userRole, onView
             ...(isBen ? [{ id: "lockdown", label: "LOCKDOWN", icon: "🔴", className: "text-destructive hover:text-destructive", onClick: () => setShowLockdown(true) }] : []),
             ...(isBen ? [{ id: "clearall", label: "CLEAR ALL", icon: "🗑", className: "text-destructive/70 hover:text-destructive", onClick: () => { setShowClearAll(true); setClearAllPassword(""); setClearAllError(""); } }] : []),
             ...(onViewAsScouter ? [{ id: "scoutform", label: "SCOUT FORM", icon: "📋", className: "text-primary hover:text-primary", onClick: onViewAsScouter }] : []),
-            { id: "refresh", label: "REFRESH", icon: "↻", onClick: () => { fetchEntries(); fetchAssignments(); fetchPitEntries(); } },
+            { id: "refresh", label: "REFRESH", icon: "↻", onClick: refreshDashboard },
           ]}
         />
       </header>
