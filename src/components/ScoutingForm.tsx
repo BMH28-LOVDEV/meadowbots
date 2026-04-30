@@ -619,14 +619,28 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
     return () => { supabase.removeChannel(channel); };
   }, [scouterName]);
 
-  const fetchData = async () => {
+  const fetchData = async (showToast = false) => {
     setLoadingData(true);
-    const [{ data: rawEntries }, { data: assignmentData }, { data: allAssignments }, { data: rawPit }] = await Promise.all([
+    const [entriesResult, assignmentResult, allAssignmentsResult, pitResult] = await Promise.all([
       supabase.from("scouting_entries").select("*").order("timestamp", { ascending: true }),
       supabase.from("team_assignments").select("team_number, team_name, qual_matches").eq("scout_name", scouterName),
       supabase.from("team_assignments").select("team_number, team_name"),
       supabase.from("pit_scouting_entries" as any).select("team_number, scouter_name"),
     ]);
+
+    const rawEntries = entriesResult.data;
+    const assignmentData = assignmentResult.data;
+    const allAssignments = allAssignmentsResult.data;
+    const rawPit = pitResult.data;
+
+    const failedRefresh = entriesResult.error || assignmentResult.error || allAssignmentsResult.error || pitResult.error;
+    if (failedRefresh) {
+      toast.error("Failed to refresh data.");
+      console.error(entriesResult.error || assignmentResult.error || allAssignmentsResult.error || pitResult.error);
+    } else if (showToast) {
+      toast.success("Refreshed.");
+    }
+
     setPitEntries(((rawPit as any[]) || []).map((r) => ({ team_number: r.team_number, scouter_name: r.scouter_name })));
 
     const nameMap: Record<string, string> = {};
@@ -837,7 +851,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           </div>
           <div className="flex items-center gap-3">
             <button
-              onClick={fetchData}
+              onClick={() => fetchData(true)}
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200"
             >
               ↻ REFRESH
@@ -865,7 +879,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             if (id !== "scouting") setScoutingMode(null);
           }}
           actions={[
-            { id: "refresh", label: "REFRESH", icon: "↻", onClick: fetchData },
+            { id: "refresh", label: "REFRESH", icon: "↻", onClick: () => fetchData(true) },
             { id: "logout", label: "LOGOUT", icon: "🚪", className: "text-destructive hover:text-destructive", onClick: onLogout },
           ]}
         />
