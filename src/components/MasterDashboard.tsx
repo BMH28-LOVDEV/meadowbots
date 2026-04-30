@@ -672,7 +672,14 @@ const MasterDashboard = ({ onLogout, username, accountUsername, userRole, onView
                 const groupAssigns = assignments.filter(a => g.members.some(m => a.scout_name?.toLowerCase().includes(m.toLowerCase())));
                 const total = groupAssigns.reduce((s, a) => s + (a.qual_matches || []).length, 0);
                 const done = groupAssigns.reduce((s, a) => s + (a.qual_matches || []).filter(m => isMatchDone(a, m)).length, 0);
-                return { ...g, total, done };
+                const quals: { match: string; done: boolean }[] = [];
+                groupAssigns.forEach(a => (a.qual_matches || []).forEach(m => quals.push({ match: m, done: isMatchDone(a, m) })));
+                quals.sort((a, b) => {
+                  const na = parseInt(a.match.replace(/\D/g, ""), 10) || 0;
+                  const nb = parseInt(b.match.replace(/\D/g, ""), 10) || 0;
+                  return na - nb;
+                });
+                return { ...g, total, done, quals };
               });
               return (
                 <>
