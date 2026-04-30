@@ -1126,17 +1126,32 @@ const MasterDashboard = ({ onLogout, username, accountUsername, userRole, onView
                     { name: "GROUP 2", color: "330 50% 60%", members: ["Heath", "Jason"] },
                     { name: "GROUP 3", color: "130 50% 50%", members: ["Alex", "Julian"] },
                   ];
+                  const DEFAULT_QUALS = Array.from({ length: 18 }, (_, i) => `Q${i + 1}`);
                   const groupStats = GROUPS.map(g => {
                     const groupAssigns = assignments.filter(a => g.members.some(m => a.scout_name?.toLowerCase().includes(m.toLowerCase())));
-                    const total = groupAssigns.reduce((s, a) => s + (a.qual_matches || []).length, 0);
-                    const done = groupAssigns.reduce((s, a) => s + (a.qual_matches || []).filter(m => isMatchDone(a, m)).length, 0);
-                    const quals: { match: string; done: boolean }[] = [];
-                    groupAssigns.forEach(a => (a.qual_matches || []).forEach(m => quals.push({ match: m, done: isMatchDone(a, m) })));
+                    const assignedQuals: { match: string; done: boolean }[] = [];
+                    groupAssigns.forEach(a => (a.qual_matches || []).forEach(m => assignedQuals.push({ match: m, done: isMatchDone(a, m) })));
+
+                    let quals: { match: string; done: boolean }[];
+                    if (assignedQuals.length > 0) {
+                      quals = assignedQuals;
+                    } else {
+                      quals = DEFAULT_QUALS.map(q => {
+                        const num = q.replace(/\D/g, "");
+                        const done = entries.some(e =>
+                          String((e as any).matchNumber ?? (e as any).match_number ?? "").replace(/\D/g, "") === num &&
+                          g.members.some(m => ((e as any).scouterName ?? (e as any).scouter_name ?? "").toLowerCase().includes(m.toLowerCase()))
+                        );
+                        return { match: q, done };
+                      });
+                    }
                     quals.sort((a, b) => {
                       const na = parseInt(a.match.replace(/\D/g, ""), 10) || 0;
                       const nb = parseInt(b.match.replace(/\D/g, ""), 10) || 0;
                       return na - nb;
                     });
+                    const total = quals.length;
+                    const done = quals.filter(q => q.done).length;
                     return { ...g, total, done, quals };
                   });
                   return (
