@@ -331,9 +331,9 @@ const PitScoutForm = ({ scouterName }: { scouterName: string }) => {
             placeholder="What does your team do well?" rows={3} className={inputCls + " resize-none"} />
         </div>
         <div>
-          <label className="block text-sm font-body font-medium text-foreground mb-2">Weaknesses</label>
+          <label className="block text-sm font-body font-medium text-foreground mb-2">Weaknesses (What Trade-Offs did your team have to make on your robot this season?)</label>
           <textarea value={pitForm.weaknesses} onChange={(e) => set("weaknesses", e.target.value)}
-            placeholder="What does your team struggle with?" rows={3} className={inputCls + " resize-none"} />
+            placeholder="What trade-offs did your team have to make on your robot this season?" rows={3} className={inputCls + " resize-none"} />
         </div>
       </div>
 
