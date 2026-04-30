@@ -101,7 +101,7 @@ const PENALTY_OPTIONS = [
 const CARD_OPTIONS = ["Yellow Card", "Red Card"];
 
 const INITIAL_FORM: FormData = {
-  teamNumber: "", teamName: "", matchNumber: "",
+  teamNumber: "", teamName: "", matchNumber: "", scoutedAlliance: "",
   autoArtifactsScored: "", autoPatternAlignment: "", autoLaunchLine: "", autoLeave: "", autoConsistency: "", autoBallsScored: "", autoCycles: "", autoFullClassifier: "", autoFullClassifierElaborate: "",
   teleopIntakeMethod: "", teleopBallCapacity: "", teleopShootingAccuracy: "", teleopGateInteraction: "",
   teleopOverflowManagement: "", teleopCycleSpeed: "", teleopArtifactClassification: "", teleopBallsScored: "", teleopCycles: "", teleopFullClassifier: "", teleopFullClassifierElaborate: "",
