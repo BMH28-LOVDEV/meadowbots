@@ -661,29 +661,65 @@ const MasterDashboard = ({ onLogout, username, accountUsername, userRole, onView
               </button>
             </div>
 
-            {/* Group Key (only on match progress) */}
-            {progressView === "match" && (
-              <div className="glass rounded-xl p-4 border border-primary/20">
-                <p className="font-display text-xs tracking-wider text-primary mb-3">👥 GROUP KEY</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <div className="rounded-lg p-2.5 border" style={{ background: "hsl(200 50% 50% / 0.15)", borderColor: "hsl(200 50% 50% / 0.4)" }}>
-                    <p className="font-display text-xs text-foreground tracking-wide mb-1">GROUP 1</p>
-                    <p className="text-xs font-body text-muted-foreground">Kayleb · Gabriel</p>
+            {/* Group Key + Group Progress (only on match progress) */}
+            {progressView === "match" && (() => {
+              const GROUPS: { name: string; color: string; members: string[] }[] = [
+                { name: "GROUP 1", color: "200 50% 50%", members: ["Kayleb", "Gabriel"] },
+                { name: "GROUP 2", color: "330 50% 60%", members: ["Heath", "Jason"] },
+                { name: "GROUP 3", color: "130 50% 50%", members: ["Alex", "Julian"] },
+              ];
+              const groupStats = GROUPS.map(g => {
+                const groupAssigns = assignments.filter(a => g.members.some(m => a.scout_name?.toLowerCase().includes(m.toLowerCase())));
+                const total = groupAssigns.reduce((s, a) => s + (a.qual_matches || []).length, 0);
+                const done = groupAssigns.reduce((s, a) => s + (a.qual_matches || []).filter(m => isMatchDone(a, m)).length, 0);
+                return { ...g, total, done };
+              });
+              return (
+                <>
+                  <div className="glass rounded-xl p-4 border border-primary/20">
+                    <p className="font-display text-xs tracking-wider text-primary mb-3">👥 GROUP KEY</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {GROUPS.map(g => (
+                        <div key={g.name} className="rounded-lg p-2.5 border" style={{ background: `hsl(${g.color} / 0.15)`, borderColor: `hsl(${g.color} / 0.4)` }}>
+                          <p className="font-display text-xs text-foreground tracking-wide mb-1">{g.name}</p>
+                          <p className="text-xs font-body text-muted-foreground">{g.members.join(" · ")}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[10px] font-body text-muted-foreground/70 mt-2 italic">
+                      Groups rotate roles every 6 quals: red alliance → blue alliance → pit/relax.
+                    </p>
                   </div>
-                  <div className="rounded-lg p-2.5 border" style={{ background: "hsl(330 50% 60% / 0.15)", borderColor: "hsl(330 50% 60% / 0.4)" }}>
-                    <p className="font-display text-xs text-foreground tracking-wide mb-1">GROUP 2</p>
-                    <p className="text-xs font-body text-muted-foreground">Heath · Jason</p>
+
+                  <div className="glass rounded-xl p-4 border border-primary/20">
+                    <p className="font-display text-xs tracking-wider text-primary mb-3">📊 GROUP PROGRESS</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {groupStats.map(g => {
+                        const pct = g.total > 0 ? Math.round((g.done / g.total) * 100) : 0;
+                        const allDone = g.total > 0 && g.done === g.total;
+                        return (
+                          <div key={g.name} className="rounded-lg p-2.5 border" style={{ background: `hsl(${g.color} / 0.10)`, borderColor: `hsl(${g.color} / 0.4)` }}>
+                            <div className="flex items-baseline justify-between mb-1.5">
+                              <p className="font-display text-xs text-foreground tracking-wide">{g.name}</p>
+                              <p className={`font-display text-xs font-bold ${allDone ? "text-green-400" : "text-foreground"}`}>
+                                {g.done}/{g.total}
+                              </p>
+                            </div>
+                            <div className="h-1.5 w-full rounded-full bg-muted/40 overflow-hidden">
+                              <div
+                                className={`h-full transition-all ${allDone ? "bg-green-400" : "bg-primary"}`}
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                            <p className="text-[10px] font-body text-muted-foreground mt-1">{pct}% quals scouted</p>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="rounded-lg p-2.5 border" style={{ background: "hsl(130 50% 50% / 0.15)", borderColor: "hsl(130 50% 50% / 0.4)" }}>
-                    <p className="font-display text-xs text-foreground tracking-wide mb-1">GROUP 3</p>
-                    <p className="text-xs font-body text-muted-foreground">Alex · Julian</p>
-                  </div>
-                </div>
-                <p className="text-[10px] font-body text-muted-foreground/70 mt-2 italic">
-                  Groups rotate roles every 6 quals: red alliance → blue alliance → pit/relax.
-                </p>
-              </div>
-            )}
+                </>
+              );
+            })()}
 
             {progressView === "match" ? (
               uniqueAssignedScoutNames.length === 0 ? (
