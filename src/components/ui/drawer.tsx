@@ -22,6 +22,7 @@ const unlockPageScroll = () => {
 const Drawer = ({
   shouldScaleBackground = false,
   noBodyStyles = true,
+  disablePreventScroll = false,
   preventScrollRestoration = true,
   onOpenChange,
   ...props
@@ -36,6 +37,7 @@ const Drawer = ({
       {...props}
       shouldScaleBackground={shouldScaleBackground}
       noBodyStyles={noBodyStyles}
+      disablePreventScroll={disablePreventScroll}
       preventScrollRestoration={preventScrollRestoration}
       onOpenChange={(open) => {
         onOpenChange?.(open);
