@@ -482,7 +482,7 @@ const MasterDashboard = ({ onLogout, username, accountUsername, userRole, onView
             {/* Stats row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="glass rounded-xl p-4 text-center border border-border/50">
-                <p className="font-display text-3xl text-primary text-glow">{entries.length}</p>
+                <p className="font-display text-3xl text-primary text-glow">{entries.length + pitEntries.length}</p>
                 <p className="text-xs text-muted-foreground font-body mt-1">Total Entries</p>
               </div>
               <div className="glass rounded-xl p-4 text-center border border-border/50">
