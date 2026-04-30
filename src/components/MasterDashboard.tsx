@@ -124,6 +124,7 @@ const MasterDashboard = ({ onLogout, username, accountUsername, onViewAsScouter 
   const [pendingError, setPendingError] = useState("");
 
   const [activeTab, setActiveTab] = useState<"dashboard" | "rankings" | "progress" | "assignments" | "bluedrivedata" | "livestream" | "approvals" | "scoutai" | "pitdata">("dashboard");
+  const [assignmentView, setAssignmentView] = useState<"match" | "pit">("match");
   const [pitEntries, setPitEntries] = useState<any[]>([]);
   const [expandedPit, setExpandedPit] = useState<string | null>(null);
 
