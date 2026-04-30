@@ -602,6 +602,11 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
 
   const assignment = assignments[selectedTeamIdx] || null;
 
+  const resetMobileScroll = () => {
+    if (typeof window === "undefined") return;
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "auto" }));
+  };
+
   
 
   // Presence tracking
@@ -877,6 +882,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           onTabChange={(id) => {
             setActiveTab(id as typeof activeTab);
             if (id !== "scouting") setScoutingMode(null);
+              resetMobileScroll();
           }}
           actions={[
             { id: "refresh", label: "REFRESH", icon: "↻", onClick: () => fetchData(true) },
@@ -1029,13 +1035,13 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             <p className="text-sm text-muted-foreground font-body">What type of scouting are you doing?</p>
             <div className="flex flex-col gap-4">
               <button
-                onClick={() => setScoutingMode("pit")}
+                onClick={() => { setScoutingMode("pit"); resetMobileScroll(); }}
                 className="w-full py-5 rounded-xl bg-accent/20 border-2 border-accent/50 text-accent font-display font-bold text-lg tracking-widest hover:bg-accent/30 hover:border-accent transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               >
                 🏗️ PIT SCOUT
               </button>
               <button
-                onClick={() => setScoutingMode("match")}
+                onClick={() => { setScoutingMode("match"); resetMobileScroll(); }}
                 className="w-full py-5 rounded-xl bg-primary/20 border-2 border-primary/50 text-primary font-display font-bold text-lg tracking-widest hover:bg-primary/30 hover:border-primary transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               >
                 🎯 MATCH SCOUT
@@ -1050,7 +1056,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
         <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
           <div className="flex items-center gap-3 mb-2">
             <button
-              onClick={() => setScoutingMode(null)}
+              onClick={() => { setScoutingMode(null); resetMobileScroll(); }}
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200"
             >
               ← BACK
@@ -1105,7 +1111,7 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
           <div className="flex items-center gap-3 mb-2">
             <button
               type="button"
-              onClick={() => setScoutingMode(null)}
+              onClick={() => { setScoutingMode(null); resetMobileScroll(); }}
               className="px-3 py-1.5 rounded-lg text-xs font-display tracking-wider border border-border text-muted-foreground hover:border-primary hover:text-primary transition-all duration-200"
             >
               ← BACK
