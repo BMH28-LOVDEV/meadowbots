@@ -258,6 +258,7 @@ const Index = () => {
           onLogout={handleLogout}
           username={profile.display_name}
           accountUsername={profile.username}
+          userRole={profile.role}
           onViewAsScouter={() => setViewAsScouter(true)}
         />
         <FloatingChat userName={profile.display_name} />
