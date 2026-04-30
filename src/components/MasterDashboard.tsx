@@ -719,6 +719,22 @@ const MasterDashboard = ({ onLogout, username, accountUsername, userRole, onView
                               />
                             </div>
                             <p className="text-[10px] font-body text-muted-foreground mt-1">{pct}% quals scouted</p>
+                            {g.quals.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {g.quals.map((q, i) => (
+                                  <span
+                                    key={`${q.match}-${i}`}
+                                    className={`px-2 py-0.5 rounded-md text-[10px] font-body font-semibold border ${
+                                      q.done
+                                        ? "bg-glow-success/20 border-glow-success text-glow-success"
+                                        : "bg-destructive/20 border-destructive text-destructive"
+                                    }`}
+                                  >
+                                    {q.match}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         );
                       })}
