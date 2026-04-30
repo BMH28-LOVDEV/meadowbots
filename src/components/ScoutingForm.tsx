@@ -1048,6 +1048,38 @@ const ScoutingForm = ({ scouterName, onLogout, userRole }: ScoutingFormProps) =>
             <p className="text-sm text-destructive/90 font-body mt-1">Team may and will most likely lie! Match Data is necessary to confirm what teams say.</p>
           </div>
 
+          {assignments.length > 0 && (
+            <div className="glass rounded-xl p-4 border border-accent/40 space-y-3">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🏗️</span>
+                  <p className="text-xs text-muted-foreground font-body uppercase tracking-wider">Your Pit Scout Assignments</p>
+                </div>
+                {(() => {
+                  const done = assignments.filter(a => pitEntries.some(p => p.team_number === a.team_number && p.scouter_name === scouterName)).length;
+                  return <p className="text-xs font-body text-foreground">{done}/{assignments.length} done</p>;
+                })()}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {assignments.map((a) => {
+                  const done = pitEntries.some(p => p.team_number === a.team_number && p.scouter_name === scouterName);
+                  return (
+                    <span
+                      key={a.team_number}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-body font-semibold border transition-all ${
+                        done
+                          ? "bg-glow-success/20 border-glow-success text-glow-success"
+                          : "bg-destructive/20 border-destructive text-destructive"
+                      }`}
+                    >
+                      {done ? "✓ " : ""}{resolveTeamName(a.team_number, a.team_name) ? `${resolveTeamName(a.team_number, a.team_name)} ` : ""}#{a.team_number}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <PitScoutForm scouterName={scouterName} />
         </div>
       )}
