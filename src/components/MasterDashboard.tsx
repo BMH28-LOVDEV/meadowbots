@@ -636,86 +636,189 @@ const MasterDashboard = ({ onLogout, username, accountUsername, userRole, onView
 
         {/* ── SCOUT PROGRESS TAB ── */}
         {activeTab === "progress" && (
-          <>
-            {uniqueAssignedScoutNames.length === 0 ? (
-              <div className="glass rounded-xl p-12 text-center">
-                <p className="text-4xl mb-4">📋</p>
-                <p className="text-muted-foreground font-body">No scouts assigned yet. Set up assignments in the Scout Assignments tab.</p>
+          <div className="space-y-4">
+            {/* Slider */}
+            <div className="glass rounded-xl p-1.5 border border-border/50 flex gap-1">
+              <button
+                onClick={() => setProgressView("match")}
+                className={`flex-1 px-4 py-2.5 rounded-lg text-xs font-display tracking-wider transition-all ${
+                  progressView === "match"
+                    ? "bg-primary/20 text-primary border border-primary/40 glow-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                🎯 MATCH SCOUTING PROGRESS
+              </button>
+              <button
+                onClick={() => setProgressView("pit")}
+                className={`flex-1 px-4 py-2.5 rounded-lg text-xs font-display tracking-wider transition-all ${
+                  progressView === "pit"
+                    ? "bg-accent/20 text-accent border border-accent/40"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                🏗️ PIT SCOUTING PROGRESS
+              </button>
+            </div>
+
+            {/* Group Key (only on match progress) */}
+            {progressView === "match" && (
+              <div className="glass rounded-xl p-4 border border-primary/20">
+                <p className="font-display text-xs tracking-wider text-primary mb-3">👥 GROUP KEY</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="rounded-lg p-2.5 border" style={{ background: "hsl(200 50% 50% / 0.15)", borderColor: "hsl(200 50% 50% / 0.4)" }}>
+                    <p className="font-display text-xs text-foreground tracking-wide mb-1">GROUP 1</p>
+                    <p className="text-xs font-body text-muted-foreground">Kayleb · Gabriel</p>
+                  </div>
+                  <div className="rounded-lg p-2.5 border" style={{ background: "hsl(330 50% 60% / 0.15)", borderColor: "hsl(330 50% 60% / 0.4)" }}>
+                    <p className="font-display text-xs text-foreground tracking-wide mb-1">GROUP 2</p>
+                    <p className="text-xs font-body text-muted-foreground">Heath · Jason</p>
+                  </div>
+                  <div className="rounded-lg p-2.5 border" style={{ background: "hsl(130 50% 50% / 0.15)", borderColor: "hsl(130 50% 50% / 0.4)" }}>
+                    <p className="font-display text-xs text-foreground tracking-wide mb-1">GROUP 3</p>
+                    <p className="text-xs font-body text-muted-foreground">Alex · Julian</p>
+                  </div>
+                </div>
+                <p className="text-[10px] font-body text-muted-foreground/70 mt-2 italic">
+                  Groups rotate roles every 6 quals: red alliance → blue alliance → pit/relax.
+                </p>
               </div>
-            ) : (
-              <div className="glass rounded-xl overflow-hidden border border-border/50">
-                <div className="px-5 py-4 border-b border-border/50 flex items-center gap-3">
-                  <span className="text-xl">📡</span>
-                  <div>
-                    <h2 className="font-display text-base text-foreground tracking-wider">SCOUT PROGRESS</h2>
-                    <p className="text-xs text-muted-foreground font-body mt-0.5">
-                      Live status — green = submitted, red = not yet scouted • 3 teams per scout
+            )}
+
+            {progressView === "match" ? (
+              uniqueAssignedScoutNames.length === 0 ? (
+                <div className="glass rounded-xl p-12 text-center">
+                  <p className="text-4xl mb-4">📋</p>
+                  <p className="text-muted-foreground font-body">No scouts assigned yet. Set up assignments in the Scout Assignments tab.</p>
+                </div>
+              ) : (
+                <div className="glass rounded-xl overflow-hidden border border-border/50">
+                  <div className="px-5 py-4 border-b border-border/50 flex items-center gap-3">
+                    <span className="text-xl">📡</span>
+                    <div>
+                      <h2 className="font-display text-base text-foreground tracking-wider">MATCH SCOUT PROGRESS</h2>
+                      <p className="text-xs text-muted-foreground font-body mt-0.5">
+                        Live status — green = submitted, red = not yet scouted • 3 teams per scout
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="divide-y divide-border/30">
+                    {uniqueAssignedScoutNames.sort().map((scoutName) => {
+                      const scoutAssignments = assignedScouts.filter(a => a.scout_name === scoutName);
+                      const totalMatches = scoutAssignments.reduce((sum, a) => sum + (a.qual_matches || []).length, 0);
+                      const doneMatches = scoutAssignments.reduce((sum, a) => (a.qual_matches || []).filter(m => isMatchDone(a, m)).length + sum, 0);
+                      const allDone = totalMatches > 0 && doneMatches === totalMatches;
+
+                      return (
+                        <div
+                          key={scoutName}
+                          className={`px-5 py-3.5 space-y-2 transition-colors ${allDone ? "bg-green-500/5" : ""}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <p className="font-display text-sm text-foreground tracking-wide leading-tight">{scoutName}</p>
+                            <p className={`font-display text-sm font-bold ${allDone ? "text-green-400" : "text-muted-foreground"}`}>
+                              {doneMatches}/{totalMatches}
+                            </p>
+                          </div>
+
+                          {scoutAssignments.map((assignment) => {
+                            const matches = assignment.qual_matches || [];
+                            return (
+                              <div key={assignment.team_number} className="flex items-center gap-3 flex-wrap">
+                                <p className="text-xs text-muted-foreground font-body min-w-[80px]">
+                                  {formatTeamLabel(assignment.team_number, assignment.team_name)}
+                                </p>
+                                <div className="flex flex-wrap gap-1.5 flex-1">
+                                  {matches.map((match) => {
+                                    const done = isMatchDone(assignment, match);
+                                    return (
+                                      <span
+                                        key={match}
+                                        className={`px-3 py-1 rounded-lg text-xs font-body font-semibold transition-all duration-200 border ${
+                                          done
+                                            ? "bg-glow-success/20 border-glow-success text-glow-success"
+                                            : "bg-destructive/20 border-destructive text-destructive"
+                                        }`}
+                                      >
+                                        {match}
+                                      </span>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="px-5 py-3 border-t border-border/50 bg-muted/20 flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground font-body">
+                      {completedScoutsCount} / {uniqueAssignedScoutNames.length} scouts complete
+                    </p>
+                    <p className="text-xs text-muted-foreground font-body">
+                      {entries.length} total entries submitted
                     </p>
                   </div>
                 </div>
+              )
+            ) : (
+              /* PIT PROGRESS VIEW */
+              (() => {
+                const pitScouts = [...TEAM_MEMBERS].sort().filter(s => assignments.some(a => a.scout_name === s));
+                if (pitScouts.length === 0) {
+                  return (
+                    <div className="glass rounded-xl p-12 text-center">
+                      <p className="text-4xl mb-4">🏗️</p>
+                      <p className="text-muted-foreground font-body">No pit assignments yet. Set up assignments in the Scout Assignments tab.</p>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="space-y-3">
+                    {pitScouts.map((scoutName) => {
+                      const scoutAssignments = assignments.filter(a => a.scout_name === scoutName);
+                      const total = scoutAssignments.length;
+                      const done = scoutAssignments.filter(a => pitEntries.some(p => p.team_number === a.team_number && p.scouter_name === scoutName)).length;
+                      const allDone = total > 0 && done === total;
 
-                <div className="divide-y divide-border/30">
-                  {uniqueAssignedScoutNames.sort().map((scoutName) => {
-                    const scoutAssignments = assignedScouts.filter(a => a.scout_name === scoutName);
-                    const totalMatches = scoutAssignments.reduce((sum, a) => sum + (a.qual_matches || []).length, 0);
-                    const doneMatches = scoutAssignments.reduce((sum, a) => (a.qual_matches || []).filter(m => isMatchDone(a, m)).length + sum, 0);
-                    const allDone = totalMatches > 0 && doneMatches === totalMatches;
-
-                    return (
-                      <div
-                        key={scoutName}
-                        className={`px-5 py-3.5 space-y-2 transition-colors ${allDone ? "bg-green-500/5" : ""}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <p className="font-display text-sm text-foreground tracking-wide leading-tight">{scoutName}</p>
-                          <p className={`font-display text-sm font-bold ${allDone ? "text-green-400" : "text-muted-foreground"}`}>
-                            {doneMatches}/{totalMatches}
-                          </p>
-                        </div>
-
-                        {scoutAssignments.map((assignment) => {
-                          const matches = assignment.qual_matches || [];
-                          return (
-                            <div key={assignment.team_number} className="flex items-center gap-3 flex-wrap">
-                              <p className="text-xs text-muted-foreground font-body min-w-[80px]">
-                                {formatTeamLabel(assignment.team_number, assignment.team_name)}
+                      return (
+                        <div key={scoutName} className={`glass rounded-xl p-4 transition-all duration-200 ${allDone ? "border border-green-500/30 bg-green-500/5" : "border border-accent/30"}`}>
+                          <div className="flex items-start justify-between gap-3 mb-3">
+                            <div>
+                              <p className="font-display text-sm text-foreground tracking-wide">{scoutName}</p>
+                              <p className={`text-xs font-body mt-0.5 ${allDone ? "text-green-400" : "text-accent"}`}>
+                                {allDone ? "✓ All pits scouted" : `${done}/${total} pits scouted`}
                               </p>
-                              <div className="flex flex-wrap gap-1.5 flex-1">
-                                {matches.map((match) => {
-                                  const done = isMatchDone(assignment, match);
-                                  return (
-                                    <span
-                                      key={match}
-                                      className={`px-3 py-1 rounded-lg text-xs font-body font-semibold transition-all duration-200 border ${
-                                        done
-                                          ? "bg-glow-success/20 border-glow-success text-glow-success"
-                                          : "bg-destructive/20 border-destructive text-destructive"
-                                      }`}
-                                    >
-                                      {match}
-                                    </span>
-                                  );
-                                })}
-                              </div>
                             </div>
-                          );
-                        })}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="px-5 py-3 border-t border-border/50 bg-muted/20 flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground font-body">
-                    {completedScoutsCount} / {uniqueAssignedScoutNames.length} scouts complete
-                  </p>
-                  <p className="text-xs text-muted-foreground font-body">
-                    {entries.length} total entries submitted
-                  </p>
-                </div>
-              </div>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {scoutAssignments.map((a) => {
+                              const isDone = pitEntries.some(p => p.team_number === a.team_number && p.scouter_name === scoutName);
+                              return (
+                                <span
+                                  key={a.team_number}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-body font-semibold border transition-all ${
+                                    isDone
+                                      ? "bg-glow-success/20 border-glow-success text-glow-success"
+                                      : "bg-destructive/20 border-destructive text-destructive"
+                                  }`}
+                                >
+                                  {isDone ? "✓ " : ""}{formatTeamLabel(a.team_number, a.team_name)}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()
             )}
-          </>
+          </div>
         )}
 
         {/* ── RANKINGS TAB ── */}
