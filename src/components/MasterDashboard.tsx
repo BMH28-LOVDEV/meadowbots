@@ -97,10 +97,10 @@ interface TeamSummary {
 
 
 
-const MasterDashboard = ({ onLogout, username, accountUsername, onViewAsScouter }: MasterDashboardProps) => {
+const MasterDashboard = ({ onLogout, username, accountUsername, userRole, onViewAsScouter }: MasterDashboardProps) => {
   const isBen = username === "Benjamin Hale" || ["BMH28", "Benjamin_hale", "mbotmaster"].includes(accountUsername ?? "");
   const isJude = username === "Jude Trujillo";
-  const isMaster = isBen || isJude || username === "Maxwell Tran" || username === "Max Tran";
+  const isMaster = userRole === "master" || isBen || isJude || username === "Maxwell Tran" || username === "Max Tran";
   const { celebrating, triggerCelebration } = useCelebration();
   const [showLockdown, setShowLockdown] = useState(false);
   const [entries, setEntries] = useState<ScoutingEntry[]>([]);
