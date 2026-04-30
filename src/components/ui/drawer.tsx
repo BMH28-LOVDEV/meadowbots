@@ -3,9 +3,44 @@ import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/lib/utils";
 
-const Drawer = ({ shouldScaleBackground = false, ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
-  <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} {...props} />
-);
+const unlockPageScroll = () => {
+  if (typeof document === "undefined") return;
+
+  const bodyTop = document.body.style.top;
+  const lockedScrollY = bodyTop.startsWith("-") ? Math.abs(Number.parseInt(bodyTop, 10) || 0) : null;
+
+  ["position", "top", "right", "bottom", "left", "width", "overflow", "overflow-y", "pointer-events"].forEach((prop) => {
+    document.body.style.removeProperty(prop);
+  });
+  ["position", "top", "right", "bottom", "left", "width", "overflow", "overflow-y"].forEach((prop) => {
+    document.documentElement.style.removeProperty(prop);
+  });
+
+  if (lockedScrollY !== null) window.scrollTo(0, lockedScrollY);
+};
+
+const Drawer = ({
+  shouldScaleBackground = false,
+  noBodyStyles = true,
+  preventScrollRestoration = true,
+  onOpenChange,
+  ...props
+}: React.ComponentProps<typeof DrawerPrimitive.Root>) => {
+  React.useEffect(() => unlockPageScroll, []);
+
+  return (
+    <DrawerPrimitive.Root
+      {...props}
+      shouldScaleBackground={shouldScaleBackground}
+      noBodyStyles={noBodyStyles}
+      preventScrollRestoration={preventScrollRestoration}
+      onOpenChange={(open) => {
+        onOpenChange?.(open);
+        if (!open) requestAnimationFrame(unlockPageScroll);
+      }}
+    />
+  );
+};
 Drawer.displayName = "Drawer";
 
 const DrawerTrigger = DrawerPrimitive.Trigger;
@@ -25,7 +60,7 @@ DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+>(({ className, children, onCloseAutoFocus, ...props }, ref) => (
   <DrawerPortal>
     <DrawerOverlay />
     <DrawerPrimitive.Content
@@ -34,6 +69,11 @@ const DrawerContent = React.forwardRef<
         "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background",
         className,
       )}
+      onCloseAutoFocus={(event) => {
+        event.preventDefault();
+        onCloseAutoFocus?.(event);
+        requestAnimationFrame(unlockPageScroll);
+      }}
       {...props}
     >
       <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
