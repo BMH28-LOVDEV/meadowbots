@@ -129,6 +129,18 @@ const MasterDashboard = ({ onLogout, username, accountUsername, userRole, onView
   const [pitEntries, setPitEntries] = useState<any[]>([]);
   const [expandedPit, setExpandedPit] = useState<string | null>(null);
 
+  // When the active tab changes (especially relevant on iOS where the previous
+  // tab's scroll position would otherwise be preserved and dump the user mid-page),
+  // smoothly scroll to the top of the page.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    // Use rAF to wait for the new tab's content to render before scrolling.
+    const id = requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "auto" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [activeTab]);
+
   const refreshDashboard = async () => {
     setLoading(true);
     setAssignmentsLoading(true);
