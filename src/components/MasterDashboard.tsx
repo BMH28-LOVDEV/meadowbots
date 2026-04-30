@@ -1370,7 +1370,7 @@ const MasterDashboard = ({ onLogout, username, accountUsername, userRole, onView
                 {[...TEAM_MEMBERS].sort().filter(scoutName => assignments.some(a => a.scout_name === scoutName)).map((scoutName) => {
                   const scoutAssignments = assignments.filter(a => a.scout_name === scoutName);
                   const total = scoutAssignments.length;
-                  const done = scoutAssignments.filter(a => pitEntries.some(p => p.team_number === a.team_number && p.scouter_name === scoutName)).length;
+                  const done = scoutAssignments.filter(a => isPitDone(a, scoutName)).length;
                   const allDone = total > 0 && done === total;
 
                   return (
