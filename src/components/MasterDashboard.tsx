@@ -332,14 +332,30 @@ const MasterDashboard = ({ onLogout, username, accountUsername, userRole, onView
   }, []);
 
 
-  // Check if a scout has submitted a specific qual match for their team
+  // Check if a scout has submitted a specific qual match for their team.
+  // Use findTeamMember so misspellings/aliases (e.g. "Kayleb Hague" -> "Kayleb Hauge",
+  // "Jason-New" -> "Jason Xie") still count as the assigned scout.
   const isMatchDone = (assignment: TeamAssignment, match: string): boolean => {
+    const assignedCanon = findTeamMember(assignment.scout_name) || assignment.scout_name;
     return entries.some(
-      (e) =>
-        e.scouterName === assignment.scout_name &&
-        e.teamNumber === assignment.team_number &&
-        e.matchNumber.toUpperCase() === match.toUpperCase()
+      (e) => {
+        const entryCanon = findTeamMember(e.scouterName) || e.scouterName;
+        return (
+          entryCanon === assignedCanon &&
+          e.teamNumber === assignment.team_number &&
+          (e.matchNumber || "").toUpperCase() === match.toUpperCase()
+        );
+      }
     );
+  };
+
+  // Check if a scout submitted a pit entry for an assigned team (alias-aware).
+  const isPitDone = (assignment: TeamAssignment, scoutName: string): boolean => {
+    const scoutCanon = findTeamMember(scoutName) || scoutName;
+    return pitEntries.some((p) => {
+      const pCanon = findTeamMember(p.scouter_name) || p.scouter_name;
+      return p.team_number === assignment.team_number && pCanon === scoutCanon;
+    });
   };
 
   const executeClearAssignment = async (scoutName: string) => {
